@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Button } from '@/shared/components/ui/button'
+import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { useAuth } from '../hooks/useAuth'
@@ -8,12 +9,13 @@ export function LoginForm() {
   const { login, loading, error, limpiarError } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [recordar, setRecordar] = useState(true)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     limpiarError()
     try {
-      await login({ email, password })
+      await login({ email, password }, recordar)
     } catch {
       // el error ya queda expuesto en el store
     }
@@ -46,6 +48,17 @@ export function LoginForm() {
           required
         />
       </div>
+
+      <label htmlFor="login-recordar" className="flex cursor-pointer items-center gap-3">
+        <Checkbox
+          id="login-recordar"
+          checked={recordar}
+          onCheckedChange={(checked) => setRecordar(checked === true)}
+        />
+        <span className="text-base text-talenta-brown-dark">
+          Recordar mi cuenta en este dispositivo
+        </span>
+      </label>
 
       {error && (
         <p role="alert" className="text-base font-medium text-red-700">
