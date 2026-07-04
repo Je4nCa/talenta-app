@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { LogOut, ShieldCheck } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
+import { buscarPais } from '@/shared/lib/paises'
 import { useAuth } from '../hooks/useAuth'
 
 function iniciales(nombre: string): string {
@@ -17,6 +18,8 @@ export function ProfileScreen() {
   const logout = useAuth((state) => state.logout)
 
   if (!usuario) return null
+
+  const pais = buscarPais(usuario.paisCodigo)
 
   return (
     <motion.div
@@ -51,6 +54,20 @@ export function ProfileScreen() {
             <dt className="text-talenta-brown-mid">Versión de Biblia</dt>
             <dd className="font-medium text-talenta-black">{usuario.versionBiblia}</dd>
           </div>
+          {pais && (
+            <>
+              <div className="flex items-center justify-between">
+                <dt className="text-talenta-brown-mid">País</dt>
+                <dd className="font-medium text-talenta-black">{pais.nombre}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="text-talenta-brown-mid">Moneda</dt>
+                <dd className="font-medium text-talenta-black">
+                  {pais.monedaSimbolo} {pais.monedaCodigo}
+                </dd>
+              </div>
+            </>
+          )}
         </dl>
       </div>
 

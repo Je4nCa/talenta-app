@@ -132,7 +132,8 @@ Cada módulo tiene su propio hook principal (`useCourse`, `useFinances`, `useBib
 - Registro y login con email + contraseña, validado contra la base de datos local (Dexie). Sin Google OAuth.
 - Sin Firebase Auth por ahora: el perfil y las credenciales se crean y validan localmente. Cuando Firebase esté listo, migrar a Firebase Auth manteniendo el mismo flujo de email/contraseña.
 - Al registrarse: crear perfil de usuario + ejecutar test de diagnóstico
-- Campos del perfil: nombre, email, idioma, versión de Biblia preferida, estado de onboarding, rol (`student` | `admin`)
+- Campos del perfil: nombre, email, idioma, versión de Biblia preferida, estado de onboarding, rol (`student` | `admin`), país y moneda
+- Al registrarse el usuario selecciona su país (lista en `src/shared/lib/paises.ts`); la moneda (`monedaCodigo`) se deriva automáticamente de ese país y define en qué moneda trabaja el módulo de Finanzas. No se pide moneda por separado ni se permite elegirla manualmente.
 
 ### Curso
 - Estructura: 3 módulos, 8 lecciones, 8 semanas
@@ -149,7 +150,9 @@ Cada módulo tiene su propio hook principal (`useCourse`, `useFinances`, `useBib
 - Memorización: mostrar el versículo completo → ocultar palabras progresivamente → el usuario lo reconstruye
 
 ### Finanzas Esencial
-Adaptar desde `Finanzas/`. Leer ese código primero. Reutilizar la lógica de Dexie, hooks y componentes que ya funcionan; adaptarlos al esquema de usuario de TALENTA.
+Adaptar desde `modulo-finanzas/`. Leer ese código primero. Reutilizar la lógica de Dexie, hooks y componentes que ya funcionan; adaptarlos al esquema de usuario de TALENTA.
+
+La moneda del módulo es siempre la del país del usuario (`usuario.monedaCodigo`, derivada en el registro — ver sección Auth). A diferencia de `modulo-finanzas/` (que dejaba elegir manualmente entre USD/CRC), en TALENTA no hay selector de moneda: se fija automáticamente y no cambia salvo que el usuario actualice su país.
 
 Schema de datos:
 ```ts

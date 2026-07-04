@@ -1,4 +1,5 @@
 import { db } from '@/shared/lib/db'
+import { buscarPais } from '@/shared/lib/paises'
 import type { LoginInput, NuevoUsuarioInput, UserProfile } from '@/shared/types/user'
 import { hashPassword, verifyPassword } from './password'
 
@@ -15,6 +16,11 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     throw new AuthError('Ya existe una cuenta con este correo.')
   }
 
+  const pais = buscarPais(input.paisCodigo)
+  if (!pais) {
+    throw new AuthError('Selecciona un país válido.')
+  }
+
   const perfil: UserProfile = {
     uid: crypto.randomUUID(),
     nombre: input.nombre.trim(),
@@ -25,6 +31,8 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     onboardingCompletado: false,
     rol: 'student',
     creadoEn: new Date(),
+    paisCodigo: pais.codigo,
+    monedaCodigo: pais.monedaCodigo,
   }
 
   await db.users.add(perfil)

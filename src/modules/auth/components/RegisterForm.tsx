@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
+import { Select } from '@/shared/components/ui/select'
+import { PAISES } from '@/shared/lib/paises'
 import { useAuth } from '../hooks/useAuth'
 
 export function RegisterForm() {
@@ -12,6 +14,7 @@ export function RegisterForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmarPassword, setConfirmarPassword] = useState('')
+  const [paisCodigo, setPaisCodigo] = useState('')
   const [errorLocal, setErrorLocal] = useState<string | null>(null)
 
   async function handleSubmit(e: FormEvent) {
@@ -27,9 +30,13 @@ export function RegisterForm() {
       setErrorLocal('Las contraseñas no coinciden.')
       return
     }
+    if (!paisCodigo) {
+      setErrorLocal('Selecciona tu país.')
+      return
+    }
 
     try {
-      await registrar({ nombre, email, password })
+      await registrar({ nombre, email, password, paisCodigo })
       navigate('/', { replace: true })
     } catch {
       // el error ya queda expuesto en el store
@@ -88,6 +95,28 @@ export function RegisterForm() {
           onChange={(e) => setConfirmarPassword(e.target.value)}
           required
         />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="register-pais">País</Label>
+        <Select
+          id="register-pais"
+          value={paisCodigo}
+          onChange={(e) => setPaisCodigo(e.target.value)}
+          required
+        >
+          <option value="" disabled>
+            Selecciona tu país
+          </option>
+          {PAISES.map((pais) => (
+            <option key={pais.codigo} value={pais.codigo}>
+              {pais.nombre}
+            </option>
+          ))}
+        </Select>
+        <p className="text-sm text-talenta-brown-mid">
+          Usaremos tu país para mostrar Finanzas en tu moneda local.
+        </p>
       </div>
 
       {(errorLocal || error) && (
