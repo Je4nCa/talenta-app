@@ -3,6 +3,7 @@ import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useVersiculosGuardados } from '../hooks/useMarcadores'
 import { alternarGuardado } from '../hooks/useMarcadores'
 import { LIBROS_BIBLIA } from '../constants/libros'
+import { nombreLibroLocalizado, obtenerIdiomaDeBiblia } from '../lib/referencias'
 
 export function VersiculosGuardadosList() {
   const usuario = useAuth((state) => state.usuario)
@@ -23,6 +24,7 @@ export function VersiculosGuardadosList() {
     <div className="flex flex-col gap-3">
       {guardados.map((g) => {
         const libro = LIBROS_BIBLIA.find((l) => l.referencia === g.libro)
+        const nombreLibro = libro ? nombreLibroLocalizado(libro, obtenerIdiomaDeBiblia(g.bibliaId)) : g.libro
         return (
           <div
             key={g.id}
@@ -30,7 +32,7 @@ export function VersiculosGuardadosList() {
           >
             <div className="flex items-start justify-between gap-3">
               <p className="text-sm font-semibold text-talenta-gold">
-                {libro?.nombre ?? g.libro} {g.capitulo}:{g.versiculo}
+                {nombreLibro} {g.capitulo}:{g.versiculo}
               </p>
               <button
                 type="button"
