@@ -4,7 +4,12 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { BibliaApiError, buscarPalabra } from '../lib/bibliaClient'
-import { parsearReferencia, type ReferenciaParseada } from '../lib/referencias'
+import {
+  nombreLibroLocalizado,
+  obtenerIdiomaDeBiblia,
+  parsearReferencia,
+  type ReferenciaParseada,
+} from '../lib/referencias'
 import { alternarGuardado, estaGuardado } from '../hooks/useMarcadores'
 import type { ResultadoBusqueda } from '../types'
 
@@ -25,9 +30,11 @@ function ResultadoBusquedaItem({
   resultado,
   parseada,
   bibliaId,
+  idioma,
   onIrAVersiculo,
 }: ResultadoValido & {
   bibliaId: string
+  idioma: string
   onIrAVersiculo: BuscadorBibliaProps['onIrAVersiculo']
 }) {
   const usuario = useAuth((state) => state.usuario)
@@ -68,7 +75,7 @@ function ResultadoBusquedaItem({
         className="flex-1 text-left"
       >
         <p className="mb-1 text-sm font-semibold text-talenta-gold">
-          {parseada.libro.nombre} {parseada.capitulo}:{parseada.versiculo}
+          {nombreLibroLocalizado(parseada.libro, idioma)} {parseada.capitulo}:{parseada.versiculo}
         </p>
         <p className="text-base text-talenta-black">{resultado.vistaPrevia}</p>
       </button>
@@ -91,6 +98,7 @@ function ResultadoBusquedaItem({
 export function BuscadorBiblia({ onIrAVersiculo }: BuscadorBibliaProps) {
   const usuario = useAuth((state) => state.usuario)
   const bibliaId = usuario?.versionBiblia ?? 'RVR60'
+  const idioma = obtenerIdiomaDeBiblia(bibliaId)
 
   const [consulta, setConsulta] = useState('')
   const [resultados, setResultados] = useState<ResultadoValido[] | null>(null)
@@ -148,6 +156,7 @@ export function BuscadorBiblia({ onIrAVersiculo }: BuscadorBibliaProps) {
             resultado={resultado}
             parseada={parseada}
             bibliaId={bibliaId}
+            idioma={idioma}
             onIrAVersiculo={onIrAVersiculo}
           />
         ))}

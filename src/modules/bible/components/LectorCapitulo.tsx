@@ -6,6 +6,7 @@ import { cn } from '@/shared/lib/utils'
 import { BibliaApiError, obtenerCapitulo } from '../lib/bibliaClient'
 import { alternarGuardado, alternarSubrayado, estaGuardado, useSubrayados } from '../hooks/useMarcadores'
 import { LIBROS_BIBLIA, type LibroBiblia } from '../constants/libros'
+import { nombreLibroLocalizado, obtenerIdiomaDeBiblia } from '../lib/referencias'
 import { SelectorLibroCapitulo } from './SelectorLibroCapitulo'
 import type { Versiculo } from '../types'
 
@@ -26,6 +27,7 @@ export function LectorCapitulo({
 }: LectorCapituloProps) {
   const usuario = useAuth((state) => state.usuario)
   const bibliaId = usuario?.versionBiblia ?? 'RVR60'
+  const idioma = obtenerIdiomaDeBiblia(bibliaId)
 
   const [versiculos, setVersiculos] = useState<Versiculo[]>([])
   const [cargando, setCargando] = useState(true)
@@ -132,6 +134,7 @@ export function LectorCapitulo({
       <SelectorLibroCapitulo
         libro={libro}
         capitulo={capitulo}
+        idioma={idioma}
         onCambiarLibro={(nuevoLibro) => {
           onCambiarLibro(nuevoLibro)
           onCambiarCapitulo(1)
@@ -149,7 +152,7 @@ export function LectorCapitulo({
           <ChevronLeft className="h-5 w-5" />
         </button>
         <span className="text-lg font-semibold text-talenta-black">
-          {libro.nombre} {capitulo}
+          {nombreLibroLocalizado(libro, idioma)} {capitulo}
         </span>
         <button
           type="button"

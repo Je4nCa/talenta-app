@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { obtenerPasaje } from '../lib/bibliaClient'
-import { formatearReferenciaEnEspanol } from '../lib/referencias'
+import { formatearReferenciaLocalizada, obtenerIdiomaDeBiblia } from '../lib/referencias'
 import { VERSICULOS_DESTACADOS } from '../constants/versiculosDestacados'
 
 function diaDelAnio(): number {
@@ -50,7 +50,7 @@ export function useVersiculoDelDia(): VersiculoDelDia {
   }, [bibliaId, elegido.referencia])
 
   return {
-    referencia: formatearReferenciaEnEspanol(elegido.referencia),
+    referencia: formatearReferenciaLocalizada(elegido.referencia, obtenerIdiomaDeBiblia(bibliaId)),
     texto,
     cargando,
     error,
