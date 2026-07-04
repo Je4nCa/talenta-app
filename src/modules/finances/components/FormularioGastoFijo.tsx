@@ -1,14 +1,13 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
-import { CATEGORIAS } from '../constants/categorias'
+import { useCategorias } from '../hooks/useCategorias'
 import { useTarjetas } from '../hooks/useTarjetas'
 import { gastosFijosRepository } from '../repositories'
 import { TipoRecurrencia } from '../types/gasto'
-import type { CategoriaId } from '../types/categoria'
 
 interface FormularioGastoFijoProps {
   uid: string
@@ -26,17 +25,24 @@ const OPCIONES_RECURRENCIA: { valor: TipoRecurrencia; etiqueta: string }[] = [
 
 export function FormularioGastoFijo({ uid, onGuardado, onCancelar }: FormularioGastoFijoProps) {
   const { tarjetas } = useTarjetas()
+  const { categorias } = useCategorias()
   const [titulo, setTitulo] = useState('')
   const [monto, setMonto] = useState('')
-  const [categoriaId, setCategoriaId] = useState<CategoriaId>('otros')
+  const [categoriaId, setCategoriaId] = useState('')
   const [recurrencia, setRecurrencia] = useState<TipoRecurrencia>(TipoRecurrencia.Mensual)
   const [tarjetaId, setTarjetaId] = useState('')
   const [guardando, setGuardando] = useState(false)
 
+  useEffect(() => {
+    if (!categoriaId && categorias.length > 0) {
+      setCategoriaId(categorias.find((c) => c.nombre === 'Otros')?.id ?? categorias[0].id)
+    }
+  }, [categorias, categoriaId])
+
   async function manejarGuardar(e: FormEvent) {
     e.preventDefault()
     const valor = Number(monto)
-    if (!titulo.trim() || !valor || valor <= 0) return
+    if (!titulo.trim() || !valor || valor <= 0 || !categoriaId) return
 
     setGuardando(true)
     const ahora = new Date().toISOString()
@@ -93,9 +99,9 @@ export function FormularioGastoFijo({ uid, onGuardado, onCancelar }: FormularioG
         <Select
           id="fijo-categoria"
           value={categoriaId}
-          onChange={(e) => setCategoriaId(e.target.value as CategoriaId)}
+          onChange={(e) => setCategoriaId(e.target.value)}
         >
-          {CATEGORIAS.map((c) => (
+          {categorias.map((c) => (
             <option key={c.id} value={c.id}>
               {c.emoji} {c.nombre}
             </option>

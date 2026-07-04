@@ -37,12 +37,14 @@ function TarjetaEstadistica({
   icon: typeof Receipt
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-talenta-tan/60 bg-talenta-white/90 p-4 shadow-sm">
+    <div className="flex min-w-0 flex-col gap-2 rounded-2xl border border-talenta-tan/60 bg-talenta-white/90 p-3 shadow-sm">
       <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-talenta-gold/15 text-talenta-gold">
         <Icon className="h-4 w-4" strokeWidth={1.75} />
       </span>
       <span className="text-xs text-talenta-brown-mid">{titulo}</span>
-      <span className="text-lg font-semibold text-talenta-black">{formatearMonto(monto, moneda)}</span>
+      <span className="break-words text-base font-semibold leading-tight text-talenta-black">
+        {formatearMonto(monto, moneda)}
+      </span>
     </div>
   )
 }

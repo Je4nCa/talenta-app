@@ -1,13 +1,13 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'
+import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
-import { CATEGORIAS } from '../constants/categorias'
+import { useCategorias } from '../hooks/useCategorias'
 import { useTarjetas } from '../hooks/useTarjetas'
 import { gastosRepository } from '../repositories'
-import type { CategoriaId } from '../types/categoria'
 import type { TipoPago } from '../types/gasto'
 
 interface FormularioGastoProps {
@@ -22,13 +22,22 @@ function fechaHoy(): string {
 
 export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGastoProps) {
   const { tarjetas } = useTarjetas()
+  const { categorias } = useCategorias()
   const [titulo, setTitulo] = useState('')
   const [monto, setMonto] = useState('')
-  const [categoriaId, setCategoriaId] = useState<CategoriaId>('otros')
+  const [categoriaId, setCategoriaId] = useState('')
   const [tipoPago, setTipoPago] = useState<TipoPago>('contado')
   const [tarjetaId, setTarjetaId] = useState('')
   const [fecha, setFecha] = useState(fechaHoy())
+  const [esCompraFutura, setEsCompraFutura] = useState(false)
+  const [fechaCobro, setFechaCobro] = useState('')
   const [guardando, setGuardando] = useState(false)
+
+  useEffect(() => {
+    if (!categoriaId && categorias.length > 0) {
+      setCategoriaId(categorias.find((c) => c.nombre === 'Otros')?.id ?? categorias[0].id)
+    }
+  }, [categorias, categoriaId])
 
   const tarjetasDisponibles =
     tipoPago === 'tarjeta'
@@ -40,7 +49,8 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
   async function manejarGuardar(e: FormEvent) {
     e.preventDefault()
     const valor = Number(monto)
-    if (!titulo.trim() || !valor || valor <= 0) return
+    if (!titulo.trim() || !valor || valor <= 0 || !categoriaId) return
+    if (esCompraFutura && !fechaCobro) return
 
     setGuardando(true)
     const ahora = new Date().toISOString()
@@ -53,6 +63,7 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
       tarjetaId: tarjetaId || undefined,
       tipoPago,
       fecha,
+      fechaCobro: esCompraFutura ? fechaCobro : undefined,
       creadoEn: ahora,
       actualizadoEn: ahora,
     })
@@ -97,9 +108,9 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
         <Select
           id="gasto-categoria"
           value={categoriaId}
-          onChange={(e) => setCategoriaId(e.target.value as CategoriaId)}
+          onChange={(e) => setCategoriaId(e.target.value)}
         >
-          {CATEGORIAS.map((c) => (
+          {categorias.map((c) => (
             <option key={c.id} value={c.id}>
               {c.emoji} {c.nombre}
             </option>
@@ -108,7 +119,7 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="gasto-fecha">Fecha</Label>
+        <Label htmlFor="gasto-fecha">Fecha de la compra</Label>
         <Input
           id="gasto-fecha"
           type="date"
@@ -117,6 +128,34 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
           required
         />
       </div>
+
+      <label htmlFor="gasto-futuro" className="flex cursor-pointer items-center gap-3">
+        <Checkbox
+          id="gasto-futuro"
+          checked={esCompraFutura}
+          onCheckedChange={(checked) => setEsCompraFutura(checked === true)}
+        />
+        <span className="text-base text-talenta-brown-dark">
+          Es una compra que se cobra después
+        </span>
+      </label>
+
+      {esCompraFutura && (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="gasto-fecha-cobro">¿Cuándo se cobra?</Label>
+          <Input
+            id="gasto-fecha-cobro"
+            type="date"
+            value={fechaCobro}
+            onChange={(e) => setFechaCobro(e.target.value)}
+            required
+          />
+          <p className="text-sm text-talenta-brown-mid">
+            Este gasto contará en el presupuesto del mes en que se cobra, no del mes en que lo
+            compraste.
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="gasto-tipopago">¿Cómo pagaste?</Label>

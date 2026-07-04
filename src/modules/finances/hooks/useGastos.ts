@@ -9,7 +9,7 @@ export function useGastosPorPeriodo(anio: number, mes: number) {
   const gastos = useLiveQuery(async () => {
     if (!uid) return []
     const todos = await finanzasDB.gastos.where('uid').equals(uid).toArray()
-    return todos.filter((g) => g.fecha.startsWith(prefijo))
+    return todos.filter((g) => (g.fechaCobro ?? g.fecha).startsWith(prefijo))
   }, [uid, prefijo])
 
   return { gastos: gastos ?? [], cargando: gastos === undefined }

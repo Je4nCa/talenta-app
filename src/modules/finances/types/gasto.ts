@@ -12,6 +12,13 @@ export interface Gasto {
   tarjetaId?: ID
   tipoPago: TipoPago
   fecha: FechaISO
+  /**
+   * Si la compra se cobra/paga en una fecha distinta a `fecha` (ej. compra
+   * de hoy que se cobra hasta fin de mes), este campo indica esa fecha real
+   * de cobro. El gasto se cuenta en el mes de `fechaCobro` (si existe) en
+   * vez del mes de `fecha`, porque es cuando realmente impacta el balance.
+   */
+  fechaCobro?: FechaISO
   notas?: string
   creadoEn: FechaHoraISO
   actualizadoEn: FechaHoraISO

@@ -5,13 +5,14 @@ import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { buscarPais } from '@/shared/lib/paises'
 import { Button } from '@/shared/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { CATEGORIA_MAP } from '../../constants/categorias'
+import { useCategorias } from '../../hooks/useCategorias'
 import { useGastosFijos, useGastosPorPeriodo } from '../../hooks/useGastos'
 import { useTarjetas } from '../../hooks/useTarjetas'
 import { gastosFijosRepository, gastosRepository } from '../../repositories'
 import { formatearMonto, NOMBRES_MES } from '../../lib/formato'
 import { FormularioGasto } from '../FormularioGasto'
 import { FormularioGastoFijo } from '../FormularioGastoFijo'
+import { TabCategorias } from './TabCategorias'
 
 function usePeriodoActivo() {
   const hoy = new Date()
@@ -31,6 +32,7 @@ function TabVariables({ uid, moneda }: { uid: string; moneda: string }) {
   const { periodo, cambiarMes } = usePeriodoActivo()
   const { gastos } = useGastosPorPeriodo(periodo.anio, periodo.mes)
   const { tarjetas } = useTarjetas()
+  const { mapa: mapaCategorias } = useCategorias()
   const [mostrandoForm, setMostrandoForm] = useState(false)
 
   const total = gastos.reduce((acc, g) => acc + g.monto, 0)
@@ -90,7 +92,7 @@ function TabVariables({ uid, moneda }: { uid: string; moneda: string }) {
       ) : (
         <div className="flex flex-col gap-3">
           {gastosOrdenados.map((g) => {
-            const categoria = CATEGORIA_MAP[g.categoriaId]
+            const categoria = mapaCategorias[g.categoriaId]
             const tarjeta = tarjetas.find((t) => t.id === g.tarjetaId)
             return (
               <div
@@ -109,6 +111,11 @@ function TabVariables({ uid, moneda }: { uid: string; moneda: string }) {
                     {g.fecha}
                     {tarjeta ? ` · ${tarjeta.banco} ${tarjeta.nombre}` : ''}
                   </p>
+                  {g.fechaCobro && (
+                    <p className="mt-0.5 text-sm font-medium text-talenta-gold">
+                      Se cobra el {g.fechaCobro}
+                    </p>
+                  )}
                 </div>
                 <p className="text-base font-semibold text-talenta-black">
                   {formatearMonto(g.monto, moneda)}
@@ -133,6 +140,7 @@ function TabVariables({ uid, moneda }: { uid: string; moneda: string }) {
 function TabFijos({ uid, moneda }: { uid: string; moneda: string }) {
   const { gastosFijos } = useGastosFijos()
   const { tarjetas } = useTarjetas()
+  const { mapa: mapaCategorias } = useCategorias()
   const [mostrandoForm, setMostrandoForm] = useState(false)
 
   const totalActivos = gastosFijos.filter((g) => g.activo).reduce((acc, g) => acc + g.monto, 0)
@@ -169,7 +177,7 @@ function TabFijos({ uid, moneda }: { uid: string; moneda: string }) {
       ) : (
         <div className="flex flex-col gap-3">
           {gastosFijos.map((g) => {
-            const categoria = CATEGORIA_MAP[g.categoriaId]
+            const categoria = mapaCategorias[g.categoriaId]
             const tarjeta = tarjetas.find((t) => t.id === g.tarjetaId)
             return (
               <div
@@ -240,12 +248,16 @@ export function Gastos() {
         <TabsList>
           <TabsTrigger value="variables">Variables</TabsTrigger>
           <TabsTrigger value="fijos">Fijos</TabsTrigger>
+          <TabsTrigger value="categorias">Categorías</TabsTrigger>
         </TabsList>
         <TabsContent value="variables">
           <TabVariables uid={usuario.uid} moneda={moneda} />
         </TabsContent>
         <TabsContent value="fijos">
           <TabFijos uid={usuario.uid} moneda={moneda} />
+        </TabsContent>
+        <TabsContent value="categorias">
+          <TabCategorias uid={usuario.uid} moneda={moneda} />
         </TabsContent>
       </Tabs>
     </motion.div>
