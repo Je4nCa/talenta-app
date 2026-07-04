@@ -5,6 +5,8 @@ Aplicación multiplataforma de mayordomía financiera y crecimiento espiritual p
 **Repo:** `https://github.com/Je4nCa/talenta-app`
 **Fase activa:** Fase 1 + Finanzas Esencial
 
+**Hosting:** por ahora el código solo vive en GitHub (sin deploy). El plan es lanzar primero como web (dominio propio por comprar) y luego publicar en iOS y Android. Por eso el diseño debe ser responsive desde el día uno, no una adaptación posterior.
+
 ---
 
 ## Estructura del repositorio
@@ -40,7 +42,7 @@ La carpeta `modulo-finanzas/` es el código fuente original de la app de finanza
 
 ## Stack tecnológico
 
-Mismo stack que `Finanzas/` para mantener consistencia. No agregar librerías sin justificación.
+Mismo stack que `modulo-finanzas/` para mantener consistencia. No agregar librerías sin justificación.
 
 - **Frontend:** React 18 + TypeScript + Vite
 - **Estilos:** TailwindCSS + shadcn/ui (Radix UI)
@@ -60,7 +62,7 @@ Mismo stack que `Finanzas/` para mantener consistencia. No agregar librerías si
 
 Firebase **aún no está configurado**. Mientras no exista el proyecto de Firebase:
 
-- Usar Dexie para persistencia local (ya probado en `Finanzas/`)
+- Usar Dexie para persistencia local (ya probado en `modulo-finanzas/`)
 - Usar Zustand para estado en memoria
 - Crear una capa de abstracción `src/shared/lib/db.ts` que exponga las mismas funciones tanto para Dexie como para Firestore, de modo que el switch sea un cambio de implementación sin tocar los módulos
 
@@ -86,6 +88,24 @@ Lema: *"Administrando para la Gloria de Dios"*
 Acróstico: *"Talentos Administrados con Lealtad Al Señor, Nos llevan a una Transformación de Abundancia"*
 
 Solo TailwindCSS para estilos. Sin estilos inline. Sin CSS modules. Los tokens de marca van en `tailwind.config.ts`.
+
+---
+
+## Responsive y multi-dispositivo
+
+La app inicia como web (GitHub → luego dominio propio) antes de empaquetarse con Capacitor para iOS/Android. Todo componente y pantalla debe construirse mobile-first y funcionar correctamente en cualquier resolución (celular, tablet, desktop, orientación landscape/portrait), usando los breakpoints de Tailwind (`sm`, `md`, `lg`, `xl`). No asumir un tamaño de pantalla fijo ni diseñar solo para desktop. Probar siempre en al menos un tamaño móvil y uno de escritorio antes de dar por terminada una UI.
+
+---
+
+## Accesibilidad y usabilidad (usuarios de todas las edades)
+
+TALENTA será usada también por personas mayores, así que la UI debe ser 100% user-friendly:
+
+- Tipografías modernas y suaves, ya definidas (Poppins para UI, Caveat solo para acentos decorativos/espirituales) — nunca fuentes finas, condensadas o decorativas en texto funcional.
+- Tamaños de letra generosos y alto contraste (usar los colores de marca respetando contraste legible); evitar texto pequeño (nunca por debajo de `text-base` en contenido principal).
+- Botones y áreas táctiles grandes, espaciado generoso entre elementos, jerarquía visual clara.
+- Lenguaje simple y directo en toda la UI, evitando tecnicismos.
+- Flujos cortos y explícitos (pocos pasos, confirmaciones claras) antes que interacciones complejas u ocultas (swipes, gestos avanzados, menús anidados).
 
 ---
 
