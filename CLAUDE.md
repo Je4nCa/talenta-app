@@ -16,7 +16,7 @@ talenta-app/
       auth/           # Login, registro, onboarding
       course/         # Curso, lecciones, manual, tests
       bible/          # Biblia, versículo diario, memorización
-      finances/       # Módulo de finanzas (migrado desde /Finanzas)
+      finances/       # Módulo de finanzas (migrado desde /modulo-finanzas)
       payments/       # TiloPay integración
       admin/          # Panel de Carlos y Alicia
       notifications/  # FCM, preferencias
@@ -28,13 +28,13 @@ talenta-app/
     router/
     App.tsx
     main.tsx
-  Finanzas/           # App de finanzas original (Je4nCa/app-finanzas)
+  modulo-finanzas/    # App de finanzas original (Je4nCa/app-finanzas), adaptada a otro contexto
                       # Leer antes de tocar el módulo finances/
   public/
   index.html
 ```
 
-La carpeta `Finanzas/` es el código fuente original de la app de finanzas. No la modifiques directamente. Léela para entender la lógica existente (Dexie, Zustand, hooks) y adáptala en `src/modules/finances/`.
+La carpeta `modulo-finanzas/` es el código fuente original de la app de finanzas, adaptado actualmente a otro contexto. No la modifiques directamente. Léela para entender la lógica existente (Dexie, Zustand, hooks) y adáptala en `src/modules/finances/` al esquema de usuario de TALENTA.
 
 ---
 
@@ -109,8 +109,9 @@ Cada módulo tiene su propio hook principal (`useCourse`, `useFinances`, `useBib
 ## Módulos de Fase 1 + Finanzas Esencial
 
 ### Auth
-- Firebase Auth (email + Google OAuth) — placeholder/mock mientras Firebase no existe
-- Al primer login: crear perfil de usuario + ejecutar test de diagnóstico
+- Registro y login con email + contraseña, validado contra la base de datos local (Dexie). Sin Google OAuth.
+- Sin Firebase Auth por ahora: el perfil y las credenciales se crean y validan localmente. Cuando Firebase esté listo, migrar a Firebase Auth manteniendo el mismo flujo de email/contraseña.
+- Al registrarse: crear perfil de usuario + ejecutar test de diagnóstico
 - Campos del perfil: nombre, email, idioma, versión de Biblia preferida, estado de onboarding, rol (`student` | `admin`)
 
 ### Curso
@@ -193,7 +194,7 @@ Estas rutas existen como pantalla "Próximamente" sin ninguna lógica:
 
 ## Primeras tareas (empezar aquí)
 
-1. Leer `Finanzas/src/` completo antes de escribir una sola línea del módulo de finanzas
+1. Leer `modulo-finanzas/src/` completo antes de escribir una sola línea del módulo de finanzas
 2. Crear `tailwind.config.ts` con los tokens de marca de TALENTA
 3. Crear la estructura de carpetas `src/modules/` con un `index.ts` vacío en cada módulo
 4. Crear `src/shared/lib/db.ts` con la abstracción Dexie → Firestore
@@ -207,7 +208,7 @@ Estas rutas existen como pantalla "Próximamente" sin ninguna lógica:
 
 | Qué | Dónde |
 |-----|-------|
-| App de finanzas original | `Finanzas/` |
+| App de finanzas original | `modulo-finanzas/` |
 | Logo TALENTA | `public/assets/talenta-logo.png` |
 | Tokens de marca | `tailwind.config.ts` |
 | Tipos globales | `src/shared/types/` |
