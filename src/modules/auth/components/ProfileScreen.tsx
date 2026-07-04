@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { LogOut, ShieldCheck } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
+import { TextSizeSlider } from '@/shared/components/TextSizeSlider'
 import { buscarPais } from '@/shared/lib/paises'
 import { useAuth } from '../hooks/useAuth'
 
@@ -70,6 +71,8 @@ export function ProfileScreen() {
           )}
         </dl>
       </div>
+
+      <TextSizeSlider />
 
       <Button
         variant="outline"
