@@ -172,7 +172,11 @@ Cada módulo tiene su propio hook principal (`useCourse`, `useFinances`, `useBib
 
 **Estado actual:**
 - ✅ `Dashboard` (Inicio): navegación por mes, balance del período, 3 tarjetas estadísticas (variables/fijos/cuotas), tracking de salario por quincena.
-- ⏳ `Gastos`, `Tarjetas`, `Pagos`, `Tasa cero`: placeholders "Próximamente" dentro del shell de Finanzas — son la siguiente fase a portar desde `modulo-finanzas/src/pages/` (misma lógica de negocio: ciclo de facturación, splits eliminados, formularios de gasto/tarjeta/cuotas).
+- ✅ `Gastos`: tabs Variables (por mes, formulario con categoría/monto/fecha/tipo de pago/tarjeta opcional) y Fijos (recurrentes, con pausar/reactivar). `src/modules/finances/components/FormularioGasto.tsx` y `FormularioGastoFijo.tsx`.
+- ✅ `Tarjetas`: alta de tarjetas crédito/débito (`FormularioTarjeta.tsx`, selector de color con swatches en vez de color picker crudo — más simple para el usuario), lista con disponible (débito) o gastado/límite con barra de progreso (crédito).
+- ✅ `Pagos`: por cada tarjeta de crédito, calcula el período de facturación real (`src/modules/finances/lib/billingCycle.ts`, mismo algoritmo que el original) según el día de corte, suma gastos + fijos asignados a esa tarjeta dentro del período, permite registrar abonos (`FormularioAbono.tsx`) y muestra el pendiente. Si el usuario no tiene ninguna tarjeta de crédito, muestra un estado vacío en vez de una pantalla rota.
+- ⏳ `Tasa cero`: sigue como placeholder "Próximamente" — cuotas sin intereses, siguiente fase.
+- Nota de alcance: por simplicidad ("fácil para el usuario"), Pagos no incluye todavía el override de "monto manual" que sí tenía el original — se puede agregar después si hace falta.
 
 Categorías (de `modulo-finanzas/src/constants/categorias.ts`, ya migradas tal cual a `src/modules/finances/constants/categorias.ts`): Comida, Apartamento, Café, Compras, Transporte, Salud, Entretenimiento, Suscripciones, Viajes, Educación, Mascotas, Otros — cada una con emoji y color.
 
