@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
@@ -6,6 +7,7 @@ import { useAuth } from '../hooks/useAuth'
 
 export function RegisterForm() {
   const { registrar, loading, error, limpiarError } = useAuth()
+  const navigate = useNavigate()
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,6 +30,7 @@ export function RegisterForm() {
 
     try {
       await registrar({ nombre, email, password })
+      navigate('/', { replace: true })
     } catch {
       // el error ya queda expuesto en el store
     }

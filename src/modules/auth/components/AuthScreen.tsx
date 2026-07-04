@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { DecorativeBackground } from './DecorativeBackground'
+import { DecorativeBackground } from '@/shared/components/DecorativeBackground'
 import { LogoMark } from './LogoMark'
 import { LoginForm } from './LoginForm'
 import { RegisterForm } from './RegisterForm'
