@@ -1,0 +1,6 @@
+export * from './comunes'
+export * from './categoria'
+export * from './tarjeta'
+export * from './gasto'
+export * from './cuotas'
+export * from './salario'

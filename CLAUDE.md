@@ -150,23 +150,21 @@ Cada módulo tiene su propio hook principal (`useCourse`, `useFinances`, `useBib
 - Memorización: mostrar el versículo completo → ocultar palabras progresivamente → el usuario lo reconstruye
 
 ### Finanzas Esencial
-Adaptar desde `modulo-finanzas/`. Leer ese código primero. Reutilizar la lógica de Dexie, hooks y componentes que ya funcionan; adaptarlos al esquema de usuario de TALENTA.
 
-La moneda del módulo es siempre la del país del usuario (`usuario.monedaCodigo`, derivada en el registro — ver sección Auth). A diferencia de `modulo-finanzas/` (que dejaba elegir manualmente entre USD/CRC), en TALENTA no hay selector de moneda: se fija automáticamente y no cambia salvo que el usuario actualice su país.
+**IMPORTANTE — decisión de arquitectura ya tomada (no re-explorar):** `modulo-finanzas/` en su forma original vive 100% en Firestore (tiempo real vía `onSnapshot`) con Google Auth y modela un hogar de 2 personas con gastos compartidos (splits 50/50, porcentaje, uno paga todo, montos fijos) y selector de moneda USD/CRC. Ya se decidió **no** portar eso tal cual:
+- **Backend:** Dexie local (no Firestore). El propio `modulo-finanzas/src/database/db.ts` ya definía un schema Dexie que nunca se usaba en runtime (todo pasaba por Firestore); ese schema fue la base para `src/modules/finances/lib/db.ts` (Dexie db separada: `talenta-finanzas-db`).
+- **Modelo de usuario:** individual, no de hogar. Se eliminó `usuarioId` multi-persona → cada registro tiene `uid` (dueño = usuario de TALENTA autenticado). Se eliminó por completo `esCompartido`/`DetalleCompartido` y la pantalla `SeleccionUsuario`.
+- **Moneda:** fija por `usuario.monedaCodigo` (ver Auth), sin selector ni tipo de cambio — se eliminó `moneda.store` y todo el manejo de USD/CRC.
 
-Schema de datos:
-```ts
-// finances/budget/{mes-año}
-{ income: number, fixedExpenses: number, variableExpenses: number, savings: number }
+**Estructura de navegación:** Finanzas es un mini-app dentro de TALENTA con **su propio bottom nav** (`FinanceBottomNav`, 5 tabs: Inicio/Gastos/Tarjetas/Pagos/Tasa 0%) y su propio header con flecha de regreso al Hub principal. Vive en rutas anidadas `/finanzas/*` (`src/router/AppRoutes.tsx`) fuera del `AppShell` principal — es decir, al entrar se reemplaza por completo la navegación de TALENTA, no coexisten los dos bottom nav. La entrada (`FinancesEntry.tsx`) muestra el `ModuleScreen` splash una sola vez al entrar (no se repite al navegar entre tabs internos de Finanzas).
 
-// finances/transactions/{txId}
-{ amount: number, type: 'income' | 'expense', category: string, date: Date, note?: string }
+**Código fuente:** `src/modules/finances/` — `types/`, `lib/db.ts`, `repositories/` (mismo contrato CRUD que el original: `obtenerPorId/obtenerTodos/crear/crearBulk/actualizar/eliminar/contar`, pero implementado sobre Dexie en vez de Firestore), `hooks/` (usan `dexie-react-hooks`'s `useLiveQuery`, equivalente reactivo local al `onSnapshot` original), `components/pages/`.
 
-// finances/categories/{catId}
-{ name: string, type: 'fixed' | 'variable' | 'hormiga' | 'transporte' | 'custom' }
-```
+**Estado actual:**
+- ✅ `Dashboard` (Inicio): navegación por mes, balance del período, 3 tarjetas estadísticas (variables/fijos/cuotas), tracking de salario por quincena.
+- ⏳ `Gastos`, `Tarjetas`, `Pagos`, `Tasa cero`: placeholders "Próximamente" dentro del shell de Finanzas — son la siguiente fase a portar desde `modulo-finanzas/src/pages/` (misma lógica de negocio: ciclo de facturación, splits eliminados, formularios de gasto/tarjeta/cuotas).
 
-Categorías predefinidas: Gastos hormiga, Bus/transporte, Peajes, Comida, Servicios. El usuario puede agregar las suyas.
+Categorías (de `modulo-finanzas/src/constants/categorias.ts`, ya migradas tal cual a `src/modules/finances/constants/categorias.ts`): Comida, Apartamento, Café, Compras, Transporte, Salud, Entretenimiento, Suscripciones, Viajes, Educación, Mascotas, Otros — cada una con emoji y color.
 
 Balance diario = ingresos − suma de egresos del día.
 Resumen semanal = vista agregada por categoría, calculada en cliente.
