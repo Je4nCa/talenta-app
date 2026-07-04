@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
@@ -9,16 +9,29 @@ import { LIBROS_BIBLIA, type LibroBiblia } from '../constants/libros'
 import { SelectorLibroCapitulo } from './SelectorLibroCapitulo'
 import type { Versiculo } from '../types'
 
-export function LectorCapitulo() {
+interface LectorCapituloProps {
+  libro: LibroBiblia
+  capitulo: number
+  versiculoDestino?: number
+  onCambiarLibro: (libro: LibroBiblia) => void
+  onCambiarCapitulo: (capitulo: number) => void
+}
+
+export function LectorCapitulo({
+  libro,
+  capitulo,
+  versiculoDestino,
+  onCambiarLibro,
+  onCambiarCapitulo,
+}: LectorCapituloProps) {
   const usuario = useAuth((state) => state.usuario)
   const bibliaId = usuario?.versionBiblia ?? 'RVR60'
 
-  const [libro, setLibro] = useState<LibroBiblia>(LIBROS_BIBLIA[42]) // Juan, por defecto
-  const [capitulo, setCapitulo] = useState(3)
   const [versiculos, setVersiculos] = useState<Versiculo[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [guardadosSet, setGuardadosSet] = useState<Set<number>>(new Set())
+  const refVersiculoDestino = useRef<HTMLParagraphElement | null>(null)
 
   const subrayados = useSubrayados(libro.referencia, capitulo)
 
@@ -63,28 +76,34 @@ export function LectorCapitulo() {
     }
   }, [usuario, versiculos, libro, capitulo])
 
+  useEffect(() => {
+    if (!cargando && versiculoDestino && refVersiculoDestino.current) {
+      refVersiculoDestino.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [cargando, versiculoDestino])
+
   function irCapituloAnterior() {
     if (capitulo > 1) {
-      setCapitulo(capitulo - 1)
+      onCambiarCapitulo(capitulo - 1)
     } else {
       const indiceAnterior = LIBROS_BIBLIA.findIndex((l) => l.referencia === libro.referencia) - 1
       const libroAnterior = LIBROS_BIBLIA[indiceAnterior]
       if (libroAnterior) {
-        setLibro(libroAnterior)
-        setCapitulo(libroAnterior.capitulos)
+        onCambiarLibro(libroAnterior)
+        onCambiarCapitulo(libroAnterior.capitulos)
       }
     }
   }
 
   function irCapituloSiguiente() {
     if (capitulo < libro.capitulos) {
-      setCapitulo(capitulo + 1)
+      onCambiarCapitulo(capitulo + 1)
     } else {
       const indiceSiguiente = LIBROS_BIBLIA.findIndex((l) => l.referencia === libro.referencia) + 1
       const libroSiguiente = LIBROS_BIBLIA[indiceSiguiente]
       if (libroSiguiente) {
-        setLibro(libroSiguiente)
-        setCapitulo(1)
+        onCambiarLibro(libroSiguiente)
+        onCambiarCapitulo(1)
       }
     }
   }
@@ -114,10 +133,10 @@ export function LectorCapitulo() {
         libro={libro}
         capitulo={capitulo}
         onCambiarLibro={(nuevoLibro) => {
-          setLibro(nuevoLibro)
-          setCapitulo(1)
+          onCambiarLibro(nuevoLibro)
+          onCambiarCapitulo(1)
         }}
-        onCambiarCapitulo={setCapitulo}
+        onCambiarCapitulo={onCambiarCapitulo}
       />
 
       <div className="flex items-center justify-between">
@@ -158,10 +177,12 @@ export function LectorCapitulo() {
           {versiculos.map((v) => (
             <p
               key={v.numero}
+              ref={v.numero === versiculoDestino ? refVersiculoDestino : undefined}
               onClick={() => manejarSubrayar(v.numero)}
               className={cn(
                 'group flex cursor-pointer gap-2 rounded-lg px-2 py-1.5 text-base leading-relaxed text-talenta-black transition-colors',
-                subrayados.has(v.numero) && 'bg-talenta-gold/20',
+                (subrayados.has(v.numero) || v.numero === versiculoDestino) &&
+                  'bg-talenta-gold/20',
               )}
             >
               <span className="select-none text-sm font-semibold text-talenta-gold">
