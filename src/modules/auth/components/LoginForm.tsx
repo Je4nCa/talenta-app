@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Input } from '@/shared/components/ui/input'
@@ -7,6 +8,7 @@ import { useAuth } from '../hooks/useAuth'
 
 export function LoginForm() {
   const { login, loading, error, limpiarError } = useAuth()
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [recordar, setRecordar] = useState(true)
@@ -16,6 +18,7 @@ export function LoginForm() {
     limpiarError()
     try {
       await login({ email, password }, recordar)
+      navigate('/', { replace: true })
     } catch {
       // el error ya queda expuesto en el store
     }
