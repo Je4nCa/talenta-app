@@ -62,11 +62,16 @@ export function BottomNav() {
           <EnlaceNav key={enlace.to} {...enlace} />
         ))}
 
-        <li className="flex flex-1 items-start justify-center">
-          <NavLink to="/" end className="group -translate-y-4">
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-talenta-black text-talenta-gold shadow-lg ring-4 ring-talenta-white transition-transform group-active:scale-95">
+        <li className="flex-1">
+          <NavLink
+            to="/"
+            end
+            className="group flex flex-col items-center gap-1 py-3 text-xs font-medium text-talenta-brown-mid transition-colors"
+          >
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-talenta-gold text-talenta-white shadow-md transition-transform group-active:scale-95">
               <Home className="h-6 w-6" strokeWidth={2} />
             </span>
+            Inicio
           </NavLink>
         </li>
 
