@@ -50,7 +50,7 @@ Mismo stack que `modulo-finanzas/` para mantener consistencia. No agregar librer
 - **Almacenamiento local:** Dexie (IndexedDB) — usado mientras Firebase no está configurado
 - **Backend:** Firebase (Auth, Firestore, Cloud Functions, FCM, Hosting) — **pendiente de configurar**
 - **Pagos:** TiloPay SDK
-- **Biblia:** bible-api.com envuelta detrás de una interfaz `BibleProvider`
+- **Biblia:** API de Biblia.com (`api.biblia.com`), requiere API key — ver sección Biblia para el detalle de la key y sus implicaciones de seguridad
 - **Gráficos:** Recharts
 - **Animaciones:** Framer Motion
 - **Multiplataforma:** Capacitor (iOS, Android, Web) — configurar después de tener la PWA estable
@@ -144,10 +144,18 @@ Cada módulo tiene su propio hook principal (`useCourse`, `useFinances`, `useBib
 - Recordatorios push cuando una lección está vencida (FCM cron — pendiente)
 
 ### Biblia
-- Interfaz `BibleProvider` con una implementación inicial: `BibleApiProvider` (bible-api.com, sin API key, CORS habilitado)
-- Preparar la interfaz para que agregar `ApiBibleProvider` en el futuro sea solo una nueva implementación
-- Versículo diario: la Cloud Function lo selecciona según la lección activa y lo envía por FCM a las 7am hora del usuario (pendiente Firebase)
-- Memorización: mostrar el versículo completo → ocultar palabras progresivamente → el usuario lo reconstruye
+
+**IMPORTANTE — decisión ya tomada (no re-explorar):** no se usa bible-api.com. Se usa la **API real de Biblia.com** (`https://api.biblia.com/v1/bible/...`, servicio de Logos/Faithlife), que sí requiere API key vía parámetro `?key=`.
+
+- **La API key vive en `VITE_BIBLIA_API_KEY`** (`.env.local`, gitignorado — nunca commitear la key real). En producción se inyecta como GitHub Actions secret del mismo nombre (`.github/workflows/deploy.yml`, paso Build). **Advertencia de seguridad real y sin resolver:** como TALENTA hoy es un SPA 100% estático sin backend, la key queda visible en cualquier request de red que haga un visitante del sitio desplegado (inspeccionable en las DevTools). No hay forma de evitar esto sin un proxy backend (ideal: una Cloud Function de Firebase que guarde la key server-side, cuando Firebase esté configurado). Mientras tanto es una limitación aceptada, no un descuido.
+- **Endpoints usados** (`src/modules/bible/lib/bibliaClient.ts`):
+  - `GET /v1/bible/content/{bibliaId}.txt.json?passage={libro capitulo}&style=oneVersePerLine` → capítulo completo. La respuesta trae una primera línea de cita (ej. "1 Corinthians 1 (RVR60)") que **siempre** hay que descartar por posición, no por patrón — libros como "1 Corintios" o "2 Reyes" empiezan con número y rompen cualquier regex que intente detectar la cita por su formato.
+  - `GET /v1/bible/search/{bibliaId}.js?query=...&mode=verse&preview=text` → búsqueda. La respuesta usa el campo `title` para la referencia (no `passage`, a pesar de lo que sugiere la documentación pública). Puede traer resultados duplicados; no usar la referencia sola como React key.
+- **Idioma de la Biblia vs. idioma de la interfaz:** la interfaz de TALENTA es 100% español (fijo). El *contenido* bíblico puede ser en cualquier idioma según la versión elegida en `SelectorBiblia` (25 versiones disponibles, definidas en `src/modules/bible/constants/biblias.ts`), pero **por defecto y mientras tanto siempre es español**: `BIBLIA_POR_DEFECTO = 'RVR60'` (Reina Valera Revisada 1960). La preferencia se guarda en `usuario.versionBiblia` (mismo campo que ya existía en el perfil) vía `useAuth().cambiarVersionBiblia()`.
+- **Referencias van en inglés canónico internamente:** el parámetro `passage` de la API solo entiende nombres de libro en inglés (`John`, `1 Corinthians`, `Genesis`...), sin importar el idioma de la Biblia elegida. `src/modules/bible/constants/libros.ts` mapea cada uno de los 66 libros: nombre en español (para la UI) + referencia canónica en inglés (para la API) + cantidad de capítulos + testamento.
+- **Persistencia local (Dexie, `talenta-biblia-db`):** tabla `guardados` (versículos guardados/marcadores) y `subrayados` (resaltado por versículo), ambas escopadas por `uid`. Sin sincronización remota todavía (coherente con el resto de la app hoy).
+- **Módulo de lectura** (`src/modules/bible/components/`): mismo patrón para cualquier Biblia — selector de versión, selector de libro/capítulo, lector con tap-para-subrayar y botón de guardar por versículo, buscador por palabra/frase, y lista de guardados. Vive dentro del `AppShell` principal (no es una mini-app con su propio bottom nav como Finanzas — no se justifica ese nivel de estructura aquí).
+- **Pendiente para después:** versículo diario + notificación push (requiere Firebase/FCM, ver sección Firebase), memorización progresiva (ocultar palabras).
 
 ### Finanzas Esencial
 
@@ -235,3 +243,6 @@ Estas rutas existen como pantalla "Próximamente" sin ninguna lógica:
 | Tipos globales | `src/shared/types/` |
 | Abstracción de base de datos | `src/shared/lib/db.ts` |
 | Feature flags | `src/shared/lib/featureFlags.ts` |
+| Cliente API de Biblia.com | `src/modules/bible/lib/bibliaClient.ts` |
+| API key de Biblia.com (local) | `.env.local` → `VITE_BIBLIA_API_KEY` (gitignorado, ver `.env.example`) |
+| API key de Biblia.com (deploy) | GitHub Actions secret `VITE_BIBLIA_API_KEY` del repo |

@@ -1,7 +1,12 @@
 import { create } from 'zustand'
 import { db } from '@/shared/lib/db'
 import type { LoginInput, NuevoUsuarioInput, UserProfile } from '@/shared/types/user'
-import { AuthError, iniciarSesion, registrarUsuario } from '../lib/authService'
+import {
+  AuthError,
+  actualizarVersionBiblia,
+  iniciarSesion,
+  registrarUsuario,
+} from '../lib/authService'
 import { guardarUidRecordado, limpiarUidRecordado, obtenerUidRecordado } from '../lib/session'
 
 interface AuthState {
@@ -14,9 +19,10 @@ interface AuthState {
   logout: () => void
   limpiarError: () => void
   restaurarSesion: () => Promise<void>
+  cambiarVersionBiblia: (versionBiblia: string) => Promise<void>
 }
 
-export const useAuth = create<AuthState>((set) => ({
+export const useAuth = create<AuthState>((set, get) => ({
   usuario: null,
   loading: false,
   restaurandoSesion: true,
@@ -73,5 +79,12 @@ export const useAuth = create<AuthState>((set) => ({
     }
 
     set({ usuario, restaurandoSesion: false })
+  },
+
+  cambiarVersionBiblia: async (versionBiblia) => {
+    const usuarioActual = get().usuario
+    if (!usuarioActual) return
+    await actualizarVersionBiblia(usuarioActual.uid, versionBiblia)
+    set({ usuario: { ...usuarioActual, versionBiblia } })
   },
 }))

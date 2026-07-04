@@ -27,7 +27,7 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     email,
     passwordHash: await hashPassword(input.password),
     idioma: 'es',
-    versionBiblia: 'RVR1960',
+    versionBiblia: 'RVR60',
     onboardingCompletado: false,
     rol: 'student',
     creadoEn: new Date(),
@@ -37,6 +37,10 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
 
   await db.users.add(perfil)
   return perfil
+}
+
+export async function actualizarVersionBiblia(uid: string, versionBiblia: string): Promise<void> {
+  await db.users.update(uid, { versionBiblia })
 }
 
 export async function iniciarSesion(input: LoginInput): Promise<UserProfile> {
