@@ -1,0 +1,7 @@
+export { gastosRepository } from './gastos.repository'
+export { gastosFijosRepository } from './gastos-fijos.repository'
+export { tarjetasRepository } from './tarjetas.repository'
+export { planesCuotasRepository, cuotasMensualesRepository } from './cuotas.repository'
+export { abonosTarjetaRepository } from './abonos.repository'
+export { montosManualesRepository } from './montos-manuales.repository'
+export { salariosRepository } from './salarios.repository'
