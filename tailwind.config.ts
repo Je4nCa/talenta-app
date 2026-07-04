@@ -18,7 +18,7 @@ export default {
       },
       fontFamily: {
         sans: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        decorative: ['Caveat', 'cursive'],
+        decorative: ['"Playfair Display"', 'Georgia', 'serif'],
       },
       borderRadius: {
         xl: '1rem',
