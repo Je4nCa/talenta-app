@@ -1,0 +1,17 @@
+{
+  "name": "TALENTA",
+  "short_name": "TALENTA",
+  "description": "Mayordomía financiera y crecimiento espiritual — Administrando para la Gloria de Dios",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F2ECE6",
+  "theme_color": "#F2ECE6",
+  "icons": [
+    {
+      "src": "assets/talenta-logo.jpeg",
+      "sizes": "1229x1229",
+      "type": "image/jpeg"
+    }
+  ]
+}
