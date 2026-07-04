@@ -5,3 +5,4 @@ export { planesCuotasRepository, cuotasMensualesRepository } from './cuotas.repo
 export { abonosTarjetaRepository } from './abonos.repository'
 export { montosManualesRepository } from './montos-manuales.repository'
 export { salariosRepository } from './salarios.repository'
+export { categoriasRepository } from './categorias.repository'

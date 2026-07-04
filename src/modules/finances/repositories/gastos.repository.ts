@@ -10,7 +10,7 @@ class GastosRepository extends BaseRepository<Gasto> {
   async obtenerPorPeriodo(uid: string, anio: number, mes: number): Promise<Gasto[]> {
     const prefijo = `${anio}-${String(mes).padStart(2, '0')}`
     const todos = await this.tabla.where('uid').equals(uid).toArray()
-    return todos.filter((g) => g.fecha.startsWith(prefijo))
+    return todos.filter((g) => (g.fechaCobro ?? g.fecha).startsWith(prefijo))
   }
 }
 
