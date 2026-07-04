@@ -13,6 +13,7 @@ import { formatearMonto, NOMBRES_MES } from '../../lib/formato'
 import { FormularioGasto } from '../FormularioGasto'
 import { FormularioGastoFijo } from '../FormularioGastoFijo'
 import { TabCategorias } from './TabCategorias'
+import { TabResumen } from './TabResumen'
 
 function usePeriodoActivo() {
   const hoy = new Date()
@@ -245,10 +246,11 @@ export function Gastos() {
       </div>
 
       <Tabs defaultValue="variables">
-        <TabsList>
+        <TabsList className="grid h-auto grid-cols-2 gap-1 sm:flex sm:h-14">
           <TabsTrigger value="variables">Variables</TabsTrigger>
           <TabsTrigger value="fijos">Fijos</TabsTrigger>
           <TabsTrigger value="categorias">Categorías</TabsTrigger>
+          <TabsTrigger value="resumen">Resumen</TabsTrigger>
         </TabsList>
         <TabsContent value="variables">
           <TabVariables uid={usuario.uid} moneda={moneda} />
@@ -258,6 +260,9 @@ export function Gastos() {
         </TabsContent>
         <TabsContent value="categorias">
           <TabCategorias uid={usuario.uid} moneda={moneda} />
+        </TabsContent>
+        <TabsContent value="resumen">
+          <TabResumen moneda={moneda} />
         </TabsContent>
       </Tabs>
     </motion.div>
