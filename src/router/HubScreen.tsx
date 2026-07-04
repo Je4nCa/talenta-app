@@ -2,6 +2,7 @@ import { motion, type Variants } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { BookHeart, BookOpen, ChevronRight, ShieldCheck, Wallet, type LucideIcon } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
+import { VersiculoDelDia } from '@/modules/bible/components/VersiculoDelDia'
 
 interface ModuloCard {
   to: string
@@ -75,8 +76,12 @@ export function HubScreen() {
         </p>
       </motion.div>
 
+      <div className="mt-6">
+        <VersiculoDelDia />
+      </div>
+
       <motion.div
-        className="mt-8 flex flex-col gap-4"
+        className="mt-6 flex flex-col gap-4"
         variants={contenedor}
         initial="hidden"
         animate="visible"

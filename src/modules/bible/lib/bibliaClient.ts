@@ -49,6 +49,21 @@ export async function obtenerCapitulo(
   return parsearVersiculos(datos.text ?? '')
 }
 
+export async function obtenerPasaje(bibliaId: string, referenciaCompleta: string): Promise<string> {
+  const parametros = new URLSearchParams({
+    passage: referenciaCompleta,
+    key: obtenerApiKey(),
+  })
+
+  const respuesta = await fetch(`${BASE_URL}/content/${bibliaId}.txt.json?${parametros}`)
+  if (!respuesta.ok) {
+    throw new BibliaApiError('No se pudo cargar el versículo. Intenta de nuevo.')
+  }
+
+  const datos = (await respuesta.json()) as { text?: string }
+  return (datos.text ?? '').trim()
+}
+
 export async function buscarPalabra(
   bibliaId: string,
   consulta: string,
