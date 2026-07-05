@@ -242,6 +242,7 @@ Estas rutas existen como pantalla "Próximamente" sin ninguna lógica:
 - Sin librerías nuevas sin consultar primero.
 - El código del módulo `Finanzas/` original no se modifica. Se lee, se adapta en `src/modules/finances/`.
 - **Nunca usar valores arbitrarios de Tailwind en px para texto o íconos** (`text-[11px]`, `h-[18px]`) — el slider de accesibilidad (`useAccesibilidad`, `src/shared/hooks/useAccesibilidad.ts`) escala toda la interfaz cambiando el `font-size` del `<html>`, y eso solo funciona con unidades `rem` (las clases normales de Tailwind como `text-xs`, `h-5`, o arbitrarios en rem como `text-[0.6875rem]`). Un valor en px absoluto queda congelado sin importar el ajuste del usuario. Bug real encontrado y corregido en `FinanceBottomNav.tsx`.
+- **Nunca hardcodear una ruta absoluta (`/assets/...`) para un archivo de `public/` dentro de un componente React** — en producción el build usa `base: '/talenta-app/'` (`vite.config.ts`, por GitHub Pages sirviendo desde un subpath), así que `/assets/x.png` resuelve a `github.io/assets/x.png` (404) en vez de `github.io/talenta-app/assets/x.png`. Usar siempre `` `${import.meta.env.BASE_URL}assets/x.png` ``. En `index.html` (favicon, manifest, etc.) usar el placeholder `%BASE_URL%assets/x.png`, que Vite sustituye en build — una ruta absoluta ahí tiene el mismo bug. Bug real encontrado y corregido en `ProfileScreen.tsx` (logo de Montevo Studio) e `index.html`.
 
 ---
 

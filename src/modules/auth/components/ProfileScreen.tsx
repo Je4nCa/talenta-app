@@ -95,7 +95,7 @@ export function ProfileScreen() {
 
         <div className="mt-4 flex items-center gap-3 border-t border-talenta-tan/50 pt-4">
           <img
-            src="/assets/Montevito.png"
+            src={`${import.meta.env.BASE_URL}assets/Montevito.png`}
             alt="Montevito, la mascota de Montevo Studio"
             className="h-11 w-11 shrink-0 rounded-xl object-cover shadow-sm"
           />
