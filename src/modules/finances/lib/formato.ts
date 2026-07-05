@@ -1,19 +1,23 @@
-const ESPACIO_SIN_SEPARACION = String.fromCharCode(160)
+import { PAISES } from '@/shared/lib/paises'
+
+const SIMBOLOS_POR_MONEDA: Record<string, string> = Object.fromEntries(
+  PAISES.map((pais) => [pais.monedaCodigo, pais.monedaSimbolo]),
+)
 
 export function formatearMonto(monto: number, monedaCodigo: string): string {
+  const simbolo = SIMBOLOS_POR_MONEDA[monedaCodigo] ?? monedaCodigo
   try {
-    const formateado = new Intl.NumberFormat('es', {
-      style: 'currency',
-      currency: monedaCodigo,
+    // Locale 'es-CO' en vez del genérico 'es': el 'es' sin país tiene un bug
+    // de ICU que omite el separador de miles para valores de 4 dígitos
+    // (ej. formatea 8000 como "8000" en vez de "8.000"), pero sí lo aplica
+    // desde 10.000 en adelante — inconsistencia confirmada probando varios
+    // locales. 'es-CO' agrupa con punto de forma consistente en todo rango.
+    const formateado = new Intl.NumberFormat('es-CO', {
       maximumFractionDigits: monedaCodigo === 'CRC' ? 0 : 2,
     }).format(monto)
-    // Intl separa el símbolo del número con un espacio de no separación;
-    // lo cambiamos por uno normal para que el texto pueda partirse ahí en
-    // tarjetas angostas, en vez de partirse a la mitad de un número o del
-    // código de moneda.
-    return formateado.split(ESPACIO_SIN_SEPARACION).join(' ')
+    return `${simbolo}${formateado}`
   } catch {
-    return `${monto.toFixed(2)} ${monedaCodigo}`
+    return `${simbolo}${monto.toFixed(2)}`
   }
 }
 
