@@ -1,15 +1,15 @@
 import { useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Plus, Receipt, RefreshCw, Repeat, Wallet } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronLeft, ChevronRight, Plus, Receipt, RefreshCw, Repeat, Trash2, Wallet } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { buscarPais } from '@/shared/lib/paises'
 import { Button } from '@/shared/components/ui/button'
-import { Input } from '@/shared/components/ui/input'
 import { useGastosFijos, useGastosPorPeriodo } from '../../hooks/useGastos'
 import { useCuotasPorPeriodo } from '../../hooks/useCuotas'
-import { useSalariosPorPeriodo } from '../../hooks/useSalarios'
-import { salariosRepository } from '../../repositories'
+import { useIngresosPorPeriodo } from '../../hooks/useIngresos'
+import { ingresosRepository } from '../../repositories'
 import { formatearMonto, NOMBRES_MES } from '../../lib/formato'
+import { FormularioIngreso } from '../FormularioIngreso'
 
 function usePeriodoActivo() {
   const hoy = new Date()
@@ -49,61 +49,14 @@ function TarjetaEstadistica({
   )
 }
 
-function FormularioQuincena({
-  uid,
-  anio,
-  mes,
-  quincena,
-}: {
-  uid: string
-  anio: number
-  mes: number
-  quincena: 1 | 2
-}) {
-  const [monto, setMonto] = useState('')
-  const [guardando, setGuardando] = useState(false)
-
-  async function guardar() {
-    const valor = Number(monto)
-    if (!valor || valor <= 0) return
-    setGuardando(true)
-    await salariosRepository.crear({
-      id: crypto.randomUUID(),
-      uid,
-      monto: valor,
-      anio,
-      mes,
-      quincena,
-      creadoEn: new Date().toISOString(),
-    })
-    setGuardando(false)
-    setMonto('')
-  }
-
-  return (
-    <div className="flex items-center gap-2">
-      <Input
-        type="number"
-        inputMode="decimal"
-        placeholder="Monto"
-        value={monto}
-        onChange={(e) => setMonto(e.target.value)}
-        className="h-11"
-      />
-      <Button size="default" className="h-11 px-4" disabled={guardando} onClick={guardar}>
-        <Plus className="h-4 w-4" />
-      </Button>
-    </div>
-  )
-}
-
 export function Dashboard() {
   const usuario = useAuth((state) => state.usuario)
   const { periodo, cambiarMes } = usePeriodoActivo()
   const { gastos } = useGastosPorPeriodo(periodo.anio, periodo.mes)
   const { gastosFijos } = useGastosFijos()
   const { cuotas } = useCuotasPorPeriodo(periodo.anio, periodo.mes)
-  const { salarios } = useSalariosPorPeriodo(periodo.anio, periodo.mes)
+  const { ingresos } = useIngresosPorPeriodo(periodo.anio, periodo.mes)
+  const [mostrandoForm, setMostrandoForm] = useState(false)
 
   if (!usuario) return null
 
@@ -118,10 +71,9 @@ export function Dashboard() {
   const totalCuotas = useMemo(() => cuotas.reduce((acc, c) => acc + c.monto, 0), [cuotas])
   const totalGastado = totalVariables + totalFijos + totalCuotas
 
-  const quincena1 = salarios.find((s) => s.quincena === 1)
-  const quincena2 = salarios.find((s) => s.quincena === 2)
-  const totalSalario = (quincena1?.monto ?? 0) + (quincena2?.monto ?? 0)
-  const balance = totalSalario - totalGastado
+  const totalIngresos = useMemo(() => ingresos.reduce((acc, i) => acc + i.monto, 0), [ingresos])
+  const balance = totalIngresos - totalGastado
+  const ingresosOrdenados = [...ingresos].sort((a, b) => b.fecha.localeCompare(a.fecha))
 
   return (
     <motion.div
@@ -156,7 +108,7 @@ export function Dashboard() {
         <p className="text-sm text-talenta-tan">Balance del mes</p>
         <p className="mt-1 text-3xl font-semibold">{formatearMonto(balance, moneda)}</p>
         <p className="mt-1 text-sm text-talenta-tan">
-          Ingresos {formatearMonto(totalSalario, moneda)} · Gastos {formatearMonto(totalGastado, moneda)}
+          Ingresos {formatearMonto(totalIngresos, moneda)} · Gastos {formatearMonto(totalGastado, moneda)}
         </p>
       </div>
 
@@ -166,44 +118,59 @@ export function Dashboard() {
         <TarjetaEstadistica titulo="Cuotas" monto={totalCuotas} moneda={moneda} icon={RefreshCw} />
       </div>
 
-      <div className="rounded-2xl border border-talenta-tan/60 bg-talenta-white/90 p-5 shadow-sm">
-        <div className="flex items-center gap-2 text-talenta-black">
+      <div>
+        <div className="mb-3 flex items-center gap-2 text-talenta-black">
           <Wallet className="h-4 w-4 text-talenta-gold" />
-          <span className="text-base font-medium">Mi salario</span>
+          <span className="text-base font-medium">Mis ingresos</span>
         </div>
 
-        <div className="mt-4 flex flex-col gap-4">
-          <div>
-            <p className="mb-1 text-sm text-talenta-brown-mid">Primera quincena</p>
-            {quincena1 ? (
-              <p className="text-base font-semibold text-talenta-black">
-                {formatearMonto(quincena1.monto, moneda)}
-              </p>
-            ) : (
-              <FormularioQuincena
+        <div className="flex flex-col gap-3">
+          <AnimatePresence mode="wait">
+            {mostrandoForm ? (
+              <FormularioIngreso
+                key="form"
                 uid={usuario.uid}
-                anio={periodo.anio}
-                mes={periodo.mes}
-                quincena={1}
+                onGuardado={() => setMostrandoForm(false)}
+                onCancelar={() => setMostrandoForm(false)}
               />
+            ) : (
+              <motion.div key="boton">
+                <Button size="lg" className="w-full gap-2" onClick={() => setMostrandoForm(true)}>
+                  <Plus className="h-5 w-5" />
+                  Agregar ingreso
+                </Button>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
 
-          <div>
-            <p className="mb-1 text-sm text-talenta-brown-mid">Segunda quincena</p>
-            {quincena2 ? (
-              <p className="text-base font-semibold text-talenta-black">
-                {formatearMonto(quincena2.monto, moneda)}
-              </p>
-            ) : (
-              <FormularioQuincena
-                uid={usuario.uid}
-                anio={periodo.anio}
-                mes={periodo.mes}
-                quincena={2}
-              />
-            )}
-          </div>
+          {ingresosOrdenados.length === 0 ? (
+            <p className="py-6 text-center text-base text-talenta-brown-mid">
+              Sin ingresos registrados este mes.
+            </p>
+          ) : (
+            ingresosOrdenados.map((i) => (
+              <div
+                key={i.id}
+                className="flex items-center gap-3 rounded-2xl border border-talenta-tan/60 bg-talenta-white/90 p-4 shadow-sm"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-base font-medium text-talenta-black">{i.titulo}</p>
+                  <p className="text-sm text-talenta-brown-mid">{i.fecha}</p>
+                </div>
+                <p className="shrink-0 text-base font-semibold text-talenta-black">
+                  {formatearMonto(i.monto, moneda)}
+                </p>
+                <button
+                  type="button"
+                  aria-label="Eliminar ingreso"
+                  onClick={() => ingresosRepository.eliminar(i.id)}
+                  className="shrink-0 text-talenta-brown-mid transition-colors hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </motion.div>

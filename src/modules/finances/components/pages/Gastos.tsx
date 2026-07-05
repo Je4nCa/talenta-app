@@ -12,6 +12,7 @@ import { gastosFijosRepository, gastosRepository } from '../../repositories'
 import { formatearMonto, NOMBRES_MES } from '../../lib/formato'
 import { FormularioGasto } from '../FormularioGasto'
 import { FormularioGastoFijo } from '../FormularioGastoFijo'
+import { VisorFactura } from '../VisorFactura'
 import { TabCategorias } from './TabCategorias'
 import { TabResumen } from './TabResumen'
 
@@ -121,6 +122,7 @@ function TabVariables({ uid, moneda }: { uid: string; moneda: string }) {
                 <p className="text-base font-semibold text-talenta-black">
                   {formatearMonto(g.monto, moneda)}
                 </p>
+                {g.facturaImagen && <VisorFactura imagen={g.facturaImagen} />}
                 <button
                   type="button"
                   aria-label="Eliminar gasto"
