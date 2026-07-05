@@ -4,6 +4,7 @@ import { Button } from '@/shared/components/ui/button'
 import { TextSizeSlider } from '@/shared/components/TextSizeSlider'
 import { buscarPais } from '@/shared/lib/paises'
 import { useAuth } from '../hooks/useAuth'
+import { FeedbackForm } from './FeedbackForm'
 import { LogoMark } from './LogoMark'
 
 function iniciales(nombre: string): string {
@@ -103,6 +104,8 @@ export function ProfileScreen() {
           </p>
         </div>
       </div>
+
+      <FeedbackForm nombre={usuario.nombre} email={usuario.email} />
 
       <Button
         variant="outline"

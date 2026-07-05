@@ -134,7 +134,7 @@ Cada módulo tiene su propio hook principal (`useCourse`, `useFinances`, `useBib
 - Al registrarse: crear perfil de usuario + ejecutar test de diagnóstico
 - Campos del perfil: nombre, email, idioma, versión de Biblia preferida, estado de onboarding, rol (`student` | `admin`), país y moneda
 - Al registrarse el usuario selecciona su país (lista en `src/shared/lib/paises.ts`); la moneda (`monedaCodigo`) se deriva automáticamente de ese país y define en qué moneda trabaja el módulo de Finanzas. No se pide moneda por separado ni se permite elegirla manualmente.
-- **Perfil** (`ProfileScreen.tsx`): datos del usuario, slider de accesibilidad de tamaño de texto/elementos (`TextSizeSlider.tsx` + `useAccesibilidad`, ver regla en "Reglas de código" sobre `rem` vs px) y una sección **"Acerca de"** — logo `LogoMark` de TALENTA, "Un proyecto de Carlos Arias y Alicia Barazarte", y "Desarrollado por Montevo Studio" junto a Montevito (mascota de Montevo, `public/assets/Montevito.png`) en una insignia cuadrada redondeada.
+- **Perfil** (`ProfileScreen.tsx`): datos del usuario, slider de accesibilidad de tamaño de texto/elementos (`TextSizeSlider.tsx` + `useAccesibilidad`, ver regla en "Reglas de código" sobre `rem` vs px), una sección **"Acerca de"** — logo `LogoMark` de TALENTA, "Un proyecto de Carlos Arias y Alicia Barazarte", y "Desarrollado por Montevo Studio" junto a Montevito (mascota de Montevo, `public/assets/Montevito.png`) en una insignia cuadrada redondeada — y un botón **"Enviar feedback"** (`FeedbackForm.tsx`, ver detalle en sección Notificaciones/EmailJS más abajo).
 
 ### Curso
 - Estructura: 3 módulos, 8 lecciones, 8 semanas
@@ -201,7 +201,16 @@ Resumen semanal = vista agregada por categoría, calculada en cliente.
 - Roster paginado con columnas: nombre, pagó (sí/no), descargó el manual (sí/no), lección actual, última actividad
 - Vista de seguimiento semanal: usuarios sin actividad en los últimos 7 días
 - Desglose de completado por lección
-- Buzón de sugerencias (solo lectura)
+- Buzón de sugerencias (solo lectura) — **pendiente**, distinto del botón de feedback de abajo: este buzón implica guardar el feedback en Firestore para que el admin lo vea dentro de la app, y no existe todavía (requiere Firebase).
+
+### Feedback de usuarios (EmailJS)
+
+**Decisión ya tomada:** TALENTA hoy es una SPA estática sin backend, así que no hay forma de enviar un correo desde un servidor propio. Se usa **EmailJS** (`@emailjs/browser`) para enviar el feedback directo desde el navegador, sin pasar por el buzón de Firestore de arriba (ese es para más adelante).
+
+- **Botón "Enviar feedback"** en Perfil (`src/modules/auth/components/FeedbackForm.tsx`), debajo de "Acerca de". Al enviar, llama a `emailjs.send(serviceId, templateId, { nombre_usuario, email_usuario, mensaje }, { publicKey })` — el nombre y correo del usuario se toman automáticamente de su perfil (`usuario.nombre` / `usuario.email`), no los vuelve a escribir, así Carlos y Alicia siempre saben quién mandó cada feedback.
+- **Configuración pendiente:** requiere una cuenta gratuita en [emailjs.com](https://www.emailjs.com/) con un Email Service conectado a una cuenta de correo real (ej. montevostudio@outlook.com o una cuenta intermedia) y una plantilla con las variables `nombre_usuario`, `email_usuario` y `mensaje`, configurada para que el "To Email" de la plantilla sea `montevostudio@outlook.com`. Las tres claves resultantes (Service ID, Template ID, Public Key) van en `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID` y `VITE_EMAILJS_PUBLIC_KEY` — mismo patrón que `VITE_BIBLIA_API_KEY`: `.env.local` en desarrollo (gitignorado, ver `.env.example`), GitHub Actions secrets del mismo nombre en producción (`.github/workflows/deploy.yml`).
+- **Misma advertencia de seguridad que la key de Biblia.com:** la Public Key de EmailJS queda visible en el navegador de cualquier visitante (es pública por diseño del servicio, pensada para usarse así desde el cliente), y el Service ID/Template ID tampoco son secretos. No hay forma de evitar esto sin backend propio. Aceptado como limitación, no un descuido.
+- Sin las tres variables configuradas, `FeedbackForm` falla de forma controlada (mensaje "No se pudo enviar tu feedback...") sin romper la UI — verificado en desarrollo sin credenciales reales.
 
 ### Notificaciones
 - Función `sendNotification(uid, title, body, data)` como único punto de envío FCM
@@ -260,3 +269,6 @@ Estas rutas existen como pantalla "Próximamente" sin ninguna lógica:
 | Cliente API de Biblia.com | `src/modules/bible/lib/bibliaClient.ts` |
 | API key de Biblia.com (local) | `.env.local` → `VITE_BIBLIA_API_KEY` (gitignorado, ver `.env.example`) |
 | API key de Biblia.com (deploy) | GitHub Actions secret `VITE_BIBLIA_API_KEY` del repo |
+| Botón de feedback de usuarios | `src/modules/auth/components/FeedbackForm.tsx` (Perfil) |
+| Claves de EmailJS (local) | `.env.local` → `VITE_EMAILJS_SERVICE_ID` / `VITE_EMAILJS_TEMPLATE_ID` / `VITE_EMAILJS_PUBLIC_KEY` |
+| Claves de EmailJS (deploy) | GitHub Actions secrets del mismo nombre en el repo |
