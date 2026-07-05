@@ -25,7 +25,7 @@ export function FinanceBottomNav() {
               end={end}
               className={({ isActive }) =>
                 cn(
-                  'flex flex-col items-center gap-1 py-3 text-[11px] font-medium text-talenta-brown-mid transition-colors',
+                  'flex flex-col items-center gap-1 py-3 text-[0.6875rem] font-medium text-talenta-brown-mid transition-colors',
                   isActive && 'text-talenta-gold',
                 )
               }
@@ -40,7 +40,7 @@ export function FinanceBottomNav() {
                         transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                       />
                     )}
-                    <Icon className="relative h-[18px] w-[18px]" strokeWidth={isActive ? 2.25 : 1.75} />
+                    <Icon className="relative h-[1.125rem] w-[1.125rem]" strokeWidth={isActive ? 2.25 : 1.75} />
                   </span>
                   {label}
                 </>
