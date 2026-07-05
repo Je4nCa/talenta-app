@@ -32,6 +32,10 @@ export function FeedbackForm({ nombre, email }: FeedbackFormProps) {
           nombre_usuario: nombre,
           email_usuario: email,
           mensaje: mensaje.trim(),
+          fecha: new Date().toLocaleString('es', {
+            dateStyle: 'long',
+            timeStyle: 'short',
+          }),
         },
         { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY },
       )
