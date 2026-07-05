@@ -29,6 +29,29 @@ export function buscarPais(codigo: string): Pais | undefined {
   return PAISES.find((pais) => pais.codigo === codigo)
 }
 
+export interface Moneda {
+  codigo: string
+  nombre: string
+  simbolo: string
+}
+
+/**
+ * Lista de monedas únicas (varios países comparten moneda, ej. USD),
+ * derivada de PAISES para el selector manual de moneda en Perfil.
+ */
+export const MONEDAS: Moneda[] = Array.from(
+  new Map(
+    PAISES.map((pais) => [
+      pais.monedaCodigo,
+      { codigo: pais.monedaCodigo, nombre: pais.monedaNombre, simbolo: pais.monedaSimbolo },
+    ]),
+  ).values(),
+)
+
+export function buscarMoneda(codigo: string): Moneda | undefined {
+  return MONEDAS.find((moneda) => moneda.codigo === codigo)
+}
+
 const BASE_INDICADOR_REGIONAL = 0x1f1e6
 const CODIGO_A = 'A'.charCodeAt(0)
 

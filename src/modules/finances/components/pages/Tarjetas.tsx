@@ -3,7 +3,6 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CreditCard, Plus, Trash2 } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
-import { buscarPais } from '@/shared/lib/paises'
 import { Button } from '@/shared/components/ui/button'
 import { useGastosFijos } from '../../hooks/useGastos'
 import { useTarjetas } from '../../hooks/useTarjetas'
@@ -108,8 +107,7 @@ export function Tarjetas() {
 
   if (!usuario) return null
 
-  const pais = buscarPais(usuario.paisCodigo)
-  const moneda = pais?.monedaCodigo ?? 'USD'
+  const moneda = usuario.monedaCodigo
 
   return (
     <motion.div
