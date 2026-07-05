@@ -2,13 +2,14 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { DecorativeBackground } from '@/shared/components/DecorativeBackground'
-import { buscarPais, emojiDeBandera } from '@/shared/lib/paises'
+import { buscarMoneda, buscarPais, emojiDeBandera } from '@/shared/lib/paises'
 import { FinanceBottomNav } from './FinanceBottomNav'
 
 export function FinancesShell() {
   const navigate = useNavigate()
   const usuario = useAuth((state) => state.usuario)
   const pais = usuario ? buscarPais(usuario.paisCodigo) : undefined
+  const moneda = usuario ? buscarMoneda(usuario.monedaCodigo) : undefined
 
   return (
     <div className="relative min-h-dvh overflow-hidden bg-talenta-cream">
@@ -25,9 +26,9 @@ export function FinancesShell() {
         </button>
         <div className="flex flex-col">
           <h1 className="text-lg font-semibold text-talenta-black">Finanzas</h1>
-          {pais && (
+          {moneda && (
             <span className="text-xs text-talenta-brown-mid">
-              Moneda: {pais.monedaNombre} {emojiDeBandera(pais.codigo)}
+              Moneda: {moneda.nombre} {pais && emojiDeBandera(pais.codigo)}
             </span>
           )}
         </div>

@@ -3,7 +3,6 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Plus, Trash2, Wallet } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
-import { buscarPais } from '@/shared/lib/paises'
 import { Button } from '@/shared/components/ui/button'
 import { ModulePlaceholder } from '@/shared/components/ModulePlaceholder'
 import { useTarjetas } from '../../hooks/useTarjetas'
@@ -153,8 +152,7 @@ export function Pagos() {
 
   if (!usuario) return null
 
-  const pais = buscarPais(usuario.paisCodigo)
-  const moneda = pais?.monedaCodigo ?? 'USD'
+  const moneda = usuario.monedaCodigo
   const tarjetasCredito = tarjetas.filter((t) => t.tipo === 'credito')
 
   if (tarjetasCredito.length === 0) {

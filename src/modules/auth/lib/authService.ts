@@ -43,6 +43,10 @@ export async function actualizarVersionBiblia(uid: string, versionBiblia: string
   await db.users.update(uid, { versionBiblia })
 }
 
+export async function actualizarMoneda(uid: string, monedaCodigo: string): Promise<void> {
+  await db.users.update(uid, { monedaCodigo })
+}
+
 export async function iniciarSesion(input: LoginInput): Promise<UserProfile> {
   const email = normalizarEmail(input.email)
   const usuario = await db.users.where('email').equals(email).first()

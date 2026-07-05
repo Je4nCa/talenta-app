@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Plus, Power, Receipt, Trash2 } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
-import { buscarPais } from '@/shared/lib/paises'
 import { Button } from '@/shared/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { useCategorias } from '../../hooks/useCategorias'
@@ -232,8 +231,7 @@ export function Gastos() {
   const usuario = useAuth((state) => state.usuario)
   if (!usuario) return null
 
-  const pais = buscarPais(usuario.paisCodigo)
-  const moneda = pais?.monedaCodigo ?? 'USD'
+  const moneda = usuario.monedaCodigo
 
   return (
     <motion.div

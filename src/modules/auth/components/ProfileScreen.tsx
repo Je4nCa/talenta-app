@@ -1,8 +1,11 @@
+import { useState, type ChangeEvent } from 'react'
 import { motion } from 'framer-motion'
 import { LogOut, ShieldCheck } from 'lucide-react'
+import { Label } from '@/shared/components/ui/label'
 import { Button } from '@/shared/components/ui/button'
+import { Select } from '@/shared/components/ui/select'
 import { TextSizeSlider } from '@/shared/components/TextSizeSlider'
-import { buscarPais } from '@/shared/lib/paises'
+import { buscarPais, MONEDAS } from '@/shared/lib/paises'
 import { useAuth } from '../hooks/useAuth'
 import { FeedbackForm } from './FeedbackForm'
 import { LogoMark } from './LogoMark'
@@ -14,6 +17,41 @@ function iniciales(nombre: string): string {
     .slice(0, 2)
     .map((parte) => parte[0]?.toUpperCase() ?? '')
     .join('')
+}
+
+function SelectorMoneda({ monedaCodigo }: { monedaCodigo: string }) {
+  const cambiarMoneda = useAuth((state) => state.cambiarMoneda)
+  const [guardando, setGuardando] = useState(false)
+
+  async function manejarCambio(e: ChangeEvent<HTMLSelectElement>) {
+    setGuardando(true)
+    await cambiarMoneda(e.target.value)
+    setGuardando(false)
+  }
+
+  return (
+    <div className="w-full rounded-2xl border border-talenta-tan/60 bg-talenta-white/80 p-5 text-left shadow-sm">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="perfil-moneda">Moneda</Label>
+        <Select
+          id="perfil-moneda"
+          value={monedaCodigo}
+          onChange={manejarCambio}
+          disabled={guardando}
+        >
+          {MONEDAS.map((moneda) => (
+            <option key={moneda.codigo} value={moneda.codigo}>
+              {moneda.simbolo} {moneda.nombre}
+            </option>
+          ))}
+        </Select>
+        <p className="text-sm text-talenta-brown-mid">
+          Cambia solo cómo se muestran los montos en Finanzas — no convierte los montos que ya
+          registraste.
+        </p>
+      </div>
+    </div>
+  )
 }
 
 export function ProfileScreen() {
@@ -58,21 +96,15 @@ export function ProfileScreen() {
             <dd className="font-medium text-talenta-black">{usuario.versionBiblia}</dd>
           </div>
           {pais && (
-            <>
-              <div className="flex items-center justify-between">
-                <dt className="text-talenta-brown-mid">País</dt>
-                <dd className="font-medium text-talenta-black">{pais.nombre}</dd>
-              </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-talenta-brown-mid">Moneda</dt>
-                <dd className="font-medium text-talenta-black">
-                  {pais.monedaSimbolo} {pais.monedaCodigo}
-                </dd>
-              </div>
-            </>
+            <div className="flex items-center justify-between">
+              <dt className="text-talenta-brown-mid">País</dt>
+              <dd className="font-medium text-talenta-black">{pais.nombre}</dd>
+            </div>
           )}
         </dl>
       </div>
+
+      <SelectorMoneda monedaCodigo={usuario.monedaCodigo} />
 
       <TextSizeSlider />
 

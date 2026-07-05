@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Plus, Receipt, RefreshCw, Repeat, Trash2, Wallet } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
-import { buscarPais } from '@/shared/lib/paises'
 import { Button } from '@/shared/components/ui/button'
 import { useGastosFijos, useGastosPorPeriodo } from '../../hooks/useGastos'
 import { useCuotasPorPeriodo } from '../../hooks/useCuotas'
@@ -60,8 +59,7 @@ export function Dashboard() {
 
   if (!usuario) return null
 
-  const pais = buscarPais(usuario.paisCodigo)
-  const moneda = pais?.monedaCodigo ?? 'USD'
+  const moneda = usuario.monedaCodigo
 
   const totalVariables = useMemo(() => gastos.reduce((acc, g) => acc + g.monto, 0), [gastos])
   const totalFijos = useMemo(

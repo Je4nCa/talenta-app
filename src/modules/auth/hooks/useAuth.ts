@@ -3,6 +3,7 @@ import { db } from '@/shared/lib/db'
 import type { LoginInput, NuevoUsuarioInput, UserProfile } from '@/shared/types/user'
 import {
   AuthError,
+  actualizarMoneda,
   actualizarVersionBiblia,
   iniciarSesion,
   registrarUsuario,
@@ -20,6 +21,7 @@ interface AuthState {
   limpiarError: () => void
   restaurarSesion: () => Promise<void>
   cambiarVersionBiblia: (versionBiblia: string) => Promise<void>
+  cambiarMoneda: (monedaCodigo: string) => Promise<void>
 }
 
 export const useAuth = create<AuthState>((set, get) => ({
@@ -86,5 +88,12 @@ export const useAuth = create<AuthState>((set, get) => ({
     if (!usuarioActual) return
     await actualizarVersionBiblia(usuarioActual.uid, versionBiblia)
     set({ usuario: { ...usuarioActual, versionBiblia } })
+  },
+
+  cambiarMoneda: async (monedaCodigo) => {
+    const usuarioActual = get().usuario
+    if (!usuarioActual) return
+    await actualizarMoneda(usuarioActual.uid, monedaCodigo)
+    set({ usuario: { ...usuarioActual, monedaCodigo } })
   },
 }))
