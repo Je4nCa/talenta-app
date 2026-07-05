@@ -228,6 +228,7 @@ Estas rutas existen como pantalla "Próximamente" sin ninguna lógica:
 - Error boundaries a nivel de ruta.
 - Sin librerías nuevas sin consultar primero.
 - El código del módulo `Finanzas/` original no se modifica. Se lee, se adapta en `src/modules/finances/`.
+- **Nunca usar valores arbitrarios de Tailwind en px para texto o íconos** (`text-[11px]`, `h-[18px]`) — el slider de accesibilidad (`useAccesibilidad`, `src/shared/hooks/useAccesibilidad.ts`) escala toda la interfaz cambiando el `font-size` del `<html>`, y eso solo funciona con unidades `rem` (las clases normales de Tailwind como `text-xs`, `h-5`, o arbitrarios en rem como `text-[0.6875rem]`). Un valor en px absoluto queda congelado sin importar el ajuste del usuario. Bug real encontrado y corregido en `FinanceBottomNav.tsx`.
 
 ---
 
