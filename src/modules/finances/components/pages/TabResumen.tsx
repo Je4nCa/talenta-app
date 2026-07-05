@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCategorias } from '../../hooks/useCategorias'
 import { useGastosPorPeriodo } from '../../hooks/useGastos'
-import { useSalariosPorPeriodo } from '../../hooks/useSalarios'
+import { useIngresosPorPeriodo } from '../../hooks/useIngresos'
 import { formatearMonto, NOMBRES_MES } from '../../lib/formato'
 
 function usePeriodoActivo() {
@@ -31,20 +31,17 @@ function formatearDia(anio: number, mes: number, dia: number): string {
 export function TabResumen({ moneda }: { moneda: string }) {
   const { periodo, cambiarMes } = usePeriodoActivo()
   const { gastos } = useGastosPorPeriodo(periodo.anio, periodo.mes)
-  const { salarios } = useSalariosPorPeriodo(periodo.anio, periodo.mes)
+  const { ingresos } = useIngresosPorPeriodo(periodo.anio, periodo.mes)
   const { mapa: mapaCategorias } = useCategorias()
 
-  // El salario se registra por quincena, sin día exacto, así que para el
-  // balance diario asumimos que cada quincena "entra" el día 1 y el 16 del
-  // mes — es una convención simple, no una fecha real de depósito.
   const ingresosPorDia = useMemo(() => {
     const mapa: Record<number, number> = {}
-    for (const s of salarios) {
-      const dia = s.quincena === 1 ? 1 : 16
-      mapa[dia] = (mapa[dia] ?? 0) + s.monto
+    for (const i of ingresos) {
+      const dia = diaDeFecha(i.fecha)
+      mapa[dia] = (mapa[dia] ?? 0) + i.monto
     }
     return mapa
-  }, [salarios])
+  }, [ingresos])
 
   const diasConMovimiento = useMemo(() => {
     const egresosPorDia: Record<number, number> = {}

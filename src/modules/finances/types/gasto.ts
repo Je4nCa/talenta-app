@@ -19,6 +19,12 @@ export interface Gasto {
    * vez del mes de `fecha`, porque es cuando realmente impacta el balance.
    */
   fechaCobro?: FechaISO
+  /**
+   * Foto de la factura o comprobante de compra, guardada como respaldo.
+   * Opcional. Se guarda tal cual como Blob en Dexie — IndexedDB soporta
+   * Blobs de forma nativa, no hace falta convertir a base64.
+   */
+  facturaImagen?: Blob
   notas?: string
   creadoEn: FechaHoraISO
   actualizadoEn: FechaHoraISO

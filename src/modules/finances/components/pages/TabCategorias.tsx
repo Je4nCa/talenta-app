@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { useCategorias } from '../../hooks/useCategorias'
 import { useGastosFijos, useGastosPorPeriodo } from '../../hooks/useGastos'
-import { useSalariosPorPeriodo } from '../../hooks/useSalarios'
+import { useIngresosPorPeriodo } from '../../hooks/useIngresos'
 import { categoriasRepository } from '../../repositories'
 import { formatearMonto, NOMBRES_MES } from '../../lib/formato'
 import { FormularioCategoria } from '../FormularioCategoria'
@@ -106,12 +106,12 @@ export function TabCategorias({ uid, moneda }: { uid: string; moneda: string }) 
   const { periodo, cambiarMes } = usePeriodoActivo()
   const { gastos } = useGastosPorPeriodo(periodo.anio, periodo.mes)
   const { gastosFijos } = useGastosFijos()
-  const { salarios } = useSalariosPorPeriodo(periodo.anio, periodo.mes)
+  const { ingresos } = useIngresosPorPeriodo(periodo.anio, periodo.mes)
   const { categorias } = useCategorias()
   const [mostrandoForm, setMostrandoForm] = useState(false)
   const [categoriaEnEdicion, setCategoriaEnEdicion] = useState<Categoria | undefined>(undefined)
 
-  const ingresoTotal = salarios.reduce((acc, s) => acc + s.monto, 0)
+  const ingresoTotal = ingresos.reduce((acc, i) => acc + i.monto, 0)
 
   const gastadoPorCategoria = useMemo(() => {
     const mapa: Record<string, number> = {}

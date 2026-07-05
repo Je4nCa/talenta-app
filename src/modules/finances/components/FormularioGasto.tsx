@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
+import { Camera, X } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Input } from '@/shared/components/ui/input'
@@ -31,6 +32,8 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
   const [fecha, setFecha] = useState(fechaHoy())
   const [esCompraFutura, setEsCompraFutura] = useState(false)
   const [fechaCobro, setFechaCobro] = useState('')
+  const [facturaFile, setFacturaFile] = useState<File | null>(null)
+  const [facturaPreviewUrl, setFacturaPreviewUrl] = useState<string | null>(null)
   const [guardando, setGuardando] = useState(false)
 
   useEffect(() => {
@@ -38,6 +41,20 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
       setCategoriaId(categorias.find((c) => c.nombre === 'Otros')?.id ?? categorias[0].id)
     }
   }, [categorias, categoriaId])
+
+  useEffect(() => {
+    if (!facturaFile) {
+      setFacturaPreviewUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(facturaFile)
+    setFacturaPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [facturaFile])
+
+  function manejarSeleccionFactura(e: ChangeEvent<HTMLInputElement>) {
+    setFacturaFile(e.target.files?.[0] ?? null)
+  }
 
   const tarjetasDisponibles =
     tipoPago === 'tarjeta'
@@ -64,6 +81,7 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
       tipoPago,
       fecha,
       fechaCobro: esCompraFutura ? fechaCobro : undefined,
+      facturaImagen: facturaFile ?? undefined,
       creadoEn: ahora,
       actualizadoEn: ahora,
     })
@@ -190,6 +208,45 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
           </Select>
         </div>
       )}
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="gasto-factura">Factura o comprobante (opcional)</Label>
+        {facturaPreviewUrl ? (
+          <div className="relative w-28">
+            <img
+              src={facturaPreviewUrl}
+              alt="Vista previa de la factura"
+              className="h-28 w-28 rounded-xl object-cover shadow-sm"
+            />
+            <button
+              type="button"
+              aria-label="Quitar imagen"
+              onClick={() => setFacturaFile(null)}
+              className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-talenta-black text-talenta-white shadow-md"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <label
+            htmlFor="gasto-factura"
+            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-talenta-tan py-4 text-base text-talenta-brown-mid transition-colors hover:border-talenta-gold hover:text-talenta-gold"
+          >
+            <Camera className="h-5 w-5" />
+            Tomar foto o subir imagen
+          </label>
+        )}
+        <input
+          id="gasto-factura"
+          type="file"
+          accept="image/*"
+          onChange={manejarSeleccionFactura}
+          className="hidden"
+        />
+        <p className="text-sm text-talenta-brown-mid">
+          Se guarda como respaldo de tu compra, solo en este dispositivo.
+        </p>
+      </div>
 
       <div className="mt-2 flex gap-3">
         <Button type="button" variant="outline" size="lg" className="flex-1" onClick={onCancelar}>
