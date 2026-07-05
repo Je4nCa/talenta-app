@@ -33,6 +33,17 @@ export interface Moneda {
   codigo: string
   nombre: string
   simbolo: string
+  /** País representativo de esta moneda, usado solo para mostrar su bandera. */
+  paisCodigo: string
+}
+
+/**
+ * Varios países comparten una misma moneda (ej. USD lo usan El Salvador,
+ * Panamá, Ecuador y EE. UU.) — para esos casos se elige a mano el país
+ * "representativo" cuya bandera se muestra junto al nombre de la moneda.
+ */
+const PAIS_REPRESENTATIVO_POR_MONEDA: Record<string, string> = {
+  USD: 'US',
 }
 
 /**
@@ -43,7 +54,12 @@ export const MONEDAS: Moneda[] = Array.from(
   new Map(
     PAISES.map((pais) => [
       pais.monedaCodigo,
-      { codigo: pais.monedaCodigo, nombre: pais.monedaNombre, simbolo: pais.monedaSimbolo },
+      {
+        codigo: pais.monedaCodigo,
+        nombre: pais.monedaNombre,
+        simbolo: pais.monedaSimbolo,
+        paisCodigo: PAIS_REPRESENTATIVO_POR_MONEDA[pais.monedaCodigo] ?? pais.codigo,
+      },
     ]),
   ).values(),
 )
