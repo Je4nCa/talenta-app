@@ -28,3 +28,13 @@ export const PAISES: Pais[] = [
 export function buscarPais(codigo: string): Pais | undefined {
   return PAISES.find((pais) => pais.codigo === codigo)
 }
+
+const BASE_INDICADOR_REGIONAL = 0x1f1e6
+const CODIGO_A = 'A'.charCodeAt(0)
+
+/** Convierte un código ISO 3166-1 alpha-2 (ej. "CR") a su emoji de bandera (🇨🇷). */
+export function emojiDeBandera(codigo: string): string {
+  return [...codigo.toUpperCase()]
+    .map((letra) => String.fromCodePoint(BASE_INDICADOR_REGIONAL + letra.charCodeAt(0) - CODIGO_A))
+    .join('')
+}
