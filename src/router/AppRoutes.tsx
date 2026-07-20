@@ -2,7 +2,6 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AdminHome } from '@/modules/admin/components/AdminHome'
 import { ProfileScreen } from '@/modules/auth/components/ProfileScreen'
 import { BibleHome } from '@/modules/bible/components/BibleHome'
-import { CourseHome } from '@/modules/course/components/CourseHome'
 import { FinancesEntry } from '@/modules/finances/components/FinancesEntry'
 import { Dashboard } from '@/modules/finances/components/pages/Dashboard'
 import { Gastos } from '@/modules/finances/components/pages/Gastos'
@@ -20,7 +19,6 @@ export function AppRoutes() {
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<HubScreen />} />
-        <Route path="curso" element={<CourseHome />} />
         <Route path="biblia" element={<BibleHome />} />
         <Route path="perfil" element={<ProfileScreen />} />
         <Route path="admin" element={esAdmin ? <AdminHome /> : <Navigate to="/" replace />} />

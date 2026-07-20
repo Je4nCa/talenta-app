@@ -1,24 +1,32 @@
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { BookHeart, BookOpen, Home, ShieldCheck, UserRound, Wallet } from 'lucide-react'
+import { BookHeart, Home, ShieldCheck, UserRound, Wallet } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 
-const enlacesIzquierda = [
-  { to: '/curso', label: 'Curso', icon: BookOpen },
-  { to: '/biblia', label: 'Biblia', icon: BookHeart },
+const enlacesBase = [
+  { to: '/', label: 'Inicio', icon: Home, end: true },
+  { to: '/biblia', label: 'Biblia', icon: BookHeart, end: false },
+  { to: '/finanzas', label: 'Finanzas', icon: Wallet, end: false },
+  { to: '/perfil', label: 'Perfil', icon: UserRound, end: false },
 ]
 
-const enlacesDerecha = [
-  { to: '/finanzas', label: 'Finanzas', icon: Wallet },
-  { to: '/perfil', label: 'Perfil', icon: UserRound },
-]
-
-function EnlaceNav({ to, label, icon: Icon }: { to: string; label: string; icon: typeof Home }) {
+function EnlaceNav({
+  to,
+  label,
+  icon: Icon,
+  end,
+}: {
+  to: string
+  label: string
+  icon: typeof Home
+  end: boolean
+}) {
   return (
     <li className="flex-1">
       <NavLink
         to={to}
+        end={end}
         className={({ isActive }) =>
           cn(
             'flex flex-col items-center gap-1 py-3 text-xs font-medium text-talenta-brown-mid transition-colors',
@@ -48,9 +56,9 @@ function EnlaceNav({ to, label, icon: Icon }: { to: string; label: string; icon:
 
 export function BottomNav() {
   const esAdmin = useAuth((state) => state.usuario?.rol === 'admin')
-  const derecha = esAdmin
-    ? [...enlacesDerecha, { to: '/admin', label: 'Admin', icon: ShieldCheck }]
-    : enlacesDerecha
+  const enlaces = esAdmin
+    ? [...enlacesBase, { to: '/admin', label: 'Admin', icon: ShieldCheck, end: false }]
+    : enlacesBase
 
   return (
     <nav
@@ -58,24 +66,7 @@ export function BottomNav() {
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-between px-2">
-        {enlacesIzquierda.map((enlace) => (
-          <EnlaceNav key={enlace.to} {...enlace} />
-        ))}
-
-        <li className="flex-1">
-          <NavLink
-            to="/"
-            end
-            className="group flex flex-col items-center gap-1 py-3 text-xs font-medium text-talenta-brown-mid transition-colors"
-          >
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-talenta-gold text-talenta-white shadow-md transition-transform group-active:scale-95">
-              <Home className="h-6 w-6" strokeWidth={2} />
-            </span>
-            Inicio
-          </NavLink>
-        </li>
-
-        {derecha.map((enlace) => (
+        {enlaces.map((enlace) => (
           <EnlaceNav key={enlace.to} {...enlace} />
         ))}
       </ul>

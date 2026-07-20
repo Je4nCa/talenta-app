@@ -1,6 +1,6 @@
 import { motion, type Variants } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { BookHeart, BookOpen, ChevronRight, ShieldCheck, Wallet, type LucideIcon } from 'lucide-react'
+import { BookHeart, ChevronRight, ShieldCheck, Wallet, type LucideIcon } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { VersiculoDelDia } from '@/modules/bible/components/VersiculoDelDia'
 
@@ -12,12 +12,6 @@ interface ModuloCard {
 }
 
 const modulos: ModuloCard[] = [
-  {
-    to: '/curso',
-    titulo: 'Curso',
-    descripcion: '8 lecciones para crecer en mayordomía',
-    icon: BookOpen,
-  },
   {
     to: '/biblia',
     titulo: 'Biblia',
