@@ -5,6 +5,8 @@ Aplicación multiplataforma de mayordomía financiera y crecimiento espiritual p
 **Repo:** `https://github.com/Je4nCa/talenta-app`
 **Fase activa:** Fase 1 + Finanzas Esencial
 
+**Actualización de alcance (decisión de Carlos y Alicia):** el módulo de Curso se elimina por completo de la Fase 1 — no se construye todavía, ni siquiera como placeholder. Fase 1 hoy es **solo Biblia + Finanzas** (más Perfil y Admin). Si en el futuro deciden retomarlo, empezar desde cero consultando esta decisión primero.
+
 **Hosting:** por ahora el código solo vive en GitHub (sin deploy). El plan es lanzar primero como web (dominio propio por comprar) y luego publicar en iOS y Android. Por eso el diseño debe ser responsive desde el día uno, no una adaptación posterior.
 
 ---
@@ -16,7 +18,6 @@ talenta-app/
   src/
     modules/
       auth/           # Login, registro, onboarding
-      course/         # Curso, lecciones, manual, tests
       bible/          # Biblia, versículo diario, memorización
       finances/       # Módulo de finanzas (migrado desde /modulo-finanzas)
       payments/       # TiloPay integración
@@ -136,13 +137,8 @@ Cada módulo tiene su propio hook principal (`useCourse`, `useFinances`, `useBib
 - Al registrarse el usuario selecciona su país (lista en `src/shared/lib/paises.ts`); la moneda (`monedaCodigo`) se deriva automáticamente de ese país como valor inicial. **Actualización de la decisión original:** ya no es fija de por vida — el usuario puede cambiarla manualmente después desde Perfil (`SelectorMoneda` en `ProfileScreen.tsx`, action `useAuth().cambiarMoneda()`). El cambio solo afecta cómo se muestran los montos (símbolo y formato) en Finanzas; **no** convierte ni recalcula los montos ya registrados — es un simple re-etiquetado, no hay tipo de cambio ni conversión.
 - **Perfil** (`ProfileScreen.tsx`): datos del usuario, un selector de **Moneda** (`MONEDAS` en `paises.ts` — lista de monedas únicas derivada de `PAISES`, deduplicada porque varios países comparten moneda, ej. USD), slider de accesibilidad de tamaño de texto/elementos (`TextSizeSlider.tsx` + `useAccesibilidad`, ver regla en "Reglas de código" sobre `rem` vs px), una sección **"Acerca de"** — logo `LogoMark` de TALENTA, "Un proyecto de Carlos Arias y Alicia Barazarte", y "Desarrollado por Montevo Studio" junto a Montevito (mascota de Montevo, `public/assets/Montevito.png`) en una insignia cuadrada redondeada — y un botón **"Enviar feedback"** (`FeedbackForm.tsx`, ver detalle en sección Notificaciones/EmailJS más abajo).
 
-### Curso
-- Estructura: 3 módulos, 8 lecciones, 8 semanas
-- Contenido de lecciones almacenado en base de datos (no hardcodeado) para que Carlos pueda actualizar sin redesplegar
-- Manual descargable en PDF (Firebase Storage en el futuro; URL externa por ahora)
-- Test de diagnóstico al iniciar la app (pre-curso)
-- Tracking de completado por lección con timestamp
-- Recordatorios push cuando una lección está vencida (FCM cron — pendiente)
+### Curso — eliminado de Fase 1
+El módulo `src/modules/course/` fue borrado por completo (era solo un placeholder "Próximamente", 0% construido). No queda ninguna referencia en rutas (`AppRoutes.tsx`), en el Hub (`HubScreen.tsx`) ni en el bottom nav (`BottomNav.tsx`). Si se retoma más adelante, es una reconstrucción desde cero, no una reactivación.
 
 ### Biblia
 
@@ -254,7 +250,7 @@ Estas rutas existen como pantalla "Próximamente" sin ninguna lógica:
 2. Crear `tailwind.config.ts` con los tokens de marca de TALENTA
 3. Crear la estructura de carpetas `src/modules/` con un `index.ts` vacío en cada módulo
 4. Crear `src/shared/lib/db.ts` con la abstracción Dexie → Firestore
-5. Construir el shell de la app: navegación inferior con tabs Curso / Biblia / Finanzas / Perfil; tab Admin visible solo para admins
+5. Construir el shell de la app: navegación inferior con tabs Inicio / Biblia / Finanzas / Perfil (Curso eliminado de Fase 1); tab Admin visible solo para admins
 6. Implementar el flujo de auth (con mock si Firebase no está listo)
 7. Módulo por módulo en el orden definido arriba
 
