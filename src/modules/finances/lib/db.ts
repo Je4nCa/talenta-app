@@ -1,13 +1,13 @@
 import Dexie, { type Table } from 'dexie'
 import type {
+  AbonoDeuda,
   AbonoTarjeta,
   Categoria,
-  CuotaMensual,
+  Deuda,
   Gasto,
   GastoFijo,
   Ingreso,
   MontoManualTarjeta,
-  PlanCuotas,
   TarjetaCredito,
 } from '../types'
 
@@ -30,12 +30,12 @@ export class FinanzasDB extends Dexie {
   tarjetas!: Table<TarjetaCredito>
   gastos!: Table<Gasto>
   gastosFijos!: Table<GastoFijo>
-  planesCuotas!: Table<PlanCuotas>
-  cuotasMensuales!: Table<CuotaMensual>
   abonosTarjeta!: Table<AbonoTarjeta>
   montosManuales!: Table<MontoManualTarjeta>
   categorias!: Table<Categoria>
   ingresos!: Table<Ingreso>
+  deudas!: Table<Deuda>
+  abonosDeuda!: Table<AbonoDeuda>
 
   constructor() {
     super('talenta-finanzas-db')
@@ -92,6 +92,24 @@ export class FinanzasDB extends Dexie {
         }))
         await tx.table('ingresos').bulkPut(ingresos)
       })
+
+    // "Tasa cero" (planesCuotas/cuotasMensuales) nunca tuvo UI para crear
+    // datos reales — se retira sin migración y se reemplaza por Créditos y
+    // Deudas (deudas/abonosDeuda), un módulo de seguimiento de deudas y
+    // préstamos de verdad.
+    this.version(4).stores({
+      tarjetas: 'id, uid, banco, tipo, creadoEn',
+      gastos: 'id, uid, fecha, fechaCobro, categoriaId, tarjetaId, tipoPago, creadoEn',
+      gastosFijos: 'id, uid, categoriaId, tarjetaId, recurrencia, activo, creadoEn',
+      planesCuotas: null,
+      cuotasMensuales: null,
+      abonosTarjeta: 'id, tarjetaId, uid, [anio+mes]',
+      montosManuales: 'id, tarjetaId, [anio+mes]',
+      categorias: 'id, uid, esPersonalizada',
+      ingresos: 'id, uid, fecha, creadoEn',
+      deudas: 'id, uid, tipo, creadoEn',
+      abonosDeuda: 'id, deudaId, uid, fecha',
+    })
   }
 }
 

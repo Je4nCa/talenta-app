@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Plus, Receipt, RefreshCw, Repeat, Trash2, Wallet } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Landmark, Plus, Receipt, Repeat, Trash2, Wallet } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { Button } from '@/shared/components/ui/button'
 import { useGastosFijos, useGastosPorPeriodo } from '../../hooks/useGastos'
-import { useCuotasPorPeriodo } from '../../hooks/useCuotas'
+import { useDeudas } from '../../hooks/useDeudas'
 import { useIngresosPorPeriodo } from '../../hooks/useIngresos'
 import { ingresosRepository } from '../../repositories'
 import { formatearMonto, NOMBRES_MES } from '../../lib/formato'
@@ -53,7 +53,7 @@ export function Dashboard() {
   const { periodo, cambiarMes } = usePeriodoActivo()
   const { gastos } = useGastosPorPeriodo(periodo.anio, periodo.mes)
   const { gastosFijos } = useGastosFijos()
-  const { cuotas } = useCuotasPorPeriodo(periodo.anio, periodo.mes)
+  const { deudas } = useDeudas()
   const { ingresos } = useIngresosPorPeriodo(periodo.anio, periodo.mes)
   const [mostrandoForm, setMostrandoForm] = useState(false)
 
@@ -66,8 +66,11 @@ export function Dashboard() {
     () => gastosFijos.filter((g) => g.activo).reduce((acc, g) => acc + g.monto, 0),
     [gastosFijos],
   )
-  const totalCuotas = useMemo(() => cuotas.reduce((acc, c) => acc + c.monto, 0), [cuotas])
-  const totalGastado = totalVariables + totalFijos + totalCuotas
+  const totalCuotaDeudas = useMemo(
+    () => deudas.reduce((acc, d) => acc + (d.cuotaMensual ?? 0), 0),
+    [deudas],
+  )
+  const totalGastado = totalVariables + totalFijos + totalCuotaDeudas
 
   const totalIngresos = useMemo(() => ingresos.reduce((acc, i) => acc + i.monto, 0), [ingresos])
   const balance = totalIngresos - totalGastado
@@ -113,7 +116,7 @@ export function Dashboard() {
       <div className="grid grid-cols-3 gap-3">
         <TarjetaEstadistica titulo="Variables" monto={totalVariables} moneda={moneda} icon={Receipt} />
         <TarjetaEstadistica titulo="Fijos" monto={totalFijos} moneda={moneda} icon={Repeat} />
-        <TarjetaEstadistica titulo="Cuotas" monto={totalCuotas} moneda={moneda} icon={RefreshCw} />
+        <TarjetaEstadistica titulo="Deudas" monto={totalCuotaDeudas} moneda={moneda} icon={Landmark} />
       </div>
 
       <div>

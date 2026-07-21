@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'
+import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
 import { PAISES } from '@/shared/lib/paises'
 import { useAuth } from '../hooks/useAuth'
+import { ModalTerminos } from './ModalTerminos'
 
 export function RegisterForm() {
   const { registrar, loading, error, limpiarError } = useAuth()
@@ -15,6 +17,9 @@ export function RegisterForm() {
   const [password, setPassword] = useState('')
   const [confirmarPassword, setConfirmarPassword] = useState('')
   const [paisCodigo, setPaisCodigo] = useState('')
+  const [codigoPromocional, setCodigoPromocional] = useState('')
+  const [terminosAceptados, setTerminosAceptados] = useState(false)
+  const [mostrandoTerminos, setMostrandoTerminos] = useState(false)
   const [errorLocal, setErrorLocal] = useState<string | null>(null)
 
   async function handleSubmit(e: FormEvent) {
@@ -34,9 +39,13 @@ export function RegisterForm() {
       setErrorLocal('Selecciona tu país.')
       return
     }
+    if (!terminosAceptados) {
+      setErrorLocal('Debes leer y aceptar los Términos y Condiciones para continuar.')
+      return
+    }
 
     try {
-      await registrar({ nombre, email, password, paisCodigo })
+      await registrar({ nombre, email, password, paisCodigo, codigoPromocional })
       navigate('/', { replace: true })
     } catch {
       // el error ya queda expuesto en el store
@@ -119,6 +128,43 @@ export function RegisterForm() {
         </p>
       </div>
 
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="register-codigo">Código promocional</Label>
+        <Input
+          id="register-codigo"
+          type="text"
+          placeholder="Ej. 2026TALENTAOFF"
+          value={codigoPromocional}
+          onChange={(e) => setCodigoPromocional(e.target.value)}
+          required
+        />
+        <p className="text-sm text-talenta-brown-mid">
+          El código de tu curso te da acceso gratis a TALENTA durante 1 mes.
+        </p>
+      </div>
+
+      <label htmlFor="register-terminos" className="flex cursor-pointer items-start gap-3">
+        <Checkbox
+          id="register-terminos"
+          checked={terminosAceptados}
+          onCheckedChange={(checked) => setTerminosAceptados(checked === true)}
+        />
+        <span className="text-sm text-talenta-brown-dark">
+          He leído y acepto los{' '}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              setMostrandoTerminos(true)
+            }}
+            className="font-medium text-talenta-gold underline underline-offset-2"
+          >
+            Términos y Condiciones, Política de Privacidad y Acuerdo de Confidencialidad
+          </button>{' '}
+          de TALENTA.
+        </span>
+      </label>
+
       {(errorLocal || error) && (
         <p role="alert" className="text-base font-medium text-red-700">
           {errorLocal ?? error}
@@ -128,6 +174,8 @@ export function RegisterForm() {
       <Button type="submit" size="lg" disabled={loading} className="mt-2">
         {loading ? 'Creando cuenta…' : 'Crear cuenta'}
       </Button>
+
+      {mostrandoTerminos && <ModalTerminos onCerrar={() => setMostrandoTerminos(false)} />}
     </form>
   )
 }

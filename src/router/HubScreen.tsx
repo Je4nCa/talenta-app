@@ -1,6 +1,6 @@
 import { motion, type Variants } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { BookHeart, ChevronRight, ShieldCheck, Wallet, type LucideIcon } from 'lucide-react'
+import { BookHeart, ChevronRight, ShieldCheck, Sparkles, Wallet, type LucideIcon } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { VersiculoDelDia } from '@/modules/bible/components/VersiculoDelDia'
 
@@ -101,6 +101,20 @@ export function HubScreen() {
           </motion.button>
         ))}
       </motion.div>
+
+      <motion.button
+        type="button"
+        onClick={() => navigate('/asistente')}
+        aria-label="Asistente Financiero"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.5, duration: 0.4 }}
+        whileTap={{ scale: 0.92 }}
+        className="fixed bottom-24 right-5 z-30 flex items-center gap-2 rounded-full bg-talenta-black px-4 py-3 text-talenta-white shadow-lg"
+      >
+        <Sparkles className="h-5 w-5 text-talenta-gold" />
+        <span className="text-sm font-medium">Asistente</span>
+      </motion.button>
     </div>
   )
 }
