@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { CreditCard, LayoutDashboard, Percent, Receipt, Wallet } from 'lucide-react'
+import { CreditCard, Landmark, LayoutDashboard, Receipt, Wallet } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
 const enlaces = [
@@ -8,7 +8,7 @@ const enlaces = [
   { to: '/finanzas/gastos', label: 'Gastos', icon: Receipt, end: false },
   { to: '/finanzas/tarjetas', label: 'Tarjetas', icon: CreditCard, end: false },
   { to: '/finanzas/pagos', label: 'Pagos', icon: Wallet, end: false },
-  { to: '/finanzas/tasa-cero', label: 'Tasa 0%', icon: Percent, end: false },
+  { to: '/finanzas/deudas', label: 'Deudas', icon: Landmark, end: false },
 ]
 
 export function FinanceBottomNav() {

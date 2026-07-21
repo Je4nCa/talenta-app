@@ -54,6 +54,12 @@ function SelectorMoneda({ monedaCodigo }: { monedaCodigo: string }) {
   )
 }
 
+function diasRestantes(finPeriodoGratuito: string): number {
+  const hoy = new Date()
+  const fin = new Date(`${finPeriodoGratuito}T00:00:00`)
+  return Math.ceil((fin.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
+}
+
 export function ProfileScreen() {
   const usuario = useAuth((state) => state.usuario)
   const logout = useAuth((state) => state.logout)
@@ -61,6 +67,7 @@ export function ProfileScreen() {
   if (!usuario) return null
 
   const pais = buscarPais(usuario.paisCodigo)
+  const dias = diasRestantes(usuario.finPeriodoGratuito)
 
   return (
     <motion.div
@@ -102,6 +109,17 @@ export function ProfileScreen() {
             </div>
           )}
         </dl>
+      </div>
+
+      <div className="w-full rounded-2xl border border-talenta-tan/60 bg-talenta-white/80 p-5 text-left shadow-sm">
+        <p className="text-base font-semibold text-talenta-black">
+          {dias > 0 ? 'Prueba gratuita activa' : 'Tu prueba gratuita ya terminó'}
+        </p>
+        <p className="mt-1 text-sm text-talenta-brown-mid">
+          {dias > 0
+            ? `Te quedan ${dias} ${dias === 1 ? 'día' : 'días'} de acceso gratis (hasta el ${usuario.finPeriodoGratuito}).`
+            : `Venció el ${usuario.finPeriodoGratuito}. Pronto podrás suscribirte para seguir usando TALENTA.`}
+        </p>
       </div>
 
       <SelectorMoneda monedaCodigo={usuario.monedaCodigo} />

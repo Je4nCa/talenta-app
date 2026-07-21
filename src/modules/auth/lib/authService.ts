@@ -1,6 +1,8 @@
 import { db } from '@/shared/lib/db'
 import { buscarPais } from '@/shared/lib/paises'
 import type { LoginInput, NuevoUsuarioInput, UserProfile } from '@/shared/types/user'
+import { VERSION_TERMINOS } from '../constants/legal'
+import { CODIGO_PROMOCIONAL_VALIDO, calcularFinPeriodoGratuito } from '../constants/promociones'
 import { hashPassword, verifyPassword } from './password'
 
 export class AuthError extends Error {}
@@ -21,6 +23,12 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     throw new AuthError('Selecciona un país válido.')
   }
 
+  const codigoPromocional = input.codigoPromocional.trim().toUpperCase()
+  if (codigoPromocional !== CODIGO_PROMOCIONAL_VALIDO) {
+    throw new AuthError('Código promocional inválido.')
+  }
+
+  const ahora = new Date()
   const perfil: UserProfile = {
     uid: crypto.randomUUID(),
     nombre: input.nombre.trim(),
@@ -30,9 +38,13 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     versionBiblia: 'RVR60',
     onboardingCompletado: false,
     rol: 'student',
-    creadoEn: new Date(),
+    creadoEn: ahora,
     paisCodigo: pais.codigo,
     monedaCodigo: pais.monedaCodigo,
+    terminosVersion: VERSION_TERMINOS,
+    terminosFechaAceptacion: ahora.toISOString(),
+    codigoPromocional,
+    finPeriodoGratuito: calcularFinPeriodoGratuito(ahora),
   }
 
   await db.users.add(perfil)
