@@ -5,6 +5,9 @@ import { CheckCircle2, MessageSquareHeart } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
+import { sanitizarTextoLibre, sanitizarValorPlano } from '@/shared/lib/sanitize'
+
+const MENSAJE_LARGO_MAXIMO = 2000
 
 interface FeedbackFormProps {
   nombre: string
@@ -29,13 +32,23 @@ export function FeedbackForm({ nombre, email }: FeedbackFormProps) {
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         {
-          nombre_usuario: nombre,
-          email_usuario: email,
-          mensaje: mensaje.trim(),
-          fecha: new Date().toLocaleString('es', {
-            dateStyle: 'long',
-            timeStyle: 'short',
-          }),
+          // Todos los valores pasan por un sanitizador antes de salir —
+          // ninguno se interpola directamente. nombre_usuario y mensaje se
+          // insertan en el HTML del cuerpo de la plantilla de EmailJS y se
+          // escapan por completo (evita que alguien inyecte etiquetas,
+          // scripts o enlaces ocultos en el correo que reciben Carlos y
+          // Alicia). email_usuario lo usa EmailJS como cabecera "Reply To"
+          // — no se escapa como HTML (lo corrompería), pero sí se limpia de
+          // saltos de línea/caracteres de control para prevenir inyección
+          // de cabeceras de correo. fecha la genera el propio código (no es
+          // texto de usuario) pero se sanitiza igual, por consistencia.
+          nombre_usuario: sanitizarTextoLibre(nombre, 200),
+          email_usuario: sanitizarValorPlano(email, 254),
+          mensaje: sanitizarTextoLibre(mensaje, MENSAJE_LARGO_MAXIMO),
+          fecha: sanitizarValorPlano(
+            new Date().toLocaleString('es', { dateStyle: 'long', timeStyle: 'short' }),
+            100,
+          ),
         },
         { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY },
       )
@@ -76,6 +89,7 @@ export function FeedbackForm({ nombre, email }: FeedbackFormProps) {
               placeholder="Ideas, errores, o lo que quieras compartir…"
               value={mensaje}
               onChange={(e) => setMensaje(e.target.value)}
+              maxLength={MENSAJE_LARGO_MAXIMO}
               required
             />
             <p className="text-sm text-talenta-brown-mid">
