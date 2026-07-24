@@ -4,6 +4,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
+import { CATEGORIAS_DEUDA_ORDENADAS } from '../constants/deudas'
 import { deudasRepository } from '../repositories'
 import { TipoDeuda } from '../types/deuda'
 
@@ -13,24 +14,18 @@ interface FormularioDeudaProps {
   onCancelar: () => void
 }
 
-const OPCIONES_TIPO: { valor: TipoDeuda; etiqueta: string }[] = [
-  { valor: TipoDeuda.TarjetaCredito, etiqueta: 'Tarjeta de crédito' },
-  { valor: TipoDeuda.PrestamoPersonal, etiqueta: 'Préstamo personal' },
-  { valor: TipoDeuda.PrestamoBancario, etiqueta: 'Préstamo bancario' },
-  { valor: TipoDeuda.Otro, etiqueta: 'Otro' },
-]
-
 function fechaHoy(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
 export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeudaProps) {
   const [nombre, setNombre] = useState('')
-  const [tipo, setTipo] = useState<TipoDeuda>(TipoDeuda.PrestamoPersonal)
+  const [tipo, setTipo] = useState<TipoDeuda>(TipoDeuda.TarjetaCredito)
   const [montoOriginal, setMontoOriginal] = useState('')
   const [tasaInteres, setTasaInteres] = useState('')
   const [cuotaMensual, setCuotaMensual] = useState('')
   const [fechaInicio, setFechaInicio] = useState(fechaHoy())
+  const [fechaLiquidacion, setFechaLiquidacion] = useState('')
   const [guardando, setGuardando] = useState(false)
 
   async function manejarGuardar(e: FormEvent) {
@@ -50,6 +45,7 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
       tasaInteres: tasaInteres ? Number(tasaInteres) : undefined,
       cuotaMensual: cuotaMensual ? Number(cuotaMensual) : undefined,
       fechaInicio,
+      fechaLiquidacion: fechaLiquidacion || undefined,
       creadoEn: ahora,
       actualizadoEn: ahora,
     })
@@ -66,7 +62,7 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
       className="flex flex-col gap-4 overflow-hidden rounded-2xl border border-talenta-tan/60 bg-talenta-white/90 p-5 shadow-sm"
     >
       <div className="flex flex-col gap-2">
-        <Label htmlFor="deuda-nombre">¿Con quién o qué es la deuda?</Label>
+        <Label htmlFor="deuda-nombre">Acreedor (¿con quién o qué es la deuda?)</Label>
         <Input
           id="deuda-nombre"
           placeholder="Ej. Préstamo del carro, Tarjeta BAC"
@@ -79,8 +75,8 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
       <div className="flex flex-col gap-2">
         <Label htmlFor="deuda-tipo">Tipo</Label>
         <Select id="deuda-tipo" value={tipo} onChange={(e) => setTipo(e.target.value as TipoDeuda)}>
-          {OPCIONES_TIPO.map((o) => (
-            <option key={o.valor} value={o.valor}>
+          {CATEGORIAS_DEUDA_ORDENADAS.map((o) => (
+            <option key={o.tipo} value={o.tipo}>
               {o.etiqueta}
             </option>
           ))}
@@ -88,7 +84,7 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="deuda-monto">Monto total de la deuda</Label>
+        <Label htmlFor="deuda-monto">Saldo de la deuda a la fecha</Label>
         <Input
           id="deuda-monto"
           type="number"
@@ -124,7 +120,7 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="deuda-cuota">Cuota mensual esperada (opcional)</Label>
+        <Label htmlFor="deuda-cuota">Pago mensual (opcional)</Label>
         <Input
           id="deuda-cuota"
           type="number"
@@ -132,6 +128,16 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
           placeholder="0.00"
           value={cuotaMensual}
           onChange={(e) => setCuotaMensual(e.target.value)}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="deuda-liquidacion">Fecha estimada de liquidación (opcional)</Label>
+        <Input
+          id="deuda-liquidacion"
+          type="date"
+          value={fechaLiquidacion}
+          onChange={(e) => setFechaLiquidacion(e.target.value)}
         />
       </div>
 
