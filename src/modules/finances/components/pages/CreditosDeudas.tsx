@@ -20,8 +20,8 @@ import { CATEGORIAS_BIEN_ORDENADAS } from '../../constants/bienes'
 import { CATEGORIAS_DEUDA_ORDENADAS } from '../../constants/deudas'
 import { useBienes } from '../../hooks/useBienes'
 import { useAbonosDeuda, useDeudas } from '../../hooks/useDeudas'
-import { descargarCSV } from '../../lib/csv'
 import { formatearMonto } from '../../lib/formato'
+import { descargarPdfBienes, descargarPdfDeudas } from '../../lib/pdf'
 import { abonosDeudaRepository, bienesRepository, deudasRepository } from '../../repositories'
 import { TipoDeuda, type Deuda } from '../../types/deuda'
 import { FormularioAbonoDeuda } from '../FormularioAbonoDeuda'
@@ -40,10 +40,6 @@ const ICONO_POR_TIPO: Record<TipoDeuda, typeof CreditCard> = {
 const ETIQUETA_POR_TIPO: Record<TipoDeuda, string> = Object.fromEntries(
   CATEGORIAS_DEUDA_ORDENADAS.map((c) => [c.tipo, c.etiqueta]),
 ) as Record<TipoDeuda, string>
-
-function fechaHoy(): string {
-  return new Date().toISOString().slice(0, 10)
-}
 
 function TarjetaDeuda({ uid, deuda, moneda }: { uid: string; deuda: Deuda; moneda: string }) {
   const { abonos } = useAbonosDeuda(deuda.id)
@@ -153,7 +149,17 @@ function TarjetaDeuda({ uid, deuda, moneda }: { uid: string; deuda: Deuda; moned
   )
 }
 
-function TabDeudas({ uid, moneda }: { uid: string; moneda: string }) {
+function TabDeudas({
+  uid,
+  nombreUsuario,
+  emailUsuario,
+  moneda,
+}: {
+  uid: string
+  nombreUsuario: string
+  emailUsuario: string
+  moneda: string
+}) {
   const { deudas } = useDeudas()
   const [mostrandoForm, setMostrandoForm] = useState(false)
 
@@ -161,35 +167,7 @@ function TabDeudas({ uid, moneda }: { uid: string; moneda: string }) {
   const deudasOrdenadas = [...deudas].sort((a, b) => b.saldoActual - a.saldoActual)
 
   function manejarDescargar() {
-    const filas: (string | number)[][] = [
-      ['Listado de Deudas (LD)'],
-      [`Fecha de elaboración: ${fechaHoy()}`],
-      [],
-      ['Acreedor', 'Saldo deuda a la fecha', 'Pago mensual', 'Tasa interés', 'Fecha de liquidación de deuda'],
-    ]
-
-    for (const { tipo, etiqueta } of CATEGORIAS_DEUDA_ORDENADAS) {
-      const deudasCategoria = deudas.filter((d) => d.tipo === tipo)
-      if (deudasCategoria.length === 0) continue
-
-      filas.push([etiqueta])
-      let subtotal = 0
-      for (const d of deudasCategoria) {
-        filas.push([
-          d.nombre,
-          d.saldoActual,
-          d.cuotaMensual ?? '',
-          d.tasaInteres !== undefined ? `${d.tasaInteres}%` : '',
-          d.fechaLiquidacion ?? '',
-        ])
-        subtotal += d.saldoActual
-      }
-      filas.push(['Total', subtotal])
-      filas.push([])
-    }
-
-    filas.push(['Total de Deudas', totalPendiente])
-    descargarCSV('listado-de-deudas.csv', filas)
+    descargarPdfDeudas({ nombreUsuario, emailUsuario, moneda, deudas })
   }
 
   return (
@@ -211,7 +189,7 @@ function TabDeudas({ uid, moneda }: { uid: string; moneda: string }) {
           onClick={manejarDescargar}
         >
           <Download className="h-4 w-4" />
-          Descargar Excel
+          Descargar PDF
         </Button>
       </div>
 
@@ -275,7 +253,17 @@ function FilaBien({
   )
 }
 
-function TabBienes({ uid, moneda }: { uid: string; moneda: string }) {
+function TabBienes({
+  uid,
+  nombreUsuario,
+  emailUsuario,
+  moneda,
+}: {
+  uid: string
+  nombreUsuario: string
+  emailUsuario: string
+  moneda: string
+}) {
   const { bienes } = useBienes()
 
   const valorPorCategoria: Record<string, number> = Object.fromEntries(
@@ -284,19 +272,7 @@ function TabBienes({ uid, moneda }: { uid: string; moneda: string }) {
   const totalBienes = bienes.reduce((acc, b) => acc + b.valorActual, 0)
 
   function manejarDescargar() {
-    const filas: (string | number)[][] = [
-      ['Listado de Bienes (LB)'],
-      [`Fecha de elaboración: ${fechaHoy()}`],
-      [],
-      ['Descripción de Bienes', 'Valor Actual (Venta)'],
-    ]
-
-    for (const { categoria, etiqueta } of CATEGORIAS_BIEN_ORDENADAS) {
-      filas.push([etiqueta, valorPorCategoria[categoria] ?? 0])
-    }
-
-    filas.push(['Total de Bienes', totalBienes])
-    descargarCSV('listado-de-bienes.csv', filas)
+    descargarPdfBienes({ nombreUsuario, emailUsuario, moneda, valorPorCategoria })
   }
 
   return (
@@ -309,7 +285,7 @@ function TabBienes({ uid, moneda }: { uid: string; moneda: string }) {
 
       <Button variant="outline" size="default" className="gap-2" onClick={manejarDescargar}>
         <Download className="h-4 w-4" />
-        Descargar Excel
+        Descargar PDF
       </Button>
 
       <div className="flex flex-col gap-2">
@@ -351,10 +327,20 @@ export function CreditosDeudas() {
           <TabsTrigger value="bienes">Bienes</TabsTrigger>
         </TabsList>
         <TabsContent value="deudas">
-          <TabDeudas uid={usuario.uid} moneda={moneda} />
+          <TabDeudas
+            uid={usuario.uid}
+            nombreUsuario={usuario.nombre}
+            emailUsuario={usuario.email}
+            moneda={moneda}
+          />
         </TabsContent>
         <TabsContent value="bienes">
-          <TabBienes uid={usuario.uid} moneda={moneda} />
+          <TabBienes
+            uid={usuario.uid}
+            nombreUsuario={usuario.nombre}
+            emailUsuario={usuario.email}
+            moneda={moneda}
+          />
         </TabsContent>
       </Tabs>
     </motion.div>
