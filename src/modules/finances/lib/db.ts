@@ -2,6 +2,7 @@ import Dexie, { type Table } from 'dexie'
 import type {
   AbonoDeuda,
   AbonoTarjeta,
+  Bien,
   Categoria,
   Deuda,
   Gasto,
@@ -36,6 +37,7 @@ export class FinanzasDB extends Dexie {
   ingresos!: Table<Ingreso>
   deudas!: Table<Deuda>
   abonosDeuda!: Table<AbonoDeuda>
+  bienes!: Table<Bien>
 
   constructor() {
     super('talenta-finanzas-db')
@@ -109,6 +111,21 @@ export class FinanzasDB extends Dexie {
       ingresos: 'id, uid, fecha, creadoEn',
       deudas: 'id, uid, tipo, creadoEn',
       abonosDeuda: 'id, deudaId, uid, fecha',
+    })
+
+    // Listado de Bienes (LB) de la Lección 1 del curso de Sanidad
+    // Financiera — un valor por categoría fija, no una lista libre.
+    this.version(5).stores({
+      tarjetas: 'id, uid, banco, tipo, creadoEn',
+      gastos: 'id, uid, fecha, fechaCobro, categoriaId, tarjetaId, tipoPago, creadoEn',
+      gastosFijos: 'id, uid, categoriaId, tarjetaId, recurrencia, activo, creadoEn',
+      abonosTarjeta: 'id, tarjetaId, uid, [anio+mes]',
+      montosManuales: 'id, tarjetaId, [anio+mes]',
+      categorias: 'id, uid, esPersonalizada',
+      ingresos: 'id, uid, fecha, creadoEn',
+      deudas: 'id, uid, tipo, creadoEn',
+      abonosDeuda: 'id, deudaId, uid, fecha',
+      bienes: 'id, uid, categoria',
     })
   }
 }

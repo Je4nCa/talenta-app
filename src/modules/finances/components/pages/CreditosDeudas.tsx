@@ -2,33 +2,47 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   CreditCard,
+  Download,
+  GraduationCap,
   HandCoins,
+  HeartPulse,
+  Home,
   Landmark,
   Plus,
   Trash2,
-  Wallet,
+  Users,
 } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { Button } from '@/shared/components/ui/button'
+import { Input } from '@/shared/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { CATEGORIAS_BIEN_ORDENADAS } from '../../constants/bienes'
+import { CATEGORIAS_DEUDA_ORDENADAS } from '../../constants/deudas'
+import { useBienes } from '../../hooks/useBienes'
 import { useAbonosDeuda, useDeudas } from '../../hooks/useDeudas'
-import { abonosDeudaRepository, deudasRepository } from '../../repositories'
+import { descargarCSV } from '../../lib/csv'
 import { formatearMonto } from '../../lib/formato'
+import { abonosDeudaRepository, bienesRepository, deudasRepository } from '../../repositories'
+import { TipoDeuda, type Deuda } from '../../types/deuda'
 import { FormularioAbonoDeuda } from '../FormularioAbonoDeuda'
 import { FormularioDeuda } from '../FormularioDeuda'
-import { TipoDeuda, type Deuda } from '../../types/deuda'
 
 const ICONO_POR_TIPO: Record<TipoDeuda, typeof CreditCard> = {
   [TipoDeuda.TarjetaCredito]: CreditCard,
-  [TipoDeuda.PrestamoPersonal]: HandCoins,
-  [TipoDeuda.PrestamoBancario]: Landmark,
-  [TipoDeuda.Otro]: Wallet,
+  [TipoDeuda.PrestamoPrendario]: HandCoins,
+  [TipoDeuda.HipotecaVivienda]: Home,
+  [TipoDeuda.DeudaFamiliarAmigos]: Users,
+  [TipoDeuda.CuentaMedica]: HeartPulse,
+  [TipoDeuda.FinanciamientoEducacion]: GraduationCap,
+  [TipoDeuda.FiadorPersonaEmpresa]: Landmark,
 }
 
-const ETIQUETA_POR_TIPO: Record<TipoDeuda, string> = {
-  [TipoDeuda.TarjetaCredito]: 'Tarjeta de crédito',
-  [TipoDeuda.PrestamoPersonal]: 'Préstamo personal',
-  [TipoDeuda.PrestamoBancario]: 'Préstamo bancario',
-  [TipoDeuda.Otro]: 'Otro',
+const ETIQUETA_POR_TIPO: Record<TipoDeuda, string> = Object.fromEntries(
+  CATEGORIAS_DEUDA_ORDENADAS.map((c) => [c.tipo, c.etiqueta]),
+) as Record<TipoDeuda, string>
+
+function fechaHoy(): string {
+  return new Date().toISOString().slice(0, 10)
 }
 
 function TarjetaDeuda({ uid, deuda, moneda }: { uid: string; deuda: Deuda; moneda: string }) {
@@ -87,9 +101,11 @@ function TarjetaDeuda({ uid, deuda, moneda }: { uid: string; deuda: Deuda; moned
         </div>
       </div>
 
-      {deuda.cuotaMensual !== undefined && (
+      {(deuda.cuotaMensual !== undefined || deuda.fechaLiquidacion) && (
         <p className="mt-2 text-sm text-talenta-brown-mid">
-          Cuota mensual esperada: {formatearMonto(deuda.cuotaMensual, moneda)}
+          {deuda.cuotaMensual !== undefined && `Pago mensual: ${formatearMonto(deuda.cuotaMensual, moneda)}`}
+          {deuda.cuotaMensual !== undefined && deuda.fechaLiquidacion && ' · '}
+          {deuda.fechaLiquidacion && `Liquidación estimada: ${deuda.fechaLiquidacion}`}
         </p>
       )}
 
@@ -137,29 +153,47 @@ function TarjetaDeuda({ uid, deuda, moneda }: { uid: string; deuda: Deuda; moned
   )
 }
 
-export function CreditosDeudas() {
-  const usuario = useAuth((state) => state.usuario)
+function TabDeudas({ uid, moneda }: { uid: string; moneda: string }) {
   const { deudas } = useDeudas()
   const [mostrandoForm, setMostrandoForm] = useState(false)
 
-  if (!usuario) return null
-
-  const moneda = usuario.monedaCodigo
   const totalPendiente = deudas.reduce((acc, d) => acc + d.saldoActual, 0)
   const deudasOrdenadas = [...deudas].sort((a, b) => b.saldoActual - a.saldoActual)
 
-  return (
-    <motion.div
-      className="mx-auto flex max-w-md flex-col gap-5 px-5 pt-2"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-    >
-      <div className="flex items-center gap-2">
-        <Landmark className="h-5 w-5 text-talenta-gold" />
-        <h1 className="text-2xl font-semibold text-talenta-black">Créditos y Deudas</h1>
-      </div>
+  function manejarDescargar() {
+    const filas: (string | number)[][] = [
+      ['Listado de Deudas (LD)'],
+      [`Fecha de elaboración: ${fechaHoy()}`],
+      [],
+      ['Acreedor', 'Saldo deuda a la fecha', 'Pago mensual', 'Tasa interés', 'Fecha de liquidación de deuda'],
+    ]
 
+    for (const { tipo, etiqueta } of CATEGORIAS_DEUDA_ORDENADAS) {
+      const deudasCategoria = deudas.filter((d) => d.tipo === tipo)
+      if (deudasCategoria.length === 0) continue
+
+      filas.push([etiqueta])
+      let subtotal = 0
+      for (const d of deudasCategoria) {
+        filas.push([
+          d.nombre,
+          d.saldoActual,
+          d.cuotaMensual ?? '',
+          d.tasaInteres !== undefined ? `${d.tasaInteres}%` : '',
+          d.fechaLiquidacion ?? '',
+        ])
+        subtotal += d.saldoActual
+      }
+      filas.push(['Total', subtotal])
+      filas.push([])
+    }
+
+    filas.push(['Total de Deudas', totalPendiente])
+    descargarCSV('listado-de-deudas.csv', filas)
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
       <div className="rounded-2xl bg-talenta-black p-5 text-talenta-white shadow-lg">
         <p className="text-sm text-talenta-tan">Total pendiente</p>
         <p className="mt-1 text-3xl font-semibold">{formatearMonto(totalPendiente, moneda)}</p>
@@ -168,11 +202,24 @@ export function CreditosDeudas() {
         </p>
       </div>
 
+      <div className="flex gap-3">
+        <Button
+          variant="outline"
+          size="default"
+          className="flex-1 gap-2"
+          disabled={deudas.length === 0}
+          onClick={manejarDescargar}
+        >
+          <Download className="h-4 w-4" />
+          Descargar Excel
+        </Button>
+      </div>
+
       <AnimatePresence mode="wait">
         {mostrandoForm ? (
           <FormularioDeuda
             key="form"
-            uid={usuario.uid}
+            uid={uid}
             onGuardado={() => setMostrandoForm(false)}
             onCancelar={() => setMostrandoForm(false)}
           />
@@ -193,10 +240,123 @@ export function CreditosDeudas() {
       ) : (
         <div className="flex flex-col gap-3">
           {deudasOrdenadas.map((d) => (
-            <TarjetaDeuda key={d.id} uid={usuario.uid} deuda={d} moneda={moneda} />
+            <TarjetaDeuda key={d.id} uid={uid} deuda={d} moneda={moneda} />
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+function FilaBien({
+  etiqueta,
+  valor,
+  onGuardar,
+}: {
+  etiqueta: string
+  valor: number
+  onGuardar: (valor: number) => void
+}) {
+  const [texto, setTexto] = useState(valor > 0 ? String(valor) : '')
+
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-talenta-tan/60 bg-talenta-white/90 px-4 py-3">
+      <label className="flex-1 text-base text-talenta-black">{etiqueta}</label>
+      <Input
+        type="number"
+        inputMode="decimal"
+        placeholder="0.00"
+        value={texto}
+        onChange={(e) => setTexto(e.target.value)}
+        onBlur={() => onGuardar(Number(texto) || 0)}
+        className="h-11 w-32 text-right"
+      />
+    </div>
+  )
+}
+
+function TabBienes({ uid, moneda }: { uid: string; moneda: string }) {
+  const { bienes } = useBienes()
+
+  const valorPorCategoria: Record<string, number> = Object.fromEntries(
+    bienes.map((b) => [b.categoria, b.valorActual]),
+  )
+  const totalBienes = bienes.reduce((acc, b) => acc + b.valorActual, 0)
+
+  function manejarDescargar() {
+    const filas: (string | number)[][] = [
+      ['Listado de Bienes (LB)'],
+      [`Fecha de elaboración: ${fechaHoy()}`],
+      [],
+      ['Descripción de Bienes', 'Valor Actual (Venta)'],
+    ]
+
+    for (const { categoria, etiqueta } of CATEGORIAS_BIEN_ORDENADAS) {
+      filas.push([etiqueta, valorPorCategoria[categoria] ?? 0])
+    }
+
+    filas.push(['Total de Bienes', totalBienes])
+    descargarCSV('listado-de-bienes.csv', filas)
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="rounded-2xl bg-talenta-black p-5 text-talenta-white shadow-lg">
+        <p className="text-sm text-talenta-tan">Total de Bienes</p>
+        <p className="mt-1 text-3xl font-semibold">{formatearMonto(totalBienes, moneda)}</p>
+        <p className="mt-1 text-sm text-talenta-tan">Se guarda automáticamente al salir de cada campo.</p>
+      </div>
+
+      <Button variant="outline" size="default" className="gap-2" onClick={manejarDescargar}>
+        <Download className="h-4 w-4" />
+        Descargar Excel
+      </Button>
+
+      <div className="flex flex-col gap-2">
+        {CATEGORIAS_BIEN_ORDENADAS.map(({ categoria, etiqueta }) => (
+          <FilaBien
+            key={categoria}
+            etiqueta={etiqueta}
+            valor={valorPorCategoria[categoria] ?? 0}
+            onGuardar={(valor) => bienesRepository.guardarValor(uid, categoria, valor)}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function CreditosDeudas() {
+  const usuario = useAuth((state) => state.usuario)
+
+  if (!usuario) return null
+
+  const moneda = usuario.monedaCodigo
+
+  return (
+    <motion.div
+      className="mx-auto flex max-w-md flex-col gap-5 px-5 pt-2"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+    >
+      <div className="flex items-center gap-2">
+        <Landmark className="h-5 w-5 text-talenta-gold" />
+        <h1 className="text-2xl font-semibold text-talenta-black">Créditos y Deudas</h1>
+      </div>
+
+      <Tabs defaultValue="deudas">
+        <TabsList>
+          <TabsTrigger value="deudas">Deudas</TabsTrigger>
+          <TabsTrigger value="bienes">Bienes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="deudas">
+          <TabDeudas uid={usuario.uid} moneda={moneda} />
+        </TabsContent>
+        <TabsContent value="bienes">
+          <TabBienes uid={usuario.uid} moneda={moneda} />
+        </TabsContent>
+      </Tabs>
     </motion.div>
   )
 }
