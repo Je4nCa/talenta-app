@@ -133,13 +133,13 @@ export function RegisterForm() {
         <Input
           id="register-codigo"
           type="text"
-          placeholder="Ej. 2026TALENTAOFF"
+          placeholder="Código de tu curso"
           value={codigoPromocional}
           onChange={(e) => setCodigoPromocional(e.target.value)}
           required
         />
         <p className="text-sm text-talenta-brown-mid">
-          El código de tu curso te da acceso gratis a TALENTA durante 1 mes.
+          El código lo recibiste de tu facilitador. Te da acceso gratis a TALENTA durante el curso.
         </p>
       </div>
 

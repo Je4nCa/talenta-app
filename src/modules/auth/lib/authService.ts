@@ -2,7 +2,7 @@ import { db } from '@/shared/lib/db'
 import { buscarPais } from '@/shared/lib/paises'
 import type { LoginInput, NuevoUsuarioInput, UserProfile } from '@/shared/types/user'
 import { VERSION_TERMINOS } from '../constants/legal'
-import { CODIGO_PROMOCIONAL_VALIDO, calcularFinPeriodoGratuito } from '../constants/promociones'
+import { CODIGO_PROMOCIONAL_VALIDO, obtenerFinPeriodoGratuito } from '../constants/promociones'
 import { hashPassword, verifyPassword } from './password'
 
 export class AuthError extends Error {}
@@ -44,7 +44,7 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     terminosVersion: VERSION_TERMINOS,
     terminosFechaAceptacion: ahora.toISOString(),
     codigoPromocional,
-    finPeriodoGratuito: calcularFinPeriodoGratuito(ahora),
+    finPeriodoGratuito: obtenerFinPeriodoGratuito(),
   }
 
   await db.users.add(perfil)
