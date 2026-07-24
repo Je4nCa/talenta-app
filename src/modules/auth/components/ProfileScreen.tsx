@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent } from 'react'
 import { motion } from 'framer-motion'
-import { LogOut, ShieldCheck } from 'lucide-react'
+import { CreditCard, LogOut, ShieldCheck } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Label } from '@/shared/components/ui/label'
 import { Button } from '@/shared/components/ui/button'
 import { Select } from '@/shared/components/ui/select'
@@ -61,6 +62,7 @@ function diasRestantes(finPeriodoGratuito: string): number {
 }
 
 export function ProfileScreen() {
+  const navigate = useNavigate()
   const usuario = useAuth((state) => state.usuario)
   const logout = useAuth((state) => state.logout)
 
@@ -118,8 +120,17 @@ export function ProfileScreen() {
         <p className="mt-1 text-sm text-talenta-brown-mid">
           {dias > 0
             ? `Te quedan ${dias} ${dias === 1 ? 'día' : 'días'} de acceso gratis (hasta el ${usuario.finPeriodoGratuito}).`
-            : `Venció el ${usuario.finPeriodoGratuito}. Pronto podrás suscribirte para seguir usando TALENTA.`}
+            : `Venció el ${usuario.finPeriodoGratuito}. Elige un plan para seguir usando TALENTA.`}
         </p>
+        <Button
+          variant="outline"
+          size="lg"
+          className="mt-4 w-full gap-2"
+          onClick={() => navigate('/perfil/suscripcion')}
+        >
+          <CreditCard className="h-5 w-5" />
+          Mi suscripción
+        </Button>
       </div>
 
       <SelectorMoneda monedaCodigo={usuario.monedaCodigo} />

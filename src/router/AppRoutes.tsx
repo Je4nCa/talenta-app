@@ -10,6 +10,7 @@ import { Gastos } from '@/modules/finances/components/pages/Gastos'
 import { Pagos } from '@/modules/finances/components/pages/Pagos'
 import { Tarjetas } from '@/modules/finances/components/pages/Tarjetas'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
+import { SuscripcionScreen } from '@/modules/payments/components/SuscripcionScreen'
 import { AppShell } from './AppShell'
 import { HubScreen } from './HubScreen'
 
@@ -23,6 +24,7 @@ export function AppRoutes() {
         <Route path="biblia" element={<BibleHome />} />
         <Route path="asistente" element={<AsistenteHome />} />
         <Route path="perfil" element={<ProfileScreen />} />
+        <Route path="perfil/suscripcion" element={<SuscripcionScreen />} />
         <Route path="admin" element={esAdmin ? <AdminHome /> : <Navigate to="/" replace />} />
       </Route>
 

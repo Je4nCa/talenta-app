@@ -201,10 +201,23 @@ Balance diario = ingresos − suma de egresos del día.
 Resumen semanal = vista agregada por categoría, calculada en cliente.
 
 ### Pagos (TiloPay)
-- Checkout embebido (sin redirección fuera de la app)
-- Webhook que actualiza el estado de suscripción del usuario (Cloud Function pendiente)
-- Estado de pago verificado en rutas protegidas
-- Comisiones: 4.25% + $0.35 por tarjeta, 2% + $0.35 por SINPE Móvil — mostrar esto al usuario antes de confirmar el pago
+
+**Módulo:** `src/modules/payments/` (ruta `/perfil/suscripcion`, entrada desde el botón "Mi suscripción" en `ProfileScreen.tsx`, debajo de la tarjeta de estado de prueba gratuita).
+
+**Planes (decisión de Carlos y Alicia, `constants/planes.ts` → `PLANES_SUSCRIPCION`):** todos en USD, TiloPay confirma que acepta USD directamente (no solo CRC).
+- Mensual: $2.99/mes.
+- Trimestral: $7.99 (equivale a $2.66/mes, ahorra 11%).
+- Anual: $27.99 (equivale a $2.33/mes, ahorra 22%).
+
+**Flujo actual:** el usuario elige un plan en `PlanesSuscripcion.tsx`, toca "Continuar al pago" → se crea un registro `Suscripcion` local (`estado: 'pendiente'`, Dexie `talenta-payments-db`, tabla `suscripciones`, repositorio `suscripciones.repository.ts`, hook `useSuscripcion.ts`) con un `ordenId` único (`crypto.randomUUID()`). Si TiloPay está configurado, se muestra `CheckoutTilopay.tsx` (el formulario real del SDK); si no, se muestra un estado "Los pagos en línea todavía no están disponibles" con el plan ya elegido visible, sugiriendo contactar a Carlos o Alicia mientras tanto — el registro pendiente queda igual guardado localmente.
+
+**Integración con TiloPay — investigado a fondo, decisiones documentadas:**
+- TiloPay **no publica un paquete npm**. Su SDK (`https://app.tilopay.com/sdk/documentation.pdf`) se integra con dos `<script>` (jQuery + `https://app.tilopay.com/sdk/v1/sdk.min.js`) — `lib/tilopayClient.ts` los inyecta dinámicamente solo cuando el usuario llega al checkout, no como dependencia empaquetada del build (evita arrastrar jQuery al resto de la app).
+- El formulario de pago (`CheckoutTilopay.tsx`) sigue exactamente el contrato de campos documentado por el SDK — `id`s `method`, `cards`, `ccnumber`, `expdate`, `cvv`, `result` — porque el SDK los lee directamente del DOM al llamar `Tilopay.startPayment()`; no se pueden renombrar aunque no seria el estilo habitual del proyecto.
+- **El único conector que falta:** el SDK requiere un `token` obtenido del método `GetTokenSdk` de la API de TiloPay, que a su vez requiere el API Key / API User / API Password del comercio (se consiguen en `admin.tilopay.com`). Esas tres credenciales **nunca deben vivir en el frontend** — a diferencia de la API key de Biblia.com o la Public Key de EmailJS (seguras de exponer por diseño de esos servicios), estas son credenciales de cobro reales: si se filtran, cualquiera podría generar tokens de cobro a nombre del comercio. Por eso `tilopayClient.ts` espera una URL de backend (`VITE_TILOPAY_TOKEN_ENDPOINT`, `.env.local` en desarrollo / GitHub Actions secret en producción, ver `.env.example` y `deploy.yml`) que en el futuro será una Cloud Function de Firebase que hace esa llamada server-side y devuelve solo el `token`. **Mientras esa variable no exista, `tilopayEstaConfigurado()` devuelve `false` y la UI muestra el estado "próximamente"** — no hay que tocar ningún otro archivo del módulo cuando la Cloud Function esté lista, solo configurar la variable.
+- `Tilopay.Init({...})` se llama con `currency: 'USD'`, `amount` (2 decimales), `orderNumber` (el `ordenId` local), `billToEmail`/`billToFirstName` del usuario, `capture: 1` y **`subscription: 1`** — este último le pide a TiloPay que tokenice la tarjeta para poder re-cobrar en el siguiente ciclo. **Pendiente real:** el re-cobro automático mensual/trimestral/anual usando esa tarjeta tokenizada no está implementado (necesita un cron/Cloud Function que TiloPay llama "Tilopay Repeat" o un job propio que vuelva a llamar `Init`/`startPayment` con la tarjeta guardada) — hoy el módulo solo cubre el primer cobro.
+- **Webhook de confirmación:** TiloPay no publica públicamente el formato exacto del webhook (está en su colección de Postman, gated). El campo `redirect` de `Init()` ya apunta de vuelta a `/perfil/suscripcion?orden={ordenId}`, pero **a propósito no se marca la suscripción como `activa` solo por ese redirect** — un parámetro de URL se puede falsificar; la confirmación real de pago debe llegar por el webhook server-side (Cloud Function pendiente) que valide la transacción con TiloPay y actualice el registro `Suscripcion` vía `suscripcionesRepository.actualizar()`.
+- **Comisiones confirmadas** (`tilopay.com/tarifas`, específico para Costa Rica): 4.25% + $0.35 por tarjeta, 2% + $0.35 por SINPE Móvil — se muestran como nota debajo del selector de planes en `SuscripcionScreen.tsx`, antes de confirmar el pago.
 
 ### Panel de administración
 - Ruta protegida por `role === 'admin'` en el perfil del usuario
