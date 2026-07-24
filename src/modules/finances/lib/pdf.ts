@@ -12,6 +12,18 @@ function fechaHoy(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+/**
+ * Las fuentes estándar de jsPDF (helvetica) solo soportan WinAnsiEncoding
+ * (cp1252), que no incluye el símbolo del colón costarricense ₡ (U+20A1) —
+ * sale en blanco/corrupto en el PDF aunque se vea bien en la UI del navegador
+ * (que sí soporta Unicode completo). Se reemplaza por ¢ (cent sign, U+00A2,
+ * sí incluido en WinAnsi), la aproximación histórica que se usaba para el
+ * colón antes de que existiera el símbolo Unicode dedicado.
+ */
+function formatearMontoPdf(monto: number, moneda: string): string {
+  return formatearMonto(monto, moneda).replace('₡', '¢')
+}
+
 function encabezado(doc: jsPDF, titulo: string, nombreUsuario: string, emailUsuario: string): number {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(16)
@@ -61,8 +73,8 @@ export function descargarPdfDeudas({
       subtotal += d.saldoActual
       return [
         d.nombre,
-        formatearMonto(d.saldoActual, moneda),
-        d.cuotaMensual !== undefined ? formatearMonto(d.cuotaMensual, moneda) : '—',
+        formatearMontoPdf(d.saldoActual, moneda),
+        d.cuotaMensual !== undefined ? formatearMontoPdf(d.cuotaMensual, moneda) : '—',
         d.tasaInteres !== undefined ? `${d.tasaInteres}%` : '—',
         d.fechaLiquidacion ?? '—',
       ]
@@ -73,7 +85,7 @@ export function descargarPdfDeudas({
       startY: cursorY,
       head: [['Acreedor', 'Saldo', 'Pago mensual', 'Tasa interés', 'Fecha liquidación']],
       body: filas,
-      foot: [['Total', formatearMonto(subtotal, moneda), '', '', '']],
+      foot: [['Total', formatearMontoPdf(subtotal, moneda), '', '', '']],
       theme: 'grid',
       headStyles: { fillColor: NEGRO, textColor: 255, fontSize: 9 },
       footStyles: { fillColor: TAN, textColor: NEGRO, fontStyle: 'bold', fontSize: 9 },
@@ -87,7 +99,7 @@ export function descargarPdfDeudas({
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(12)
   doc.setTextColor(...NEGRO)
-  doc.text(`Total de Deudas: ${formatearMonto(totalGeneral, moneda)}`, 14, cursorY)
+  doc.text(`Total de Deudas: ${formatearMontoPdf(totalGeneral, moneda)}`, 14, cursorY)
 
   doc.save('listado-de-deudas.pdf')
 }
@@ -103,7 +115,7 @@ export function descargarPdfBienes({
 
   const filas = CATEGORIAS_BIEN_ORDENADAS.map(({ categoria, etiqueta }) => [
     etiqueta,
-    formatearMonto(valorPorCategoria[categoria] ?? 0, moneda),
+    formatearMontoPdf(valorPorCategoria[categoria] ?? 0, moneda),
   ])
   const total = CATEGORIAS_BIEN_ORDENADAS.reduce(
     (acc, { categoria }) => acc + (valorPorCategoria[categoria] ?? 0),
@@ -114,7 +126,7 @@ export function descargarPdfBienes({
     startY: cursorY,
     head: [['Descripción de Bienes', 'Valor Actual (Venta)']],
     body: filas,
-    foot: [['Total de Bienes', formatearMonto(total, moneda)]],
+    foot: [['Total de Bienes', formatearMontoPdf(total, moneda)]],
     theme: 'grid',
     headStyles: { fillColor: NEGRO, textColor: 255, fontSize: 9 },
     footStyles: { fillColor: TAN, textColor: NEGRO, fontStyle: 'bold', fontSize: 10 },
