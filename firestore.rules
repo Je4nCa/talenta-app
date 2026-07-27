@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function esDueno(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Requiere que el propio documento del usuario tenga rol == 'admin'.
+    // Un admin nunca puede auto-asignarse este rol vía reglas (ver más abajo
+    // en /users/{uid}) — solo se otorga desde fuera del cliente (Cloud
+    // Function con Admin SDK), igual que el resto de lógica de confianza
+    // (webhooks de TiloPay, etc.) descrita en CLAUDE.md.
+    function esAdmin() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.rol == 'admin';
+    }
+
+    match /users/{uid} {
+      allow read: if esDueno(uid) || esAdmin();
+
+      // Toda cuenta nueva se crea como 'student' — el rol 'admin' nunca se
+      // auto-asigna desde el cliente.
+      allow create: if esDueno(uid) && request.resource.data.rol == 'student';
+
+      // El dueño puede actualizar su perfil, pero no cambiar su propio rol.
+      allow update: if esDueno(uid) && request.resource.data.rol == resource.data.rol;
+      // Un admin sí puede cambiar el rol de otros (ej. panel de administración).
+      allow update: if esAdmin();
+
+      allow delete: if false;
+
+      // Subcolecciones del usuario (course, finances, spiritual, payments,
+      // assessments, etc.): solo el dueño lee/escribe; un admin solo lee
+      // (para el roster del panel de administración, sin poder modificar
+      // datos privados de un estudiante).
+      match /{subcoleccion}/{documento=**} {
+        allow read, write: if esDueno(uid);
+        allow read: if esAdmin();
+      }
+    }
+
+    // Todo lo que no esté explícitamente permitido arriba queda cerrado.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
