@@ -27,7 +27,7 @@ export function SuscripcionScreen() {
 
   if (!usuario) return null
 
-  const dias = diasRestantes(usuario.finPeriodoGratuito)
+  const dias = usuario.finPeriodoGratuito ? diasRestantes(usuario.finPeriodoGratuito) : null
   const plan = obtenerPlan(planId)
   const configurado = tilopayEstaConfigurado()
   const uid = usuario.uid
@@ -65,7 +65,15 @@ export function SuscripcionScreen() {
         <h1 className="text-xl font-semibold text-talenta-black">Mi suscripción</h1>
       </div>
 
-      {suscripcion?.estado === 'activa' ? (
+      {dias === null ? (
+        <div className="w-full rounded-2xl border border-talenta-tan/60 bg-talenta-white/80 p-5 text-left shadow-sm">
+          <p className="text-base font-semibold text-talenta-black">Acceso completo</p>
+          <p className="mt-1 text-sm text-talenta-brown-mid">
+            Tu cuenta tiene acceso ilimitado a TALENTA, sin ningún costo — no necesitas
+            suscripción.
+          </p>
+        </div>
+      ) : suscripcion?.estado === 'activa' ? (
         <div className="flex w-full items-center gap-3 rounded-2xl border border-talenta-tan/60 bg-talenta-white/80 p-5 text-left shadow-sm">
           <CheckCircle2 className="h-6 w-6 shrink-0 text-talenta-gold" />
           <div>
@@ -89,7 +97,7 @@ export function SuscripcionScreen() {
         </div>
       )}
 
-      {!ordenPendiente ? (
+      {dias === null ? null : !ordenPendiente ? (
         <>
           <PlanesSuscripcion planSeleccionado={planId} onSeleccionar={setPlanId} />
 
