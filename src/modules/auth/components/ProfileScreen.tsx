@@ -87,10 +87,17 @@ export function ProfileScreen() {
         <p className="mt-1 text-base text-talenta-brown-mid">{usuario.email}</p>
       </div>
 
-      {usuario.rol === 'admin' && (
+      {usuario.rol === 'superadmin' && (
         <span className="flex items-center gap-2 rounded-full bg-talenta-gold/15 px-4 py-1.5 text-sm font-medium text-talenta-brown-dark">
           <ShieldCheck className="h-4 w-4" />
           Administrador
+        </span>
+      )}
+
+      {usuario.rol === 'facilitador' && (
+        <span className="flex items-center gap-2 rounded-full bg-talenta-gold/15 px-4 py-1.5 text-sm font-medium text-talenta-brown-dark">
+          <ShieldCheck className="h-4 w-4" />
+          Facilitador
         </span>
       )}
 

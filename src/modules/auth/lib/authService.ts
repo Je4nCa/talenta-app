@@ -5,7 +5,8 @@ import type { LoginInput, NuevoUsuarioInput, UserProfile, UserRole } from '@/sha
 import { CORREOS_ESTUDIANTES_HASH } from '../constants/estudiantesInscritos'
 import { VERSION_TERMINOS } from '../constants/legal'
 import {
-  CODIGO_PROMOCIONAL_ADMIN,
+  CODIGO_PROMOCIONAL_FACILITADOR,
+  CODIGO_PROMOCIONAL_SUPERADMIN,
   CODIGO_PROMOCIONAL_VALIDO,
   obtenerFinPeriodoGratuito,
 } from '../constants/promociones'
@@ -32,8 +33,10 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
   const codigoPromocional = input.codigoPromocional.trim().toUpperCase()
   let rol: UserRole = 'student'
 
-  if (codigoPromocional === CODIGO_PROMOCIONAL_ADMIN) {
-    rol = 'admin'
+  if (codigoPromocional === CODIGO_PROMOCIONAL_SUPERADMIN) {
+    rol = 'superadmin'
+  } else if (codigoPromocional === CODIGO_PROMOCIONAL_FACILITADOR) {
+    rol = 'facilitador'
   } else if (codigoPromocional === CODIGO_PROMOCIONAL_VALIDO) {
     const emailHash = await sha256Hex(email)
     if (!CORREOS_ESTUDIANTES_HASH.includes(emailHash)) {
@@ -59,8 +62,9 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     terminosVersion: VERSION_TERMINOS,
     terminosFechaAceptacion: ahora.toISOString(),
     codigoPromocional,
-    // Las cuentas admin (código CODIGO_PROMOCIONAL_ADMIN) tienen acceso
-    // completo sin costo desde el registro — no aplica período de prueba.
+    // Las cuentas facilitador y superadmin tienen acceso completo sin costo
+    // desde el registro — no aplica período de prueba. Solo los estudiantes
+    // reciben finPeriodoGratuito.
     ...(rol === 'student' ? { finPeriodoGratuito: obtenerFinPeriodoGratuito() } : {}),
   }
 
