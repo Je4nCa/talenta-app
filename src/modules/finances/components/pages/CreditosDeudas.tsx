@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
+  ChevronLeft,
+  ChevronRight,
   CreditCard,
   Download,
   GraduationCap,
@@ -18,11 +20,13 @@ import { Input } from '@/shared/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { CATEGORIAS_BIEN_ORDENADAS } from '../../constants/bienes'
 import { CATEGORIAS_DEUDA_ORDENADAS } from '../../constants/deudas'
+import { CATEGORIAS_RIE_ORDENADAS, DIAS_RIE } from '../../constants/rie'
 import { useBienes } from '../../hooks/useBienes'
 import { useAbonosDeuda, useDeudas } from '../../hooks/useDeudas'
+import { useRIE } from '../../hooks/useRIE'
 import { formatearMonto } from '../../lib/formato'
-import { descargarPdfBienes, descargarPdfDeudas } from '../../lib/pdf'
-import { abonosDeudaRepository, bienesRepository, deudasRepository } from '../../repositories'
+import { descargarPdfBienes, descargarPdfDeudas, descargarPdfRIE } from '../../lib/pdf'
+import { abonosDeudaRepository, bienesRepository, deudasRepository, rieRepository } from '../../repositories'
 import { TipoDeuda, type Deuda } from '../../types/deuda'
 import { FormularioAbonoDeuda } from '../FormularioAbonoDeuda'
 import { FormularioDeuda } from '../FormularioDeuda'
@@ -302,6 +306,81 @@ function TabBienes({
   )
 }
 
+function TabRIE({
+  uid,
+  nombreUsuario,
+  emailUsuario,
+  moneda,
+}: {
+  uid: string
+  nombreUsuario: string
+  emailUsuario: string
+  moneda: string
+}) {
+  const { celdas } = useRIE()
+  const [dia, setDia] = useState(1)
+
+  const totalRegistrado = celdas.reduce((acc, c) => acc + c.monto, 0)
+
+  function manejarDescargar() {
+    descargarPdfRIE({ nombreUsuario, emailUsuario, moneda, celdas })
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="rounded-2xl bg-talenta-black p-5 text-talenta-white shadow-lg">
+        <p className="text-sm text-talenta-tan">Total registrado ({DIAS_RIE} días)</p>
+        <p className="mt-1 text-3xl font-semibold">{formatearMonto(totalRegistrado, moneda)}</p>
+        <p className="mt-1 text-sm text-talenta-tan">Se guarda automáticamente al salir de cada campo.</p>
+      </div>
+
+      <Button
+        variant="outline"
+        size="default"
+        className="gap-2"
+        disabled={celdas.length === 0}
+        onClick={manejarDescargar}
+      >
+        <Download className="h-4 w-4" />
+        Descargar PDF
+      </Button>
+
+      <div className="flex items-center justify-between rounded-xl border border-talenta-tan/60 bg-talenta-white/90 px-4 py-3">
+        <button
+          type="button"
+          aria-label="Día anterior"
+          disabled={dia === 1}
+          onClick={() => setDia((d) => Math.max(1, d - 1))}
+          className="flex h-9 w-9 items-center justify-center rounded-full text-talenta-brown-dark transition-colors disabled:opacity-30"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <span className="text-lg font-semibold text-talenta-black">Día {dia}</span>
+        <button
+          type="button"
+          aria-label="Día siguiente"
+          disabled={dia === DIAS_RIE}
+          onClick={() => setDia((d) => Math.min(DIAS_RIE, d + 1))}
+          className="flex h-9 w-9 items-center justify-center rounded-full text-talenta-brown-dark transition-colors disabled:opacity-30"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {CATEGORIAS_RIE_ORDENADAS.map(({ categoria, etiqueta }) => (
+          <FilaBien
+            key={`${dia}-${categoria}`}
+            etiqueta={etiqueta}
+            valor={celdas.find((c) => c.dia === dia && c.categoria === categoria)?.monto ?? 0}
+            onGuardar={(valor) => rieRepository.guardarValor(uid, dia, categoria, valor)}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function CreditosDeudas() {
   const usuario = useAuth((state) => state.usuario)
 
@@ -325,6 +404,7 @@ export function CreditosDeudas() {
         <TabsList>
           <TabsTrigger value="deudas">Deudas</TabsTrigger>
           <TabsTrigger value="bienes">Bienes</TabsTrigger>
+          <TabsTrigger value="rie">RIE</TabsTrigger>
         </TabsList>
         <TabsContent value="deudas">
           <TabDeudas
@@ -336,6 +416,14 @@ export function CreditosDeudas() {
         </TabsContent>
         <TabsContent value="bienes">
           <TabBienes
+            uid={usuario.uid}
+            nombreUsuario={usuario.nombre}
+            emailUsuario={usuario.email}
+            moneda={moneda}
+          />
+        </TabsContent>
+        <TabsContent value="rie">
+          <TabRIE
             uid={usuario.uid}
             nombreUsuario={usuario.nombre}
             emailUsuario={usuario.email}

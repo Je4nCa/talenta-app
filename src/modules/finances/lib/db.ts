@@ -3,6 +3,7 @@ import type {
   AbonoDeuda,
   AbonoTarjeta,
   Bien,
+  CeldaRIE,
   Categoria,
   Deuda,
   Gasto,
@@ -38,6 +39,7 @@ export class FinanzasDB extends Dexie {
   deudas!: Table<Deuda>
   abonosDeuda!: Table<AbonoDeuda>
   bienes!: Table<Bien>
+  rie!: Table<CeldaRIE>
 
   constructor() {
     super('talenta-finanzas-db')
@@ -126,6 +128,22 @@ export class FinanzasDB extends Dexie {
       deudas: 'id, uid, tipo, creadoEn',
       abonosDeuda: 'id, deudaId, uid, fecha',
       bienes: 'id, uid, categoria',
+    })
+
+    // Registro de Ingresos y Egresos (RIE) de la Lección 1 — cuadrícula de
+    // 31 días x 15 categorías fijas, una celda por día+categoría.
+    this.version(6).stores({
+      tarjetas: 'id, uid, banco, tipo, creadoEn',
+      gastos: 'id, uid, fecha, fechaCobro, categoriaId, tarjetaId, tipoPago, creadoEn',
+      gastosFijos: 'id, uid, categoriaId, tarjetaId, recurrencia, activo, creadoEn',
+      abonosTarjeta: 'id, tarjetaId, uid, [anio+mes]',
+      montosManuales: 'id, tarjetaId, [anio+mes]',
+      categorias: 'id, uid, esPersonalizada',
+      ingresos: 'id, uid, fecha, creadoEn',
+      deudas: 'id, uid, tipo, creadoEn',
+      abonosDeuda: 'id, deudaId, uid, fecha',
+      bienes: 'id, uid, categoria',
+      rie: 'id, uid, dia, categoria',
     })
   }
 }
