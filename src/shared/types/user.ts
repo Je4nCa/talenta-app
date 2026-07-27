@@ -18,8 +18,14 @@ export interface UserProfile {
   terminosFechaAceptacion: string
   /** Código promocional usado al registrarse (ej. 2026TALENTAOFF). */
   codigoPromocional: string
-  /** Fecha (YYYY-MM-DD) en que termina el período de acceso gratuito otorgado por el código. */
-  finPeriodoGratuito: string
+  /**
+   * Fecha (YYYY-MM-DD) en que termina el período de acceso gratuito otorgado
+   * por el código de estudiante. `undefined` significa acceso completo sin
+   * fecha de vencimiento ni costo — así se registran las cuentas creadas con
+   * el código de administrador (rol `admin`), que nunca tienen prueba
+   * gratuita ni pasan por suscripción.
+   */
+  finPeriodoGratuito?: string
 }
 
 export type NuevoUsuarioInput = {

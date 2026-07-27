@@ -59,7 +59,9 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     terminosVersion: VERSION_TERMINOS,
     terminosFechaAceptacion: ahora.toISOString(),
     codigoPromocional,
-    finPeriodoGratuito: obtenerFinPeriodoGratuito(),
+    // Las cuentas admin (código CODIGO_PROMOCIONAL_ADMIN) tienen acceso
+    // completo sin costo desde el registro — no aplica período de prueba.
+    ...(rol === 'student' ? { finPeriodoGratuito: obtenerFinPeriodoGratuito() } : {}),
   }
 
   await db.users.add(perfil)

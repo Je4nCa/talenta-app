@@ -69,7 +69,7 @@ export function ProfileScreen() {
   if (!usuario) return null
 
   const pais = buscarPais(usuario.paisCodigo)
-  const dias = diasRestantes(usuario.finPeriodoGratuito)
+  const dias = usuario.finPeriodoGratuito ? diasRestantes(usuario.finPeriodoGratuito) : null
 
   return (
     <motion.div
@@ -113,25 +113,34 @@ export function ProfileScreen() {
         </dl>
       </div>
 
-      <div className="w-full rounded-2xl border border-talenta-tan/60 bg-talenta-white/80 p-5 text-left shadow-sm">
-        <p className="text-base font-semibold text-talenta-black">
-          {dias > 0 ? 'Prueba gratuita activa' : 'Tu prueba gratuita ya terminó'}
-        </p>
-        <p className="mt-1 text-sm text-talenta-brown-mid">
-          {dias > 0
-            ? `Te quedan ${dias} ${dias === 1 ? 'día' : 'días'} de acceso gratis (hasta el ${usuario.finPeriodoGratuito}).`
-            : `Venció el ${usuario.finPeriodoGratuito}. Elige un plan para seguir usando TALENTA.`}
-        </p>
-        <Button
-          variant="outline"
-          size="lg"
-          className="mt-4 w-full gap-2"
-          onClick={() => navigate('/perfil/suscripcion')}
-        >
-          <CreditCard className="h-5 w-5" />
-          Mi suscripción
-        </Button>
-      </div>
+      {dias === null ? (
+        <div className="w-full rounded-2xl border border-talenta-tan/60 bg-talenta-white/80 p-5 text-left shadow-sm">
+          <p className="text-base font-semibold text-talenta-black">Acceso completo</p>
+          <p className="mt-1 text-sm text-talenta-brown-mid">
+            Tu cuenta tiene acceso ilimitado a TALENTA, sin ningún costo.
+          </p>
+        </div>
+      ) : (
+        <div className="w-full rounded-2xl border border-talenta-tan/60 bg-talenta-white/80 p-5 text-left shadow-sm">
+          <p className="text-base font-semibold text-talenta-black">
+            {dias > 0 ? 'Prueba gratuita activa' : 'Tu prueba gratuita ya terminó'}
+          </p>
+          <p className="mt-1 text-sm text-talenta-brown-mid">
+            {dias > 0
+              ? `Te quedan ${dias} ${dias === 1 ? 'día' : 'días'} de acceso gratis (hasta el ${usuario.finPeriodoGratuito}).`
+              : `Venció el ${usuario.finPeriodoGratuito}. Elige un plan para seguir usando TALENTA.`}
+          </p>
+          <Button
+            variant="outline"
+            size="lg"
+            className="mt-4 w-full gap-2"
+            onClick={() => navigate('/perfil/suscripcion')}
+          >
+            <CreditCard className="h-5 w-5" />
+            Mi suscripción
+          </Button>
+        </div>
+      )}
 
       <SelectorMoneda monedaCodigo={usuario.monedaCodigo} />
 
