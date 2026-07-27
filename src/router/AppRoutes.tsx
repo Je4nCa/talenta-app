@@ -15,7 +15,7 @@ import { AppShell } from './AppShell'
 import { HubScreen } from './HubScreen'
 
 export function AppRoutes() {
-  const esAdmin = useAuth((state) => state.usuario?.rol === 'admin')
+  const esAdmin = useAuth((state) => state.usuario?.rol === 'superadmin')
 
   return (
     <Routes>

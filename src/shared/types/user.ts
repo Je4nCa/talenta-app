@@ -1,4 +1,4 @@
-export type UserRole = 'student' | 'admin'
+export type UserRole = 'student' | 'facilitador' | 'superadmin'
 
 export interface UserProfile {
   uid: string
@@ -21,9 +21,8 @@ export interface UserProfile {
   /**
    * Fecha (YYYY-MM-DD) en que termina el período de acceso gratuito otorgado
    * por el código de estudiante. `undefined` significa acceso completo sin
-   * fecha de vencimiento ni costo — así se registran las cuentas creadas con
-   * el código de administrador (rol `admin`), que nunca tienen prueba
-   * gratuita ni pasan por suscripción.
+   * fecha de vencimiento ni costo — así se registran las cuentas `facilitador`
+   * y `superadmin`, que nunca tienen prueba gratuita ni pasan por suscripción.
    */
   finPeriodoGratuito?: string
 }

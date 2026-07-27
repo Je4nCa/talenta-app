@@ -40,7 +40,7 @@ export function HubScreen() {
   const usuario = useAuth((state) => state.usuario)
   const navigate = useNavigate()
 
-  const tarjetas = usuario?.rol === 'admin'
+  const tarjetas = usuario?.rol === 'superadmin'
     ? [
         ...modulos,
         {

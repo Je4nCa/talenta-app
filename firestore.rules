@@ -7,21 +7,23 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == uid;
     }
 
-    // Requiere que el propio documento del usuario tenga rol == 'admin'.
-    // Un admin nunca puede auto-asignarse este rol vía reglas (ver más abajo
-    // en /users/{uid}) — solo se otorga desde fuera del cliente (Cloud
+    // Requiere que el propio documento del usuario tenga rol == 'superadmin'.
+    // Un superadmin nunca puede auto-asignarse este rol vía reglas (ver más
+    // abajo en /users/{uid}) — solo se otorga desde fuera del cliente (Cloud
     // Function con Admin SDK), igual que el resto de lógica de confianza
-    // (webhooks de TiloPay, etc.) descrita en CLAUDE.md.
+    // (webhooks de TiloPay, etc.) descrita en CLAUDE.md. Los tres roles son
+    // 'student' (curso, prueba gratuita), 'facilitador' (acceso completo,
+    // sin panel de admin) y 'superadmin' (acceso completo + panel de admin).
     function esAdmin() {
       return request.auth != null &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.rol == 'admin';
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.rol == 'superadmin';
     }
 
     match /users/{uid} {
       allow read: if esDueno(uid) || esAdmin();
 
-      // Toda cuenta nueva se crea como 'student' — el rol 'admin' nunca se
-      // auto-asigna desde el cliente.
+      // Toda cuenta nueva se crea como 'student' — los roles 'facilitador' y
+      // 'superadmin' nunca se auto-asignan desde el cliente.
       allow create: if esDueno(uid) && request.resource.data.rol == 'student';
 
       // El dueño puede actualizar su perfil, pero no cambiar su propio rol.

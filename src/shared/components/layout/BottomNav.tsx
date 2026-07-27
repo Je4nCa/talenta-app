@@ -55,7 +55,7 @@ function EnlaceNav({
 }
 
 export function BottomNav() {
-  const esAdmin = useAuth((state) => state.usuario?.rol === 'admin')
+  const esAdmin = useAuth((state) => state.usuario?.rol === 'superadmin')
   const enlaces = esAdmin
     ? [...enlacesBase, { to: '/admin', label: 'Admin', icon: ShieldCheck, end: false }]
     : enlacesBase

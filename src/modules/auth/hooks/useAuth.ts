@@ -36,7 +36,8 @@ export const useAuth = create<AuthState>((set, get) => ({
       const usuario = await registrarUsuario(input)
       set({ usuario, loading: false })
     } catch (err) {
-      const mensaje = err instanceof AuthError ? err.message : 'No se pudo crear la cuenta.'
+      const detalle = err instanceof Error ? err.message : String(err)
+      const mensaje = err instanceof AuthError ? err.message : `No se pudo crear la cuenta (${detalle}).`
       set({ error: mensaje, loading: false })
       throw err
     }
