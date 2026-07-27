@@ -64,13 +64,17 @@ Mismo stack que `modulo-finanzas/` para mantener consistencia. No agregar librer
 
 ## Firebase — estado actual
 
-Firebase **aún no está configurado**. Mientras no exista el proyecto de Firebase:
+**Proyecto conectado (2026-07-27), datos todavía en Dexie.** El proyecto de Firebase (`talenta-7b541`) ya está creado y configurado en el código (`src/shared/lib/firebase.ts` → exporta `firebaseApp`, `firebaseAuth`, `firestore`), con sus credenciales como variables de entorno `VITE_FIREBASE_*` (mismo patrón que `VITE_BIBLIA_API_KEY`: `.env.local` en desarrollo, GitHub Actions secrets en producción — **estos secrets aún no se han creado en el repo de GitHub, hay que agregarlos en Settings → Secrets antes de que el deploy en producción funcione**). La API key de Firebase no es secreta (misma naturaleza que la de Biblia.com o la Public Key de EmailJS — identifica el proyecto, no autoriza nada por sí sola; la seguridad real la dan las Firestore Rules, no ocultar esta key).
 
-- Usar Dexie para persistencia local (ya probado en `modulo-finanzas/`)
+**Pero ningún módulo lee/escribe en Firestore todavía** — Auth sigue siendo 100% local (Dexie + bcrypt, ver sección Auth) y cada módulo (`bible`, `finances`, `payments`) sigue con su propia base Dexie separada. Conectar el SDK es un paso previo, no la migración en sí:
+
+- Usar Dexie para persistencia local mientras cada módulo no se haya migrado
 - Usar Zustand para estado en memoria
 - Crear una capa de abstracción `src/shared/lib/db.ts` que exponga las mismas funciones tanto para Dexie como para Firestore, de modo que el switch sea un cambio de implementación sin tocar los módulos
 
-Cuando Firebase esté listo, se migrará módulo por módulo sin reescribir los componentes.
+La migración real (mover Auth a Firebase Authentication, y cada módulo de Dexie a Firestore bajo `users/{uid}/...`) se hace módulo por módulo, sin reescribir los componentes — **pendiente**, no ha empezado.
+
+**Firestore Security Rules:** viven en `firestore.rules` (raíz del repo) y ya están escritas para el modelo de datos documentado en "Principio de arquitectura" (`users/{uid}/course`, `/finances`, `/spiritual`, `/payments`, `/assessments`) — cada usuario solo puede leer/escribir sus propios documentos; un admin puede leer todo (para el futuro roster del panel) pero no escribir subcolecciones ajenas; nadie puede auto-asignarse `rol: 'admin'` vía el cliente (debe venir de una Cloud Function con Admin SDK, igual que la validación de pagos de TiloPay). **Estas reglas solo tienen efecto real una vez Firebase Authentication esté conectado** (`request.auth.uid` no existe mientras el login siga siendo local vía Dexie) — hoy están listas pero inertes. Para publicarlas: pegar el contenido de `firestore.rules` en Firebase Console → Firestore Database → Rules, o `firebase deploy --only firestore:rules` con el Firebase CLI (usa `firebase.json` ya presente en el repo).
 
 ---
 
