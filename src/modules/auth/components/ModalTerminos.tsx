@@ -88,7 +88,7 @@ const SECCIONES: Seccion[] = [
     titulo: 'IX. Derechos ARCO del Usuario',
     parrafos: [
       'Art. 24. De conformidad con el Capítulo IV de la Ley N.° 8968 y su Reglamento, el Usuario tiene derecho a: Acceso —obtener confirmación de si sus datos son tratados y recibir copia de los mismos—; Rectificación —corregir datos inexactos o incompletos—; Cancelación —solicitar la eliminación de sus datos cuando ya no sean necesarios para los fines del tratamiento—; y Oposición —oponerse al tratamiento de sus datos para finalidades específicas, en particular el envío de notificaciones—. Adicionalmente, el Usuario tiene derecho a la portabilidad de sus datos financieros en formato CSV y a la limitación del tratamiento mientras se resuelve una reclamación.',
-      'Art. 25. Para ejercer cualquiera de estos derechos, el Usuario debe enviar solicitud escrita al correo montevostudio@outlook.com, indicando el derecho que desea ejercer, describiendo el dato afectado y adjuntando copia de un documento de identidad vigente que acredite su identidad. El Ministerio resolverá la solicitud en un plazo máximo de diez (10) días hábiles contados desde su recepción. En caso de que la solicitud sea improcedente, se informará al Usuario con indicación de los motivos.',
+      'Art. 25. Para ejercer cualquiera de estos derechos, el Usuario debe enviar solicitud escrita al correo tech@talentaapp.com, indicando el derecho que desea ejercer, describiendo el dato afectado y adjuntando copia de un documento de identidad vigente que acredite su identidad. El Ministerio resolverá la solicitud en un plazo máximo de diez (10) días hábiles contados desde su recepción. En caso de que la solicitud sea improcedente, se informará al Usuario con indicación de los motivos.',
       'Art. 26. Sin perjuicio de lo anterior, el Usuario podrá presentar una reclamación ante la Agencia de Protección de Datos de los Habitantes (PRODHAB), órgano adscrito al Ministerio de Justicia y Paz de Costa Rica, si considera que el tratamiento de sus datos no se ajusta a la legislación vigente.',
     ],
   },
@@ -135,7 +135,7 @@ const SECCIONES: Seccion[] = [
       'Art. 34. Al marcar la casilla de aceptación habilitada en la Aplicación durante el proceso de registro, el Usuario: (a) declara haber leído y comprendido íntegramente el presente instrumento; (b) manifiesta su acuerdo libre, informado e inequívoco con todos los términos y condiciones aquí establecidos; (c) acepta quedar vinculado jurídicamente por sus disposiciones. Este acto de aceptación electrónica tiene plena validez y eficacia jurídica conforme a la Ley N.° 8454 de Certificados, Firmas Digitales y Documentos Electrónicos de Costa Rica y queda registrado en el sistema con indicación de fecha, hora exacta (UTC) y versión del documento aceptado.',
       'Contacto del responsable del tratamiento: Ministerio de Mayordomía Financiera — Carlos y Alicia Arias.',
       'Contacto del operador técnico: Montevo Studio — Jean Carlo Villamonte Murillo.',
-      'Correo: montevostudio@outlook.com · WhatsApp: +506 6333 1383.',
+      'Correo: tech@talentaapp.com · WhatsApp: +506 6333 1383.',
       'Horario de atención: lunes a viernes, 8:00 a.m. – 5:00 p.m., hora de Costa Rica (UTC-6).',
     ],
   },
