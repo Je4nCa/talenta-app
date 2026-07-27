@@ -1,4 +1,10 @@
-import { db } from '@/shared/lib/db'
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  type AuthError as FirebaseAuthError,
+} from 'firebase/auth'
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { firebaseAuth, firestore } from '@/shared/lib/firebase'
 import { sha256Hex } from '@/shared/lib/hash'
 import { buscarPais } from '@/shared/lib/paises'
 import type { LoginInput, NuevoUsuarioInput, UserProfile, UserRole } from '@/shared/types/user'
@@ -10,7 +16,6 @@ import {
   CODIGO_PROMOCIONAL_VALIDO,
   obtenerFinPeriodoGratuito,
 } from '../constants/promociones'
-import { hashPassword, verifyPassword } from './password'
 
 export class AuthError extends Error {}
 
@@ -18,12 +23,16 @@ function normalizarEmail(email: string): string {
   return email.trim().toLowerCase()
 }
 
+function esErrorFirebase(err: unknown): err is FirebaseAuthError {
+  return typeof err === 'object' && err !== null && 'code' in err
+}
+
+function docUsuario(uid: string) {
+  return doc(firestore, 'users', uid)
+}
+
 export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserProfile> {
   const email = normalizarEmail(input.email)
-  const existente = await db.users.where('email').equals(email).first()
-  if (existente) {
-    throw new AuthError('Ya existe una cuenta con este correo.')
-  }
 
   const pais = buscarPais(input.paisCodigo)
   if (!pais) {
@@ -46,12 +55,21 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     throw new AuthError('Código promocional inválido.')
   }
 
-  const ahora = new Date()
+  let credencial
+  try {
+    credencial = await createUserWithEmailAndPassword(firebaseAuth, email, input.password)
+  } catch (err) {
+    if (esErrorFirebase(err) && err.code === 'auth/email-already-in-use') {
+      throw new AuthError('Ya existe una cuenta con este correo.')
+    }
+    throw err
+  }
+
+  const ahora = new Date().toISOString()
   const perfil: UserProfile = {
-    uid: crypto.randomUUID(),
+    uid: credencial.user.uid,
     nombre: input.nombre.trim(),
     email,
-    passwordHash: await hashPassword(input.password),
     idioma: 'es',
     versionBiblia: 'RVR60',
     onboardingCompletado: false,
@@ -60,7 +78,7 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     paisCodigo: pais.codigo,
     monedaCodigo: pais.monedaCodigo,
     terminosVersion: VERSION_TERMINOS,
-    terminosFechaAceptacion: ahora.toISOString(),
+    terminosFechaAceptacion: ahora,
     codigoPromocional,
     // Las cuentas facilitador y superadmin tienen acceso completo sin costo
     // desde el registro — no aplica período de prueba. Solo los estudiantes
@@ -68,29 +86,40 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     ...(rol === 'student' ? { finPeriodoGratuito: obtenerFinPeriodoGratuito() } : {}),
   }
 
-  await db.users.add(perfil)
+  try {
+    await setDoc(docUsuario(perfil.uid), perfil)
+  } catch (err) {
+    // Si no se pudo guardar el perfil, no dejar huérfana la cuenta de Auth
+    // recién creada — el usuario podría quedar "registrado" sin perfil.
+    await credencial.user.delete().catch(() => {})
+    throw err
+  }
+
   return perfil
 }
 
 export async function actualizarVersionBiblia(uid: string, versionBiblia: string): Promise<void> {
-  await db.users.update(uid, { versionBiblia })
+  await updateDoc(docUsuario(uid), { versionBiblia })
 }
 
 export async function actualizarMoneda(uid: string, monedaCodigo: string): Promise<void> {
-  await db.users.update(uid, { monedaCodigo })
+  await updateDoc(docUsuario(uid), { monedaCodigo })
 }
 
 export async function iniciarSesion(input: LoginInput): Promise<UserProfile> {
   const email = normalizarEmail(input.email)
-  const usuario = await db.users.where('email').equals(email).first()
-  if (!usuario) {
+
+  let credencial
+  try {
+    credencial = await signInWithEmailAndPassword(firebaseAuth, email, input.password)
+  } catch {
     throw new AuthError('Correo o contraseña incorrectos.')
   }
 
-  const valido = await verifyPassword(input.password, usuario.passwordHash)
-  if (!valido) {
-    throw new AuthError('Correo o contraseña incorrectos.')
+  const snap = await getDoc(docUsuario(credencial.user.uid))
+  if (!snap.exists()) {
+    throw new AuthError('No se encontró tu perfil. Contacta a soporte.')
   }
 
-  return usuario
+  return snap.data() as UserProfile
 }

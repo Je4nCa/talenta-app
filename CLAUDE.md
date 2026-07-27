@@ -64,17 +64,15 @@ Mismo stack que `modulo-finanzas/` para mantener consistencia. No agregar librer
 
 ## Firebase — estado actual
 
-**Proyecto conectado (2026-07-27), datos todavía en Dexie.** El proyecto de Firebase (`talenta-7b541`) ya está creado y configurado en el código (`src/shared/lib/firebase.ts` → exporta `firebaseApp`, `firebaseAuth`, `firestore`), con sus credenciales como variables de entorno `VITE_FIREBASE_*` (mismo patrón que `VITE_BIBLIA_API_KEY`: `.env.local` en desarrollo, GitHub Actions secrets en producción — **estos secrets aún no se han creado en el repo de GitHub, hay que agregarlos en Settings → Secrets antes de que el deploy en producción funcione**). La API key de Firebase no es secreta (misma naturaleza que la de Biblia.com o la Public Key de EmailJS — identifica el proyecto, no autoriza nada por sí sola; la seguridad real la dan las Firestore Rules, no ocultar esta key).
+**Proyecto conectado (2026-07-27).** El proyecto de Firebase (`talenta-7b541`) está creado y configurado en el código (`src/shared/lib/firebase.ts` → exporta `firebaseApp`, `firebaseAuth`, `firestore`), con sus credenciales como variables de entorno `VITE_FIREBASE_*` (mismo patrón que `VITE_BIBLIA_API_KEY`: `.env.local` en desarrollo, GitHub Actions secrets en producción). La API key de Firebase no es secreta (misma naturaleza que la de Biblia.com o la Public Key de EmailJS — identifica el proyecto, no autoriza nada por sí sola; la seguridad real la dan las Firestore Rules, no ocultar esta key).
 
-**Pero ningún módulo lee/escribe en Firestore todavía** — Auth sigue siendo 100% local (Dexie + bcrypt, ver sección Auth) y cada módulo (`bible`, `finances`, `payments`) sigue con su propia base Dexie separada. Conectar el SDK es un paso previo, no la migración en sí:
+**Auth ya migró a Firebase Authentication (2026-07-27) — primer módulo migrado.** El login sigue siendo exactamente el mismo formulario de correo + contraseña de siempre (sin Google OAuth, sin cambio de UI) — lo que cambió es la implementación por debajo: `src/modules/auth/lib/authService.ts` usa `createUserWithEmailAndPassword`/`signInWithEmailAndPassword` de Firebase Auth, y el perfil del usuario vive en Firestore (`users/{uid}`), ya no en Dexie. `src/shared/lib/db.ts`, `lib/password.ts` y `lib/session.ts` se eliminaron — Firebase Auth maneja el hash de la contraseña (ya no `UserProfile.passwordHash`) y su propia persistencia de sesión entre pestañas/reinicios (`setPersistence` con `browserLocalPersistence`/`browserSessionPersistence`, reemplaza el viejo "recordar uid en localStorage"). `useAuth().restaurarSesion()` ahora se apoya en `onAuthStateChanged` de Firebase en vez de leer Dexie.
 
-- Usar Dexie para persistencia local mientras cada módulo no se haya migrado
-- Usar Zustand para estado en memoria
-- Crear una capa de abstracción `src/shared/lib/db.ts` que exponga las mismas funciones tanto para Dexie como para Firestore, de modo que el switch sea un cambio de implementación sin tocar los módulos
+**Bible, Finances y Payments siguen 100% en Dexie** — cada módulo (`bible`, `finances`, `payments`) sigue con su propia base Dexie separada, pendiente de migrar módulo por módulo (orden sugerido: Biblia primero por ser bajo riesgo, Finanzas al final porque es lo que los estudiantes están usando activamente para la Lección 1).
 
-La migración real (mover Auth a Firebase Authentication, y cada módulo de Dexie a Firestore bajo `users/{uid}/...`) se hace módulo por módulo, sin reescribir los componentes — **pendiente**, no ha empezado.
+**Decisión de seguridad importante (2026-07-27):** los 3 códigos promocionales (`CODIGO_PROMOCIONAL_VALIDO`/`FACILITADOR`/`SUPERADMIN` en `src/modules/auth/constants/promociones.ts`) siguen validándose en el cliente (`authService.ts`) — no hay Cloud Function todavía porque eso requiere pasar el proyecto de Firebase al plan de pago (Blaze), y no era necesario para arrancar el curso. Para que un usuario no pueda auto-asignarse `rol: 'facilitador'`/`'superadmin'` llamando a Firestore directamente (saltándose la UI), la regla `tieneCodigoValido()` en `firestore.rules` **repite los mismos 3 códigos literalmente** — si algún código cambia en `promociones.ts`, hay que actualizar `firestore.rules` a la par (y volver a pegarlo en Firebase Console → Firestore Database → Rules, los cambios locales al archivo no aplican solos). Mismo nivel de protección que el chequeo del cliente hoy, ni más ni menos — la mejora real (Cloud Function + Admin SDK) queda pendiente para cuando se active facturación.
 
-**Firestore Security Rules:** viven en `firestore.rules` (raíz del repo) y ya están escritas para el modelo de datos documentado en "Principio de arquitectura" (`users/{uid}/course`, `/finances`, `/spiritual`, `/payments`, `/assessments`) — cada usuario solo puede leer/escribir sus propios documentos; un admin puede leer todo (para el futuro roster del panel) pero no escribir subcolecciones ajenas; nadie puede auto-asignarse `rol: 'admin'` vía el cliente (debe venir de una Cloud Function con Admin SDK, igual que la validación de pagos de TiloPay). **Estas reglas solo tienen efecto real una vez Firebase Authentication esté conectado** (`request.auth.uid` no existe mientras el login siga siendo local vía Dexie) — hoy están listas pero inertes. Para publicarlas: pegar el contenido de `firestore.rules` en Firebase Console → Firestore Database → Rules, o `firebase deploy --only firestore:rules` con el Firebase CLI (usa `firebase.json` ya presente en el repo).
+**Firestore Security Rules:** viven en `firestore.rules` (raíz del repo), ya publicadas en Firebase Console y activas — cada usuario solo puede leer/escribir sus propios documentos bajo `users/{uid}/...`; un `superadmin` puede leer todo (para el futuro roster del panel) pero no escribir subcolecciones ajenas; nadie puede cambiar su propio rol después de creado (`allow update` compara `resource.data.rol` contra el nuevo valor). Para republicar cambios: pegar el contenido de `firestore.rules` en Firebase Console → Firestore Database → Rules, o `firebase deploy --only firestore:rules` con el Firebase CLI (usa `firebase.json` ya presente en el repo). También hace falta tener **Authentication → Sign-in method → Email/Password** habilitado en la consola (ya activado).
 
 ---
 
@@ -137,8 +135,8 @@ Cada módulo tiene su propio hook principal (`useCourse`, `useFinances`, `useBib
 ## Módulos de Fase 1 + Finanzas Esencial
 
 ### Auth
-- Registro y login con email + contraseña, validado contra la base de datos local (Dexie). Sin Google OAuth.
-- Sin Firebase Auth por ahora: el perfil y las credenciales se crean y validan localmente. Cuando Firebase esté listo, migrar a Firebase Auth manteniendo el mismo flujo de email/contraseña.
+- Registro y login con email + contraseña, vía Firebase Authentication (ver sección Firebase más arriba). Sin Google OAuth.
+- El perfil (todo excepto la contraseña, que Firebase Auth gestiona internamente) vive en Firestore, colección `users/{uid}`.
 - Al registrarse: crear perfil de usuario + ejecutar test de diagnóstico
 - Campos del perfil: nombre, email, idioma, versión de Biblia preferida, estado de onboarding, rol (`student` | `facilitador` | `superadmin`), país y moneda
 - Al registrarse el usuario selecciona su país (lista en `src/shared/lib/paises.ts`); la moneda (`monedaCodigo`) se deriva automáticamente de ese país como valor inicial. **Actualización de la decisión original:** ya no es fija de por vida — el usuario puede cambiarla manualmente después desde Perfil (`SelectorMoneda` en `ProfileScreen.tsx`, action `useAuth().cambiarMoneda()`). El cambio solo afecta cómo se muestran los montos (símbolo y formato) en Finanzas; **no** convierte ni recalcula los montos ya registrados — es un simple re-etiquetado, no hay tipo de cambio ni conversión.
@@ -298,7 +296,8 @@ Estas rutas existen como pantalla "Próximamente" sin ninguna lógica:
 | Logo TALENTA | `public/assets/talenta-logo.png` |
 | Tokens de marca | `tailwind.config.ts` |
 | Tipos globales | `src/shared/types/` |
-| Abstracción de base de datos | `src/shared/lib/db.ts` |
+| Config e instancias de Firebase | `src/shared/lib/firebase.ts` |
+| Reglas de Firestore | `firestore.rules` |
 | Feature flags | `src/shared/lib/featureFlags.ts` |
 | Cliente API de Biblia.com | `src/modules/bible/lib/bibliaClient.ts` |
 | API key de Biblia.com (local) | `.env.local` → `VITE_BIBLIA_API_KEY` (gitignorado, ver `.env.example`) |

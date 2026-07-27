@@ -8,10 +8,9 @@ service cloud.firestore {
     }
 
     // Requiere que el propio documento del usuario tenga rol == 'superadmin'.
-    // Un superadmin nunca puede auto-asignarse este rol vía reglas (ver más
-    // abajo en /users/{uid}) — solo se otorga desde fuera del cliente (Cloud
-    // Function con Admin SDK), igual que el resto de lógica de confianza
-    // (webhooks de TiloPay, etc.) descrita en CLAUDE.md. Los tres roles son
+    // Solo se llega a ese rol al crear la cuenta con el código correcto (ver
+    // tieneCodigoValido más abajo) — nadie puede cambiar su propio rol
+    // después (ver reglas de "update" en /users/{uid}). Los tres roles son
     // 'student' (curso, prueba gratuita), 'facilitador' (acceso completo,
     // sin panel de admin) y 'superadmin' (acceso completo + panel de admin).
     function esAdmin() {
@@ -19,12 +18,23 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.rol == 'superadmin';
     }
 
+    // Códigos promocionales (ver src/modules/auth/constants/promociones.ts —
+    // deben mantenerse EXACTAMENTE iguales en ambos archivos). No hay Cloud
+    // Function todavía (requeriría plan Blaze); mientras tanto, la regla es
+    // lo único que impide que alguien llame a Firestore directamente y se
+    // auto-asigne facilitador/superadmin sin el código correcto — mismo
+    // nivel de protección que el chequeo actual en el cliente, ni más ni
+    // menos, ya que este archivo vive en el mismo repo público que el bundle.
+    function tieneCodigoValido(datos) {
+      return (datos.rol == 'student') ||
+        (datos.rol == 'facilitador' && datos.codigoPromocional == 'TALEFACILITA2026') ||
+        (datos.rol == 'superadmin' && datos.codigoPromocional == 'TALENTAADMIN272612');
+    }
+
     match /users/{uid} {
       allow read: if esDueno(uid) || esAdmin();
 
-      // Toda cuenta nueva se crea como 'student' — los roles 'facilitador' y
-      // 'superadmin' nunca se auto-asignan desde el cliente.
-      allow create: if esDueno(uid) && request.resource.data.rol == 'student';
+      allow create: if esDueno(uid) && tieneCodigoValido(request.resource.data);
 
       // El dueño puede actualizar su perfil, pero no cambiar su propio rol.
       allow update: if esDueno(uid) && request.resource.data.rol == resource.data.rol;

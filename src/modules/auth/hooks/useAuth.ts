@@ -1,5 +1,13 @@
+import {
+  browserLocalPersistence,
+  browserSessionPersistence,
+  onAuthStateChanged,
+  setPersistence,
+  signOut,
+} from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 import { create } from 'zustand'
-import { db } from '@/shared/lib/db'
+import { firebaseAuth, firestore } from '@/shared/lib/firebase'
 import type { LoginInput, NuevoUsuarioInput, UserProfile } from '@/shared/types/user'
 import {
   AuthError,
@@ -8,7 +16,6 @@ import {
   iniciarSesion,
   registrarUsuario,
 } from '../lib/authService'
-import { guardarUidRecordado, limpiarUidRecordado, obtenerUidRecordado } from '../lib/session'
 
 interface AuthState {
   usuario: UserProfile | null
@@ -46,12 +53,10 @@ export const useAuth = create<AuthState>((set, get) => ({
   login: async (input, recordar) => {
     set({ loading: true, error: null })
     try {
+      // Reemplaza el viejo "recordar uid en localStorage" — Firebase Auth ya
+      // trae su propio mecanismo de persistencia de sesión entre pestañas.
+      await setPersistence(firebaseAuth, recordar ? browserLocalPersistence : browserSessionPersistence)
       const usuario = await iniciarSesion(input)
-      if (recordar) {
-        guardarUidRecordado(usuario.uid)
-      } else {
-        limpiarUidRecordado()
-      }
       set({ usuario, loading: false })
     } catch (err) {
       const mensaje = err instanceof AuthError ? err.message : 'No se pudo iniciar sesión.'
@@ -61,27 +66,32 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   logout: () => {
-    limpiarUidRecordado()
+    void signOut(firebaseAuth)
     set({ usuario: null })
   },
 
   limpiarError: () => set({ error: null }),
 
-  restaurarSesion: async () => {
-    const uid = obtenerUidRecordado()
-    if (!uid) {
-      set({ restaurandoSesion: false })
-      return
-    }
-
-    const usuario = await db.users.get(uid)
-    if (!usuario) {
-      limpiarUidRecordado()
-      set({ restaurandoSesion: false })
-      return
-    }
-
-    set({ usuario, restaurandoSesion: false })
+  restaurarSesion: () => {
+    return new Promise<void>((resolve) => {
+      let primeraVez = true
+      onAuthStateChanged(firebaseAuth, async (fbUser) => {
+        if (!fbUser) {
+          set({ usuario: null, restaurandoSesion: false })
+        } else {
+          try {
+            const snap = await getDoc(doc(firestore, 'users', fbUser.uid))
+            set({ usuario: snap.exists() ? (snap.data() as UserProfile) : null, restaurandoSesion: false })
+          } catch {
+            set({ usuario: null, restaurandoSesion: false })
+          }
+        }
+        if (primeraVez) {
+          primeraVez = false
+          resolve()
+        }
+      })
+    })
   },
 
   cambiarVersionBiblia: async (versionBiblia) => {

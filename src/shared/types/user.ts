@@ -4,12 +4,12 @@ export interface UserProfile {
   uid: string
   nombre: string
   email: string
-  passwordHash: string
   idioma: 'es'
   versionBiblia: string
   onboardingCompletado: boolean
   rol: UserRole
-  creadoEn: Date
+  /** ISO, UTC — la contraseña ya no vive aquí, la maneja Firebase Authentication. */
+  creadoEn: string
   paisCodigo: string
   monedaCodigo: string
   /** Versión del instrumento legal aceptada (ver src/modules/auth/constants/textoLegal.ts). */
