@@ -2,8 +2,10 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { CATEGORIAS_BIEN_ORDENADAS } from '../constants/bienes'
 import { CATEGORIAS_DEUDA_ORDENADAS } from '../constants/deudas'
+import { CATEGORIAS_RIE_ORDENADAS, DIAS_RIE } from '../constants/rie'
 import { formatearMonto } from './formato'
 import type { Deuda } from '../types/deuda'
+import type { CeldaRIE } from '../types/rie'
 
 const NEGRO: [number, number, number] = [31, 27, 23]
 const TAN: [number, number, number] = [219, 198, 178]
@@ -135,4 +137,54 @@ export function descargarPdfBienes({
   })
 
   doc.save('listado-de-bienes.pdf')
+}
+
+export function descargarPdfRIE({
+  nombreUsuario,
+  emailUsuario,
+  moneda,
+  celdas,
+}: DatosPersona & { celdas: CeldaRIE[] }): void {
+  // Cuadrícula de 31 días x 15 categorías — en vertical no cabe con letra
+  // legible, por eso este PDF sale en horizontal (a diferencia de LD y LB).
+  const doc = new jsPDF({ orientation: 'landscape' })
+  const cursorY = encabezado(doc, 'Registro de Ingresos y Egresos (RIE)', nombreUsuario, emailUsuario)
+
+  const montoPorCelda = new Map(celdas.map((c) => [`${c.dia}-${c.categoria}`, c.monto]))
+  const obtener = (dia: number, categoria: string) => montoPorCelda.get(`${dia}-${categoria}`) ?? 0
+
+  function filaTotales(etiqueta: string, desde: number, hasta: number) {
+    return [
+      etiqueta,
+      ...CATEGORIAS_RIE_ORDENADAS.map(({ categoria }) => {
+        let suma = 0
+        for (let dia = desde; dia <= hasta; dia++) suma += obtener(dia, categoria)
+        return formatearMontoPdf(suma, moneda)
+      }),
+    ]
+  }
+
+  const filas: (string | number)[][] = []
+  for (let dia = 1; dia <= DIAS_RIE; dia++) {
+    filas.push([
+      dia,
+      ...CATEGORIAS_RIE_ORDENADAS.map(({ categoria }) => formatearMontoPdf(obtener(dia, categoria), moneda)),
+    ])
+    if (dia === 15) filas.push(filaTotales('Sub Total', 1, 15))
+  }
+  filas.push(filaTotales('Sub Total', 16, DIAS_RIE))
+
+  autoTable(doc, {
+    startY: cursorY,
+    head: [['Día', ...CATEGORIAS_RIE_ORDENADAS.map((c) => c.etiqueta)]],
+    body: filas,
+    foot: [filaTotales('Total del mes', 1, DIAS_RIE)],
+    theme: 'grid',
+    headStyles: { fillColor: NEGRO, textColor: 255, fontSize: 7 },
+    footStyles: { fillColor: TAN, textColor: NEGRO, fontStyle: 'bold', fontSize: 7 },
+    styles: { fontSize: 6.5, cellPadding: 1.2 },
+    margin: { left: 8, right: 8 },
+  })
+
+  doc.save('registro-de-ingresos-y-egresos.pdf')
 }
