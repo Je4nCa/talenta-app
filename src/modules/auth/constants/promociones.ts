@@ -5,10 +5,23 @@
  * el acceso continuado requiere una suscripción de pago (TiloPay,
  * pendiente de integrar).
  *
+ * Además del código, el correo ingresado debe coincidir con la lista de
+ * estudiantes inscritos (`CORREOS_ESTUDIANTES_HASH` en
+ * `estudiantesInscritos.ts`) — el código solo no basta para este flujo.
+ *
  * No mostrar nunca este valor en la UI (placeholders, ejemplos, etc.) —
  * es privado, solo lo conocen los estudiantes inscritos.
  */
 export const CODIGO_PROMOCIONAL_VALIDO = 'CURSOTALE26'
+
+/**
+ * Código para administradores/facilitadores: no requiere que el correo
+ * esté en la lista de estudiantes inscritos, y la cuenta creada con este
+ * código queda con rol `admin` (acceso al panel de administración) en vez
+ * de `student`. No mostrar nunca este valor en la UI — igual de privado
+ * que el código de estudiante, o más.
+ */
+export const CODIGO_PROMOCIONAL_ADMIN = 'TALENTAADMIN272612'
 
 /**
  * La prueba gratuita NO se cuenta desde la fecha de registro de cada

@@ -1,8 +1,14 @@
 import { db } from '@/shared/lib/db'
+import { sha256Hex } from '@/shared/lib/hash'
 import { buscarPais } from '@/shared/lib/paises'
-import type { LoginInput, NuevoUsuarioInput, UserProfile } from '@/shared/types/user'
+import type { LoginInput, NuevoUsuarioInput, UserProfile, UserRole } from '@/shared/types/user'
+import { CORREOS_ESTUDIANTES_HASH } from '../constants/estudiantesInscritos'
 import { VERSION_TERMINOS } from '../constants/legal'
-import { CODIGO_PROMOCIONAL_VALIDO, obtenerFinPeriodoGratuito } from '../constants/promociones'
+import {
+  CODIGO_PROMOCIONAL_ADMIN,
+  CODIGO_PROMOCIONAL_VALIDO,
+  obtenerFinPeriodoGratuito,
+} from '../constants/promociones'
 import { hashPassword, verifyPassword } from './password'
 
 export class AuthError extends Error {}
@@ -24,7 +30,16 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
   }
 
   const codigoPromocional = input.codigoPromocional.trim().toUpperCase()
-  if (codigoPromocional !== CODIGO_PROMOCIONAL_VALIDO) {
+  let rol: UserRole = 'student'
+
+  if (codigoPromocional === CODIGO_PROMOCIONAL_ADMIN) {
+    rol = 'admin'
+  } else if (codigoPromocional === CODIGO_PROMOCIONAL_VALIDO) {
+    const emailHash = await sha256Hex(email)
+    if (!CORREOS_ESTUDIANTES_HASH.includes(emailHash)) {
+      throw new AuthError('Este correo no está en la lista de estudiantes inscritos en el curso.')
+    }
+  } else {
     throw new AuthError('Código promocional inválido.')
   }
 
@@ -37,7 +52,7 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     idioma: 'es',
     versionBiblia: 'RVR60',
     onboardingCompletado: false,
-    rol: 'student',
+    rol,
     creadoEn: ahora,
     paisCodigo: pais.codigo,
     monedaCodigo: pais.monedaCodigo,
