@@ -6,24 +6,19 @@ import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
 import { generarId } from '@/shared/lib/id'
 import { useCategorias } from '../hooks/useCategorias'
+import { useMonedas } from '../hooks/useMonedas'
 import { useTarjetas } from '../hooks/useTarjetas'
 import { useGuardado } from '../hooks/useGuardado'
+import { OPCIONES_RECURRENCIA } from '../lib/recurrencia'
 import { gastosFijosRepository } from '../repositories'
 import { TipoRecurrencia } from '../types/gasto'
+import { SelectorMonedaMovimiento } from './SelectorMonedaMovimiento'
 
 interface FormularioGastoFijoProps {
   uid: string
   onGuardado: () => void
   onCancelar: () => void
 }
-
-const OPCIONES_RECURRENCIA: { valor: TipoRecurrencia; etiqueta: string }[] = [
-  { valor: TipoRecurrencia.Mensual, etiqueta: 'Cada mes' },
-  { valor: TipoRecurrencia.Bimestral, etiqueta: 'Cada 2 meses' },
-  { valor: TipoRecurrencia.Trimestral, etiqueta: 'Cada 3 meses' },
-  { valor: TipoRecurrencia.Semestral, etiqueta: 'Cada 6 meses' },
-  { valor: TipoRecurrencia.Anual, etiqueta: 'Cada año' },
-]
 
 export function FormularioGastoFijo({ uid, onGuardado, onCancelar }: FormularioGastoFijoProps) {
   const { tarjetas } = useTarjetas()
@@ -33,6 +28,8 @@ export function FormularioGastoFijo({ uid, onGuardado, onCancelar }: FormularioG
   const [categoriaId, setCategoriaId] = useState('')
   const [recurrencia, setRecurrencia] = useState<TipoRecurrencia>(TipoRecurrencia.Mensual)
   const [tarjetaId, setTarjetaId] = useState('')
+  const { monedaPrincipal } = useMonedas()
+  const [moneda, setMoneda] = useState(monedaPrincipal)
   const { guardando, error, guardar } = useGuardado()
 
   useEffect(() => {
@@ -55,6 +52,7 @@ export function FormularioGastoFijo({ uid, onGuardado, onCancelar }: FormularioG
         monto: valor,
         categoriaId,
         recurrencia,
+        moneda,
         tarjetaId: tarjetaId || undefined,
         activo: true,
         creadoEn: ahora,
@@ -94,6 +92,8 @@ export function FormularioGastoFijo({ uid, onGuardado, onCancelar }: FormularioG
           required
         />
       </div>
+
+      <SelectorMonedaMovimiento id="fijo-moneda" valor={moneda} onCambiar={setMoneda} />
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="fijo-categoria">Categoría</Label>

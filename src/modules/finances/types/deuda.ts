@@ -32,6 +32,12 @@ export interface Deuda {
   /** Fecha estimada de liquidación total de la deuda, opcional (campo del formulario LD). */
   fechaLiquidacion?: FechaISO
   notas?: string
+  /**
+   * Moneda en la que ocurrió realmente este movimiento. `undefined` = la
+   * moneda principal del usuario (así siguen siendo válidos los registros
+   * creados antes de que existiera la segunda moneda).
+   */
+  moneda?: string
   creadoEn: FechaHoraISO
   actualizadoEn: FechaHoraISO
 }
@@ -42,5 +48,11 @@ export interface AbonoDeuda {
   uid: string
   monto: number
   fecha: FechaISO
+  /**
+   * Moneda en la que ocurrió realmente este movimiento. `undefined` = la
+   * moneda principal del usuario (así siguen siendo válidos los registros
+   * creados antes de que existiera la segunda moneda).
+   */
+  moneda?: string
   creadoEn: FechaHoraISO
 }

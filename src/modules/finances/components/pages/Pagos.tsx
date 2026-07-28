@@ -124,8 +124,10 @@ function TarjetaPago({
             key="form"
             uid={uid}
             tarjetaId={tarjeta.id}
+            moneda={tarjeta.moneda}
             anio={anio}
             mes={mes}
+            textoBoton="Registrar pago"
             onGuardado={() => setMostrandoForm(false)}
             onCancelar={() => setMostrandoForm(false)}
           />

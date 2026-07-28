@@ -8,10 +8,12 @@ import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
 import { generarId } from '@/shared/lib/id'
 import { useCategorias } from '../hooks/useCategorias'
+import { useMonedas } from '../hooks/useMonedas'
 import { useTarjetas } from '../hooks/useTarjetas'
 import { comprimirFacturaADataUrl } from '../lib/imagen'
 import { gastosRepository } from '../repositories'
 import type { TipoPago } from '../types/gasto'
+import { SelectorMonedaMovimiento } from './SelectorMonedaMovimiento'
 
 interface FormularioGastoProps {
   uid: string
@@ -38,6 +40,8 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
   const [facturaPreviewUrl, setFacturaPreviewUrl] = useState<string | null>(null)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { monedaPrincipal } = useMonedas()
+  const [moneda, setMoneda] = useState(monedaPrincipal)
 
   useEffect(() => {
     if (!categoriaId && categorias.length > 0) {
@@ -86,6 +90,7 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
         categoriaId,
         tarjetaId: tarjetaId || undefined,
         tipoPago,
+        moneda,
         fecha,
         fechaCobro: esCompraFutura ? fechaCobro : undefined,
         facturaImagen,
@@ -133,6 +138,8 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
           required
         />
       </div>
+
+      <SelectorMonedaMovimiento id="gasto-moneda" valor={moneda} onCambiar={setMoneda} />
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="gasto-categoria">Categoría</Label>

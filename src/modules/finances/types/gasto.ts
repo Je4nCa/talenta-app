@@ -26,11 +26,19 @@ export interface Gasto {
    */
   facturaImagen?: string
   notas?: string
+  /**
+   * Moneda en la que ocurrió realmente este movimiento. `undefined` = la
+   * moneda principal del usuario (así siguen siendo válidos los registros
+   * creados antes de que existiera la segunda moneda).
+   */
+  moneda?: string
   creadoEn: FechaHoraISO
   actualizadoEn: FechaHoraISO
 }
 
 export enum TipoRecurrencia {
+  Semanal = 'semanal',
+  Quincenal = 'quincenal',
   Mensual = 'mensual',
   Bimestral = 'bimestral',
   Trimestral = 'trimestral',
@@ -47,6 +55,12 @@ export interface GastoFijo {
   tarjetaId?: ID
   categoriaId: CategoriaId
   activo: boolean
+  /**
+   * Moneda en la que ocurrió realmente este movimiento. `undefined` = la
+   * moneda principal del usuario (así siguen siendo válidos los registros
+   * creados antes de que existiera la segunda moneda).
+   */
+  moneda?: string
   creadoEn: FechaHoraISO
   actualizadoEn: FechaHoraISO
 }

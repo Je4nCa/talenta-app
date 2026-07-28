@@ -6,9 +6,11 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { cn } from '@/shared/lib/utils'
 import { generarId } from '@/shared/lib/id'
+import { useMonedas } from '../hooks/useMonedas'
 import { useGuardado } from '../hooks/useGuardado'
 import { tarjetasRepository } from '../repositories'
 import type { TarjetaCredito, TipoTarjeta } from '../types/tarjeta'
+import { SelectorMonedaMovimiento } from './SelectorMonedaMovimiento'
 
 interface FormularioTarjetaProps {
   uid: string
@@ -33,6 +35,8 @@ export function FormularioTarjeta({
   const [diaCierre, setDiaCierre] = useState(tarjetaExistente?.diaCierre?.toString() ?? '')
   const [diaPago, setDiaPago] = useState(tarjetaExistente?.diaPago?.toString() ?? '')
   const [saldoInicial, setSaldoInicial] = useState(tarjetaExistente?.saldoInicial?.toString() ?? '')
+  const { monedaPrincipal } = useMonedas()
+  const [moneda, setMoneda] = useState(tarjetaExistente?.moneda ?? monedaPrincipal)
   const { guardando, error, guardar } = useGuardado()
 
   async function manejarGuardar(e: FormEvent) {
@@ -47,6 +51,7 @@ export function FormularioTarjeta({
         nombre: nombre.trim(),
         tipo,
         color,
+        moneda,
         limite: tipo === 'credito' ? Number(limite) || undefined : undefined,
         diaCierre: tipo === 'credito' ? Number(diaCierre) : undefined,
         diaPago: tipo === 'credito' ? Number(diaPago) : undefined,
@@ -131,6 +136,8 @@ export function FormularioTarjeta({
           required
         />
       </div>
+
+      <SelectorMonedaMovimiento id="tarjeta-moneda" valor={moneda} onCambiar={setMoneda} />
 
       {tipo === 'credito' ? (
         <>

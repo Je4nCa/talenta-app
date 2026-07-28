@@ -6,8 +6,10 @@ import { Button } from '@/shared/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { useCategorias } from '../../hooks/useCategorias'
 import { useGastosFijos, useGastosPorPeriodo } from '../../hooks/useGastos'
+import { useMonedas } from '../../hooks/useMonedas'
 import { useTarjetas } from '../../hooks/useTarjetas'
 import { gastosFijosRepository, gastosRepository } from '../../repositories'
+import { ETIQUETA_RECURRENCIA, montoMensualEquivalente } from '../../lib/recurrencia'
 import { formatearMonto, NOMBRES_MES } from '../../lib/formato'
 import { FormularioGasto } from '../FormularioGasto'
 import { FormularioGastoFijo } from '../FormularioGastoFijo'
@@ -36,7 +38,8 @@ function TabVariables({ uid, moneda }: { uid: string; moneda: string }) {
   const { mapa: mapaCategorias } = useCategorias()
   const [mostrandoForm, setMostrandoForm] = useState(false)
 
-  const total = gastos.reduce((acc, g) => acc + g.monto, 0)
+  const { aPrincipal } = useMonedas()
+  const total = gastos.reduce((acc, g) => acc + aPrincipal(g.monto, g.moneda), 0)
   const gastosOrdenados = [...gastos].sort((a, b) => b.fecha.localeCompare(a.fecha))
 
   return (
@@ -119,7 +122,7 @@ function TabVariables({ uid, moneda }: { uid: string; moneda: string }) {
                   )}
                 </div>
                 <p className="text-base font-semibold text-talenta-black">
-                  {formatearMonto(g.monto, moneda)}
+                  {formatearMonto(g.monto, g.moneda ?? moneda)}
                 </p>
                 {g.facturaImagen && <VisorFactura imagen={g.facturaImagen} />}
                 <button
@@ -145,7 +148,14 @@ function TabFijos({ uid, moneda }: { uid: string; moneda: string }) {
   const { mapa: mapaCategorias } = useCategorias()
   const [mostrandoForm, setMostrandoForm] = useState(false)
 
-  const totalActivos = gastosFijos.filter((g) => g.activo).reduce((acc, g) => acc + g.monto, 0)
+  const { aPrincipal } = useMonedas()
+  // Equivalente mensual: un fijo semanal pesa ~4,33 veces en el mes.
+  const totalActivos = gastosFijos
+    .filter((g) => g.activo)
+    .reduce(
+      (acc, g) => acc + aPrincipal(montoMensualEquivalente(g.monto, g.recurrencia), g.moneda),
+      0,
+    )
 
   return (
     <div className="flex flex-col gap-4">
@@ -195,12 +205,13 @@ function TabFijos({ uid, moneda }: { uid: string; moneda: string }) {
                 <div className="flex-1">
                   <p className="text-base font-medium text-talenta-black">{g.titulo}</p>
                   <p className="text-sm text-talenta-brown-mid">
-                    {g.activo ? 'Activo' : 'Pausado'}
+                    {ETIQUETA_RECURRENCIA[g.recurrencia] ?? 'Cada mes'}
+                    {g.activo ? '' : ' · Pausado'}
                     {tarjeta ? ` · ${tarjeta.banco} ${tarjeta.nombre}` : ''}
                   </p>
                 </div>
                 <p className="text-base font-semibold text-talenta-black">
-                  {formatearMonto(g.monto, moneda)}
+                  {formatearMonto(g.monto, g.moneda ?? moneda)}
                 </p>
                 <button
                   type="button"

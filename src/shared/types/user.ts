@@ -11,7 +11,15 @@ export interface UserProfile {
   /** ISO, UTC — la contraseña ya no vive aquí, la maneja Firebase Authentication. */
   creadoEn: string
   paisCodigo: string
+  /** Moneda principal: en la que se muestran todos los totales y balances. */
   monedaCodigo: string
+  /**
+   * Segunda moneda, opcional — para quien recibe ingresos o paga deudas en
+   * dos monedas (ej. colones y dólares). Cuando está definida, los
+   * formularios dejan elegir en cuál de las dos ocurrió cada movimiento, y
+   * los totales se convierten a `monedaCodigo` al tipo de cambio del día.
+   */
+  monedaSecundaria?: string
   /** Versión del instrumento legal aceptada (ver src/modules/auth/constants/textoLegal.ts). */
   terminosVersion: string
   /** Fecha y hora exacta (ISO, UTC) de aceptación — requerido por el instrumento legal, Art. 34. */

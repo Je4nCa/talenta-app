@@ -4,8 +4,10 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { generarId } from '@/shared/lib/id'
+import { useMonedas } from '../hooks/useMonedas'
 import { useGuardado } from '../hooks/useGuardado'
 import { ingresosRepository } from '../repositories'
+import { SelectorMonedaMovimiento } from './SelectorMonedaMovimiento'
 
 interface FormularioIngresoProps {
   uid: string
@@ -21,6 +23,8 @@ export function FormularioIngreso({ uid, onGuardado, onCancelar }: FormularioIng
   const [titulo, setTitulo] = useState('')
   const [monto, setMonto] = useState('')
   const [fecha, setFecha] = useState(fechaHoy())
+  const { monedaPrincipal } = useMonedas()
+  const [moneda, setMoneda] = useState(monedaPrincipal)
   const { guardando, error, guardar } = useGuardado()
 
   async function manejarGuardar(e: FormEvent) {
@@ -34,6 +38,7 @@ export function FormularioIngreso({ uid, onGuardado, onCancelar }: FormularioIng
         uid,
         titulo: titulo.trim(),
         monto: valor,
+        moneda,
         fecha,
         creadoEn: new Date().toISOString(),
       })
@@ -71,6 +76,8 @@ export function FormularioIngreso({ uid, onGuardado, onCancelar }: FormularioIng
           required
         />
       </div>
+
+      <SelectorMonedaMovimiento id="ingreso-moneda" valor={moneda} onCambiar={setMoneda} />
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="ingreso-fecha">Fecha en que lo recibiste</Label>
