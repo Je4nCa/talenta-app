@@ -4,6 +4,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
+import { generarId } from '@/shared/lib/id'
 import { CATEGORIAS_DEUDA_ORDENADAS } from '../constants/deudas'
 import { useGuardado } from '../hooks/useGuardado'
 import { deudasRepository } from '../repositories'
@@ -37,7 +38,7 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
     await guardar(async () => {
       const ahora = new Date().toISOString()
       await deudasRepository.crear({
-        id: crypto.randomUUID(),
+        id: generarId(),
         uid,
         nombre: nombre.trim(),
         tipo,

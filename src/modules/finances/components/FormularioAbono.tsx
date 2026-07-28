@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
+import { generarId } from '@/shared/lib/id'
 import { useGuardado } from '../hooks/useGuardado'
 import { abonosTarjetaRepository } from '../repositories'
 
@@ -38,7 +39,7 @@ export function FormularioAbono({
 
     await guardar(async () => {
       await abonosTarjetaRepository.crear({
-        id: crypto.randomUUID(),
+        id: generarId(),
         tarjetaId,
         uid,
         anio,

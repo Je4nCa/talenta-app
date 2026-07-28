@@ -5,6 +5,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { cn } from '@/shared/lib/utils'
+import { generarId } from '@/shared/lib/id'
 import { useGuardado } from '../hooks/useGuardado'
 import { tarjetasRepository } from '../repositories'
 import type { TarjetaCredito, TipoTarjeta } from '../types/tarjeta'
@@ -59,7 +60,7 @@ export function FormularioTarjeta({
         })
       } else {
         await tarjetasRepository.crear({
-          id: crypto.randomUUID(),
+          id: generarId(),
           uid,
           ...datos,
           creadoEn: ahora,

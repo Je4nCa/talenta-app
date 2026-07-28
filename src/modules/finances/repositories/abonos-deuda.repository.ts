@@ -1,6 +1,7 @@
 import { deleteDoc, doc, runTransaction } from 'firebase/firestore'
 import { firestore } from '@/shared/lib/firebase'
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
+import { generarId } from '@/shared/lib/id'
 import type { AbonoDeuda } from '../types'
 
 class AbonosDeudaRepository extends FirestoreRepository<AbonoDeuda> {
@@ -16,7 +17,7 @@ class AbonosDeudaRepository extends FirestoreRepository<AbonoDeuda> {
   /** Registra el abono y descuenta el monto del saldo de la deuda en una sola transacción. */
   async registrarAbono(deudaId: string, uid: string, monto: number, fecha: string): Promise<void> {
     const refDeuda = doc(firestore, 'users', uid, 'deudas', deudaId)
-    const refAbono = this.docRef(uid, crypto.randomUUID())
+    const refAbono = this.docRef(uid, generarId())
 
     await runTransaction(firestore, async (tx) => {
       const deudaSnap = await tx.get(refDeuda)
