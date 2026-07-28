@@ -20,11 +20,11 @@ export interface Gasto {
    */
   fechaCobro?: FechaISO
   /**
-   * Foto de la factura o comprobante de compra, guardada como respaldo.
-   * Opcional. Se guarda tal cual como Blob en Dexie — IndexedDB soporta
-   * Blobs de forma nativa, no hace falta convertir a base64.
+   * Foto de la factura o comprobante, como data URL JPEG ya comprimido
+   * (ver `lib/imagen.ts`). Opcional. **No usar `Blob` aquí**: Firestore no
+   * puede serializarlo (Dexie sí podía) y limita el documento a 1 MB.
    */
-  facturaImagen?: Blob
+  facturaImagen?: string
   notas?: string
   creadoEn: FechaHoraISO
   actualizadoEn: FechaHoraISO

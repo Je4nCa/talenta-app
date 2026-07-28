@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
+import { useGuardado } from '../hooks/useGuardado'
 import { abonosDeudaRepository } from '../repositories'
 
 interface FormularioAbonoDeudaProps {
@@ -19,17 +20,17 @@ function fechaHoy(): string {
 export function FormularioAbonoDeuda({ uid, deudaId, onGuardado, onCancelar }: FormularioAbonoDeudaProps) {
   const [monto, setMonto] = useState('')
   const [fecha, setFecha] = useState(fechaHoy())
-  const [guardando, setGuardando] = useState(false)
+  const { guardando, error, guardar } = useGuardado()
 
   async function manejarGuardar(e: FormEvent) {
     e.preventDefault()
     const valor = Number(monto)
     if (!valor || valor <= 0) return
 
-    setGuardando(true)
-    await abonosDeudaRepository.registrarAbono(deudaId, uid, valor, fecha)
-    setGuardando(false)
-    onGuardado()
+    await guardar(
+      () => abonosDeudaRepository.registrarAbono(deudaId, uid, valor, fecha),
+      onGuardado,
+    )
   }
 
   return (
@@ -62,6 +63,12 @@ export function FormularioAbonoDeuda({ uid, deudaId, onGuardado, onCancelar }: F
           required
         />
       </div>
+      {error && (
+        <p role="alert" className="text-base font-medium text-red-700">
+          {error}
+        </p>
+      )}
+
       <div className="flex gap-3">
         <Button type="button" variant="outline" size="default" className="flex-1" onClick={onCancelar}>
           Cancelar
