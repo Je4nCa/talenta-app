@@ -5,6 +5,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { cn } from '@/shared/lib/utils'
+import { useGuardado } from '../hooks/useGuardado'
 import { tarjetasRepository } from '../repositories'
 import type { TarjetaCredito, TipoTarjeta } from '../types/tarjeta'
 
@@ -31,18 +32,16 @@ export function FormularioTarjeta({
   const [diaCierre, setDiaCierre] = useState(tarjetaExistente?.diaCierre?.toString() ?? '')
   const [diaPago, setDiaPago] = useState(tarjetaExistente?.diaPago?.toString() ?? '')
   const [saldoInicial, setSaldoInicial] = useState(tarjetaExistente?.saldoInicial?.toString() ?? '')
-  const [guardando, setGuardando] = useState(false)
+  const { guardando, error, guardar } = useGuardado()
 
   async function manejarGuardar(e: FormEvent) {
     e.preventDefault()
     if (!banco.trim() || !nombre.trim()) return
     if (tipo === 'credito' && (!diaCierre || !diaPago)) return
 
-    setGuardando(true)
-    const ahora = new Date().toISOString()
-
-    if (tarjetaExistente) {
-      await tarjetasRepository.actualizar(uid, tarjetaExistente.id, {
+    await guardar(async () => {
+      const ahora = new Date().toISOString()
+      const datos = {
         banco: banco.trim(),
         nombre: nombre.trim(),
         tipo,
@@ -51,27 +50,23 @@ export function FormularioTarjeta({
         diaCierre: tipo === 'credito' ? Number(diaCierre) : undefined,
         diaPago: tipo === 'credito' ? Number(diaPago) : undefined,
         saldoInicial: tipo === 'debito' ? Number(saldoInicial) || 0 : undefined,
-        actualizadoEn: ahora,
-      })
-    } else {
-      await tarjetasRepository.crear({
-        id: crypto.randomUUID(),
-        uid,
-        banco: banco.trim(),
-        nombre: nombre.trim(),
-        tipo,
-        color,
-        limite: tipo === 'credito' ? Number(limite) || undefined : undefined,
-        diaCierre: tipo === 'credito' ? Number(diaCierre) : undefined,
-        diaPago: tipo === 'credito' ? Number(diaPago) : undefined,
-        saldoInicial: tipo === 'debito' ? Number(saldoInicial) || 0 : undefined,
-        creadoEn: ahora,
-        actualizadoEn: ahora,
-      })
-    }
+      }
 
-    setGuardando(false)
-    onGuardado()
+      if (tarjetaExistente) {
+        await tarjetasRepository.actualizar(uid, tarjetaExistente.id, {
+          ...datos,
+          actualizadoEn: ahora,
+        })
+      } else {
+        await tarjetasRepository.crear({
+          id: crypto.randomUUID(),
+          uid,
+          ...datos,
+          creadoEn: ahora,
+          actualizadoEn: ahora,
+        })
+      }
+    }, onGuardado)
   }
 
   return (
@@ -210,6 +205,12 @@ export function FormularioTarjeta({
           ))}
         </div>
       </div>
+
+      {error && (
+        <p role="alert" className="text-base font-medium text-red-700">
+          {error}
+        </p>
+      )}
 
       <div className="mt-2 flex gap-3">
         <Button type="button" variant="outline" size="lg" className="flex-1" onClick={onCancelar}>

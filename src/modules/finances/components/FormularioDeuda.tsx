@@ -5,6 +5,7 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
 import { CATEGORIAS_DEUDA_ORDENADAS } from '../constants/deudas'
+import { useGuardado } from '../hooks/useGuardado'
 import { deudasRepository } from '../repositories'
 import { TipoDeuda } from '../types/deuda'
 
@@ -26,31 +27,30 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
   const [cuotaMensual, setCuotaMensual] = useState('')
   const [fechaInicio, setFechaInicio] = useState(fechaHoy())
   const [fechaLiquidacion, setFechaLiquidacion] = useState('')
-  const [guardando, setGuardando] = useState(false)
+  const { guardando, error, guardar } = useGuardado()
 
   async function manejarGuardar(e: FormEvent) {
     e.preventDefault()
     const valor = Number(montoOriginal)
     if (!nombre.trim() || !valor || valor <= 0) return
 
-    setGuardando(true)
-    const ahora = new Date().toISOString()
-    await deudasRepository.crear({
-      id: crypto.randomUUID(),
-      uid,
-      nombre: nombre.trim(),
-      tipo,
-      montoOriginal: valor,
-      saldoActual: valor,
-      tasaInteres: tasaInteres ? Number(tasaInteres) : undefined,
-      cuotaMensual: cuotaMensual ? Number(cuotaMensual) : undefined,
-      fechaInicio,
-      fechaLiquidacion: fechaLiquidacion || undefined,
-      creadoEn: ahora,
-      actualizadoEn: ahora,
-    })
-    setGuardando(false)
-    onGuardado()
+    await guardar(async () => {
+      const ahora = new Date().toISOString()
+      await deudasRepository.crear({
+        id: crypto.randomUUID(),
+        uid,
+        nombre: nombre.trim(),
+        tipo,
+        montoOriginal: valor,
+        saldoActual: valor,
+        tasaInteres: tasaInteres ? Number(tasaInteres) : undefined,
+        cuotaMensual: cuotaMensual ? Number(cuotaMensual) : undefined,
+        fechaInicio,
+        fechaLiquidacion: fechaLiquidacion || undefined,
+        creadoEn: ahora,
+        actualizadoEn: ahora,
+      })
+    }, onGuardado)
   }
 
   return (
@@ -140,6 +140,12 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
           onChange={(e) => setFechaLiquidacion(e.target.value)}
         />
       </div>
+
+      {error && (
+        <p role="alert" className="text-base font-medium text-red-700">
+          {error}
+        </p>
+      )}
 
       <div className="mt-2 flex gap-3">
         <Button type="button" variant="outline" size="lg" className="flex-1" onClick={onCancelar}>

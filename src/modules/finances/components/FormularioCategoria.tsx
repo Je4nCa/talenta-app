@@ -4,6 +4,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { cn } from '@/shared/lib/utils'
+import { useGuardado } from '../hooks/useGuardado'
 import { categoriasRepository } from '../repositories'
 import { TipoCategoria, type Categoria } from '../types/categoria'
 
@@ -29,38 +30,36 @@ export function FormularioCategoria({
   const [porcentajeRecomendado, setPorcentajeRecomendado] = useState(
     categoriaExistente?.porcentajeRecomendado?.toString() ?? '',
   )
-  const [guardando, setGuardando] = useState(false)
+  const { guardando, error, guardar } = useGuardado()
 
   async function manejarGuardar(e: FormEvent) {
     e.preventDefault()
     if (!nombre.trim()) return
 
-    setGuardando(true)
-    const porcentaje = porcentajeRecomendado ? Number(porcentajeRecomendado) : undefined
+    await guardar(async () => {
+      const porcentaje = porcentajeRecomendado ? Number(porcentajeRecomendado) : undefined
 
-    if (categoriaExistente) {
-      await categoriasRepository.actualizar(uid, categoriaExistente.id, {
-        nombre: nombre.trim(),
-        emoji,
-        color,
-        porcentajeRecomendado: porcentaje,
-      })
-    } else {
-      await categoriasRepository.crear({
-        id: crypto.randomUUID(),
-        uid,
-        nombre: nombre.trim(),
-        emoji,
-        color,
-        tipo: TipoCategoria.Egreso,
-        porcentajeRecomendado: porcentaje,
-        esPersonalizada: true,
-        creadoEn: new Date().toISOString(),
-      })
-    }
-
-    setGuardando(false)
-    onGuardado()
+      if (categoriaExistente) {
+        await categoriasRepository.actualizar(uid, categoriaExistente.id, {
+          nombre: nombre.trim(),
+          emoji,
+          color,
+          porcentajeRecomendado: porcentaje,
+        })
+      } else {
+        await categoriasRepository.crear({
+          id: crypto.randomUUID(),
+          uid,
+          nombre: nombre.trim(),
+          emoji,
+          color,
+          tipo: TipoCategoria.Egreso,
+          porcentajeRecomendado: porcentaje,
+          esPersonalizada: true,
+          creadoEn: new Date().toISOString(),
+        })
+      }
+    }, onGuardado)
   }
 
   return (
@@ -136,6 +135,12 @@ export function FormularioCategoria({
           Te ayudamos a comparar cuánto gastas en esta categoría contra lo recomendado.
         </p>
       </div>
+
+      {error && (
+        <p role="alert" className="text-base font-medium text-red-700">
+          {error}
+        </p>
+      )}
 
       <div className="mt-2 flex gap-3">
         <Button type="button" variant="outline" size="lg" className="flex-1" onClick={onCancelar}>

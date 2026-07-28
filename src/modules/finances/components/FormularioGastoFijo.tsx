@@ -6,6 +6,7 @@ import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
 import { useCategorias } from '../hooks/useCategorias'
 import { useTarjetas } from '../hooks/useTarjetas'
+import { useGuardado } from '../hooks/useGuardado'
 import { gastosFijosRepository } from '../repositories'
 import { TipoRecurrencia } from '../types/gasto'
 
@@ -31,7 +32,7 @@ export function FormularioGastoFijo({ uid, onGuardado, onCancelar }: FormularioG
   const [categoriaId, setCategoriaId] = useState('')
   const [recurrencia, setRecurrencia] = useState<TipoRecurrencia>(TipoRecurrencia.Mensual)
   const [tarjetaId, setTarjetaId] = useState('')
-  const [guardando, setGuardando] = useState(false)
+  const { guardando, error, guardar } = useGuardado()
 
   useEffect(() => {
     if (!categoriaId && categorias.length > 0) {
@@ -44,22 +45,21 @@ export function FormularioGastoFijo({ uid, onGuardado, onCancelar }: FormularioG
     const valor = Number(monto)
     if (!titulo.trim() || !valor || valor <= 0 || !categoriaId) return
 
-    setGuardando(true)
-    const ahora = new Date().toISOString()
-    await gastosFijosRepository.crear({
-      id: crypto.randomUUID(),
-      uid,
-      titulo: titulo.trim(),
-      monto: valor,
-      categoriaId,
-      recurrencia,
-      tarjetaId: tarjetaId || undefined,
-      activo: true,
-      creadoEn: ahora,
-      actualizadoEn: ahora,
-    })
-    setGuardando(false)
-    onGuardado()
+    await guardar(async () => {
+      const ahora = new Date().toISOString()
+      await gastosFijosRepository.crear({
+        id: crypto.randomUUID(),
+        uid,
+        titulo: titulo.trim(),
+        monto: valor,
+        categoriaId,
+        recurrencia,
+        tarjetaId: tarjetaId || undefined,
+        activo: true,
+        creadoEn: ahora,
+        actualizadoEn: ahora,
+      })
+    }, onGuardado)
   }
 
   return (
@@ -140,6 +140,12 @@ export function FormularioGastoFijo({ uid, onGuardado, onCancelar }: FormularioG
             ))}
           </Select>
         </div>
+      )}
+
+      {error && (
+        <p role="alert" className="text-base font-medium text-red-700">
+          {error}
+        </p>
       )}
 
       <div className="mt-2 flex gap-3">

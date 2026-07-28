@@ -3,6 +3,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   type AuthError as FirebaseAuthError,
+  type UserCredential,
 } from 'firebase/auth'
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { firebaseAuth, firestore } from '@/shared/lib/firebase'
@@ -30,6 +31,33 @@ function esErrorFirebase(err: unknown): err is FirebaseAuthError {
 
 function docUsuario(uid: string) {
   return doc(firestore, 'users', uid)
+}
+
+/**
+ * Caso "registro a medias": el correo ya existe en Firebase Auth. Si la
+ * contraseña es correcta y la cuenta **no** tiene perfil en Firestore,
+ * devolvemos la credencial para que `registrarUsuario` termine de crear el
+ * perfil. Si sí tiene perfil, es un correo ya registrado de verdad.
+ */
+async function recuperarRegistroIncompleto(
+  email: string,
+  password: string,
+): Promise<UserCredential> {
+  let credencial: UserCredential
+  try {
+    credencial = await signInWithEmailAndPassword(firebaseAuth, email, password)
+  } catch {
+    // No sabemos la contraseña de esa cuenta: para nosotros es simplemente
+    // un correo ya tomado.
+    throw new AuthError('Ya existe una cuenta con este correo.')
+  }
+
+  const snap = await getDoc(docUsuario(credencial.user.uid))
+  if (snap.exists()) {
+    throw new AuthError('Ya existe una cuenta con este correo. Intenta iniciar sesión.')
+  }
+
+  return credencial
 }
 
 export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserProfile> {
@@ -61,9 +89,17 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     credencial = await createUserWithEmailAndPassword(firebaseAuth, email, input.password)
   } catch (err) {
     if (esErrorFirebase(err) && err.code === 'auth/email-already-in-use') {
-      throw new AuthError('Ya existe una cuenta con este correo.')
+      // La cuenta existe en Firebase Auth. Puede ser un registro que quedó a
+      // medias: si la creación del perfil en Firestore falló, la cuenta de
+      // Auth pudo quedar huérfana (sin perfil), y entonces el usuario queda
+      // atrapado — no puede entrar ("no se encontró tu perfil") ni volver a
+      // registrarse ("ya existe una cuenta"). Le pasó a una usuaria real.
+      // Si nos da la contraseña correcta y efectivamente no tiene perfil,
+      // terminamos el registro que quedó incompleto en vez de bloquearla.
+      credencial = await recuperarRegistroIncompleto(email, input.password)
+    } else {
+      throw err
     }
-    throw err
   }
 
   const ahora = new Date().toISOString()
@@ -136,7 +172,12 @@ export async function iniciarSesion(input: LoginInput): Promise<UserProfile> {
 
   const snap = await getDoc(docUsuario(credencial.user.uid))
   if (!snap.exists()) {
-    throw new AuthError('No se encontró tu perfil. Contacta a soporte.')
+    // Registro que quedó a medias (cuenta en Auth, sin perfil). Se resuelve
+    // solo: al volver a "Crear cuenta" con este mismo correo y contraseña,
+    // `registrarUsuario` detecta el caso y termina de crear el perfil.
+    throw new AuthError(
+      'Tu registro quedó incompleto. Ve a "Crear cuenta" y regístrate de nuevo con este mismo correo y contraseña para terminarlo.',
+    )
   }
 
   return snap.data() as UserProfile

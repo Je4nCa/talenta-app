@@ -8,6 +8,7 @@ import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
 import { useCategorias } from '../hooks/useCategorias'
 import { useTarjetas } from '../hooks/useTarjetas'
+import { comprimirFacturaADataUrl } from '../lib/imagen'
 import { gastosRepository } from '../repositories'
 import type { TipoPago } from '../types/gasto'
 
@@ -35,6 +36,7 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
   const [facturaFile, setFacturaFile] = useState<File | null>(null)
   const [facturaPreviewUrl, setFacturaPreviewUrl] = useState<string | null>(null)
   const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!categoriaId && categorias.length > 0) {
@@ -70,23 +72,33 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
     if (esCompraFutura && !fechaCobro) return
 
     setGuardando(true)
-    const ahora = new Date().toISOString()
-    await gastosRepository.crear({
-      id: crypto.randomUUID(),
-      uid,
-      titulo: titulo.trim(),
-      monto: valor,
-      categoriaId,
-      tarjetaId: tarjetaId || undefined,
-      tipoPago,
-      fecha,
-      fechaCobro: esCompraFutura ? fechaCobro : undefined,
-      facturaImagen: facturaFile ?? undefined,
-      creadoEn: ahora,
-      actualizadoEn: ahora,
-    })
-    setGuardando(false)
-    onGuardado()
+    setError(null)
+    try {
+      const ahora = new Date().toISOString()
+      const facturaImagen = facturaFile ? await comprimirFacturaADataUrl(facturaFile) : undefined
+
+      await gastosRepository.crear({
+        id: crypto.randomUUID(),
+        uid,
+        titulo: titulo.trim(),
+        monto: valor,
+        categoriaId,
+        tarjetaId: tarjetaId || undefined,
+        tipoPago,
+        fecha,
+        fechaCobro: esCompraFutura ? fechaCobro : undefined,
+        facturaImagen,
+        creadoEn: ahora,
+        actualizadoEn: ahora,
+      })
+      onGuardado()
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'No se pudo guardar el gasto. Intenta de nuevo.',
+      )
+    } finally {
+      setGuardando(false)
+    }
   }
 
   return (
@@ -244,9 +256,15 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
           className="hidden"
         />
         <p className="text-sm text-talenta-brown-mid">
-          Se guarda como respaldo de tu compra, solo en este dispositivo.
+          Se guarda como respaldo de tu compra, en tu cuenta.
         </p>
       </div>
+
+      {error && (
+        <p role="alert" className="text-base font-medium text-red-700">
+          {error}
+        </p>
+      )}
 
       <div className="mt-2 flex gap-3">
         <Button type="button" variant="outline" size="lg" className="flex-1" onClick={onCancelar}>

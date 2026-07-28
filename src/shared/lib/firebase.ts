@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { initializeFirestore } from 'firebase/firestore'
 
 /**
  * Config del proyecto de Firebase — no son secretos que haya que proteger
@@ -10,9 +10,8 @@ import { getFirestore } from 'firebase/firestore'
  * resto del proyecto (`.env.local` en desarrollo, GitHub Actions secrets en
  * producción), no porque deban ocultarse.
  *
- * Firebase todavía no reemplaza a Dexie en ningún módulo — esto solo deja
- * el proyecto conectado y listo. La migración de datos (Auth, Firestore)
- * ocurre módulo por módulo, en pasos separados (ver CLAUDE.md).
+ * Toda la app (Auth, Biblia, Finanzas, Pagos) persiste aquí — ya no queda
+ * nada en Dexie (ver CLAUDE.md).
  */
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -25,4 +24,18 @@ const firebaseConfig = {
 
 export const firebaseApp = initializeApp(firebaseConfig)
 export const firebaseAuth = getAuth(firebaseApp)
-export const firestore = getFirestore(firebaseApp)
+
+/**
+ * `ignoreUndefinedProperties: true` es **obligatorio** aquí, no una
+ * preferencia: por defecto Firestore *lanza* un error si un objeto trae
+ * cualquier campo en `undefined`, y el modelo de datos de la app está lleno
+ * de campos opcionales que se pasan explícitamente como `undefined` cuando
+ * no aplican (`tarjetaId` en un gasto de contado, `limite`/`diaCierre` en una
+ * tarjeta de débito, `saldoInicial` en una de crédito, etc.). En Dexie eso
+ * era inofensivo; al migrar a Firestore rompió el guardado de tarjetas y
+ * gastos en producción (bug real reportado por estudiantes del curso). Con
+ * esta opción, los campos `undefined` simplemente se omiten del documento.
+ */
+export const firestore = initializeFirestore(firebaseApp, {
+  ignoreUndefinedProperties: true,
+})

@@ -1,18 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 
-export function VisorFactura({ imagen }: { imagen: Blob }) {
+/** `imagen` es un data URL JPEG ya comprimido (ver `lib/imagen.ts`). */
+export function VisorFactura({ imagen }: { imagen: string }) {
   const [abierto, setAbierto] = useState(false)
-  const [url, setUrl] = useState<string | null>(null)
-
-  useEffect(() => {
-    const objectUrl = URL.createObjectURL(imagen)
-    setUrl(objectUrl)
-    return () => URL.revokeObjectURL(objectUrl)
-  }, [imagen])
-
-  if (!url) return null
+  const url = imagen
 
   return (
     <>
