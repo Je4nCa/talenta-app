@@ -1,15 +1,14 @@
-import { finanzasDB } from '../lib/db'
+import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import { CATEGORIAS_SEMILLA } from '../constants/categorias'
 import type { Categoria } from '../types'
-import { BaseRepository } from './base.repository'
 
-class CategoriasRepository extends BaseRepository<Categoria> {
+class CategoriasRepository extends FirestoreRepository<Categoria> {
   constructor() {
-    super(finanzasDB.categorias)
+    super('categorias')
   }
 
   async obtenerPorUsuario(uid: string): Promise<Categoria[]> {
-    return this.tabla.where('uid').equals(uid).toArray()
+    return this.obtenerTodos(uid)
   }
 
   /** Copia las categorías semilla para un usuario nuevo, solo si aún no tiene ninguna. */
@@ -18,7 +17,7 @@ class CategoriasRepository extends BaseRepository<Categoria> {
     if (existentes.length > 0) return
 
     const ahora = new Date().toISOString()
-    await this.tabla.bulkPut(
+    await this.crearBulk(
       CATEGORIAS_SEMILLA.map((semilla) => ({
         ...semilla,
         id: `${uid}-${semilla.id}`,

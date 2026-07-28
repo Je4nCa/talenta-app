@@ -1,17 +1,16 @@
-import { pagosDb } from '../lib/db'
+import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { Suscripcion } from '../types/suscripcion'
 
-export const suscripcionesRepository = {
+class SuscripcionesRepository extends FirestoreRepository<Suscripcion> {
+  constructor() {
+    super('suscripciones')
+  }
+
   async obtenerActualPorUsuario(uid: string): Promise<Suscripcion | undefined> {
-    const todas = await pagosDb.suscripciones.where('uid').equals(uid).sortBy('creadoEn')
-    return todas[todas.length - 1]
-  },
-
-  async crear(suscripcion: Suscripcion): Promise<void> {
-    await pagosDb.suscripciones.add(suscripcion)
-  },
-
-  async actualizar(id: string, cambios: Partial<Suscripcion>): Promise<void> {
-    await pagosDb.suscripciones.update(id, cambios)
-  },
+    const todas = await this.obtenerTodos(uid)
+    const ordenadas = [...todas].sort((a, b) => a.creadoEn.localeCompare(b.creadoEn))
+    return ordenadas[ordenadas.length - 1]
+  }
 }
+
+export const suscripcionesRepository = new SuscripcionesRepository()

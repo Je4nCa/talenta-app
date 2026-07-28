@@ -1,15 +1,14 @@
-import { finanzasDB } from '../lib/db'
+import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { Gasto } from '../types'
-import { BaseRepository } from './base.repository'
 
-class GastosRepository extends BaseRepository<Gasto> {
+class GastosRepository extends FirestoreRepository<Gasto> {
   constructor() {
-    super(finanzasDB.gastos)
+    super('gastos')
   }
 
   async obtenerPorPeriodo(uid: string, anio: number, mes: number): Promise<Gasto[]> {
     const prefijo = `${anio}-${String(mes).padStart(2, '0')}`
-    const todos = await this.tabla.where('uid').equals(uid).toArray()
+    const todos = await this.obtenerTodos(uid)
     return todos.filter((g) => (g.fechaCobro ?? g.fecha).startsWith(prefijo))
   }
 }

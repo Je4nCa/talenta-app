@@ -1,17 +1,18 @@
 import { useState } from 'react'
-import { useLiveQuery } from 'dexie-react-hooks'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Plus, Trash2, Wallet } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { Button } from '@/shared/components/ui/button'
 import { ModulePlaceholder } from '@/shared/components/ModulePlaceholder'
+import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import { useTarjetas } from '../../hooks/useTarjetas'
 import { useGastosFijos } from '../../hooks/useGastos'
-import { finanzasDB } from '../../lib/db'
 import { abonosTarjetaRepository } from '../../repositories'
 import { periodoFacturacion } from '../../lib/billingCycle'
 import { formatearMonto, NOMBRES_MES } from '../../lib/formato'
 import { FormularioAbono } from '../FormularioAbono'
+import type { AbonoTarjeta } from '../../types/tarjeta'
+import type { Gasto } from '../../types/gasto'
 import type { TarjetaCredito } from '../../types/tarjeta'
 
 function usePeriodoActivo() {
@@ -46,18 +47,18 @@ function TarjetaPago({
   const [mostrandoForm, setMostrandoForm] = useState(false)
   const { desde, hasta } = periodoFacturacion(anio, mes, tarjeta.diaCierre ?? 1)
 
-  const totalGastos = useLiveQuery(async () => {
-    const gastos = await finanzasDB.gastos.where('tarjetaId').equals(tarjeta.id).toArray()
-    return gastos.filter((g) => g.fecha >= desde && g.fecha <= hasta).reduce((acc, g) => acc + g.monto, 0)
-  }, [tarjeta.id, desde, hasta])
+  const { datos: gastosTodos } = useColeccionUsuario<Gasto>(uid, 'gastos')
+  const totalGastos = gastosTodos
+    .filter((g) => g.tarjetaId === tarjeta.id && g.fecha >= desde && g.fecha <= hasta)
+    .reduce((acc, g) => acc + g.monto, 0)
 
-  const abonos = useLiveQuery(
-    () => abonosTarjetaRepository.porTarjetaYPeriodo(tarjeta.id, anio, mes),
-    [tarjeta.id, anio, mes],
+  const { datos: abonosTodos } = useColeccionUsuario<AbonoTarjeta>(uid, 'abonosTarjeta')
+  const abonos = abonosTodos.filter(
+    (a) => a.tarjetaId === tarjeta.id && a.anio === anio && a.mes === mes,
   )
 
-  const totalPeriodo = (totalGastos ?? 0) + totalFijos
-  const totalAbonado = (abonos ?? []).reduce((acc, a) => acc + a.monto, 0)
+  const totalPeriodo = totalGastos + totalFijos
+  const totalAbonado = abonos.reduce((acc, a) => acc + a.monto, 0)
   const pendiente = totalPeriodo - totalAbonado
 
   return (
@@ -93,9 +94,9 @@ function TarjetaPago({
         </p>
       </div>
 
-      {(abonos ?? []).length > 0 && (
+      {abonos.length > 0 && (
         <div className="mt-3 flex flex-col gap-2">
-          {abonos!.map((a) => (
+          {abonos.map((a) => (
             <div
               key={a.id}
               className="flex items-center justify-between rounded-lg bg-talenta-cream/60 px-3 py-2 text-sm"
@@ -107,7 +108,7 @@ function TarjetaPago({
               <button
                 type="button"
                 aria-label="Eliminar pago"
-                onClick={() => abonosTarjetaRepository.eliminar(a.id)}
+                onClick={() => abonosTarjetaRepository.eliminar(a.uid, a.id)}
                 className="text-talenta-brown-mid transition-colors hover:text-red-700"
               >
                 <Trash2 className="h-4 w-4" />

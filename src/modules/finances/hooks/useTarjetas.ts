@@ -1,23 +1,10 @@
-import { useLiveQuery } from 'dexie-react-hooks'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
-import { finanzasDB } from '../lib/db'
+import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
+import type { TarjetaCredito } from '../types'
 
 export function useTarjetas() {
   const uid = useAuth((state) => state.usuario?.uid)
+  const { datos: tarjetas, cargando } = useColeccionUsuario<TarjetaCredito>(uid, 'tarjetas')
 
-  const tarjetas = useLiveQuery(async () => {
-    if (!uid) return []
-    return finanzasDB.tarjetas.where('uid').equals(uid).toArray()
-  }, [uid])
-
-  return { tarjetas: tarjetas ?? [], cargando: tarjetas === undefined }
-}
-
-export function useTarjeta(id: string | undefined) {
-  const tarjeta = useLiveQuery(async () => {
-    if (!id) return undefined
-    return finanzasDB.tarjetas.get(id)
-  }, [id])
-
-  return { tarjeta }
+  return { tarjetas, cargando }
 }

@@ -42,7 +42,7 @@ export function FormularioTarjeta({
     const ahora = new Date().toISOString()
 
     if (tarjetaExistente) {
-      await tarjetasRepository.actualizar(tarjetaExistente.id, {
+      await tarjetasRepository.actualizar(uid, tarjetaExistente.id, {
         banco: banco.trim(),
         nombre: nombre.trim(),
         tipo,

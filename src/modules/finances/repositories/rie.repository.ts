@@ -1,14 +1,13 @@
-import { finanzasDB } from '../lib/db'
+import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { CeldaRIE, CategoriaRIE } from '../types'
-import { BaseRepository } from './base.repository'
 
-class RIERepository extends BaseRepository<CeldaRIE> {
+class RIERepository extends FirestoreRepository<CeldaRIE> {
   constructor() {
-    super(finanzasDB.rie)
+    super('rie')
   }
 
   async guardarValor(uid: string, dia: number, categoria: CategoriaRIE, monto: number): Promise<void> {
-    await this.tabla.put({
+    await this.crear({
       id: `${uid}-${dia}-${categoria}`,
       uid,
       dia,

@@ -125,7 +125,7 @@ function TabVariables({ uid, moneda }: { uid: string; moneda: string }) {
                 <button
                   type="button"
                   aria-label="Eliminar gasto"
-                  onClick={() => gastosRepository.eliminar(g.id)}
+                  onClick={() => gastosRepository.eliminar(g.uid, g.id)}
                   className="shrink-0 text-talenta-brown-mid transition-colors hover:text-red-700"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -205,7 +205,7 @@ function TabFijos({ uid, moneda }: { uid: string; moneda: string }) {
                 <button
                   type="button"
                   aria-label={g.activo ? 'Pausar gasto fijo' : 'Reactivar gasto fijo'}
-                  onClick={() => gastosFijosRepository.actualizar(g.id, { activo: !g.activo })}
+                  onClick={() => gastosFijosRepository.actualizar(g.uid, g.id, { activo: !g.activo })}
                   className="shrink-0 text-talenta-brown-mid transition-colors hover:text-talenta-gold"
                 >
                   <Power className="h-4 w-4" />
@@ -213,7 +213,7 @@ function TabFijos({ uid, moneda }: { uid: string; moneda: string }) {
                 <button
                   type="button"
                   aria-label="Eliminar gasto fijo"
-                  onClick={() => gastosFijosRepository.eliminar(g.id)}
+                  onClick={() => gastosFijosRepository.eliminar(g.uid, g.id)}
                   className="shrink-0 text-talenta-brown-mid transition-colors hover:text-red-700"
                 >
                   <Trash2 className="h-4 w-4" />

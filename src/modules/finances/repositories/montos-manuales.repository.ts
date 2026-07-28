@@ -1,10 +1,9 @@
-import { finanzasDB } from '../lib/db'
+import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { MontoManualTarjeta } from '../types'
-import { BaseRepository } from './base.repository'
 
-class MontosManualesRepository extends BaseRepository<MontoManualTarjeta> {
+class MontosManualesRepository extends FirestoreRepository<MontoManualTarjeta> {
   constructor() {
-    super(finanzasDB.montosManuales)
+    super('montosManuales')
   }
 
   idPara(tarjetaId: string, anio: number, mes: number): string {
