@@ -1,5 +1,4 @@
-import { useLiveQuery } from 'dexie-react-hooks'
-import { pagosDb } from '../lib/db'
+import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import type { Suscripcion } from '../types/suscripcion'
 
 interface UseSuscripcionResultado {
@@ -8,20 +7,13 @@ interface UseSuscripcionResultado {
   suscripcion: Suscripcion | null
 }
 
-/**
- * `undefined` mientras Dexie no ha resuelto la consulta, `null` cuando ya
- * resolvió y el usuario no tiene ninguna suscripción registrada — hay que
- * distinguir ambos casos para no mostrar "cargando" para siempre.
- */
 export function useSuscripcion(uid: string): UseSuscripcionResultado {
-  const resultado = useLiveQuery(async () => {
-    const todas = await pagosDb.suscripciones.where('uid').equals(uid).sortBy('creadoEn')
-    return todas[todas.length - 1] ?? null
-  }, [uid])
+  const { datos, cargando } = useColeccionUsuario<Suscripcion>(uid, 'suscripciones')
+  const ordenadas = [...datos].sort((a, b) => a.creadoEn.localeCompare(b.creadoEn))
 
   return {
-    loading: resultado === undefined,
+    loading: cargando,
     error: null,
-    suscripcion: resultado ?? null,
+    suscripcion: ordenadas[ordenadas.length - 1] ?? null,
   }
 }

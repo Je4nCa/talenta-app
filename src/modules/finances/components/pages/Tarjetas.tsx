@@ -1,36 +1,34 @@
 import { useState } from 'react'
-import { useLiveQuery } from 'dexie-react-hooks'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CreditCard, Plus, Trash2 } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { Button } from '@/shared/components/ui/button'
+import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import { useGastosFijos } from '../../hooks/useGastos'
 import { useTarjetas } from '../../hooks/useTarjetas'
-import { finanzasDB } from '../../lib/db'
 import { tarjetasRepository } from '../../repositories'
 import { formatearMonto } from '../../lib/formato'
 import { FormularioTarjeta } from '../FormularioTarjeta'
+import type { Gasto } from '../../types/gasto'
 import type { TarjetaCredito } from '../../types/tarjeta'
 
-function useTotalGastadoTarjeta(tarjetaId: string) {
-  const total = useLiveQuery(async () => {
-    const gastos = await finanzasDB.gastos.where('tarjetaId').equals(tarjetaId).toArray()
-    return gastos.reduce((acc, g) => acc + g.monto, 0)
-  }, [tarjetaId])
-
-  return total ?? 0
+function useTotalGastadoTarjeta(uid: string, tarjetaId: string) {
+  const { datos: gastos } = useColeccionUsuario<Gasto>(uid, 'gastos')
+  return gastos.filter((g) => g.tarjetaId === tarjetaId).reduce((acc, g) => acc + g.monto, 0)
 }
 
 function FilaTarjeta({
+  uid,
   tarjeta,
   moneda,
   totalFijos,
 }: {
+  uid: string
   tarjeta: TarjetaCredito
   moneda: string
   totalFijos: number
 }) {
-  const totalGastado = useTotalGastadoTarjeta(tarjeta.id)
+  const totalGastado = useTotalGastadoTarjeta(uid, tarjeta.id)
 
   const disponible =
     tarjeta.tipo === 'debito' ? (tarjeta.saldoInicial ?? 0) - totalGastado : undefined
@@ -60,7 +58,7 @@ function FilaTarjeta({
         <button
           type="button"
           aria-label="Eliminar tarjeta"
-          onClick={() => tarjetasRepository.eliminar(tarjeta.id)}
+          onClick={() => tarjetasRepository.eliminar(tarjeta.uid, tarjeta.id)}
           className="shrink-0 text-talenta-brown-mid transition-colors hover:text-red-700"
         >
           <Trash2 className="h-4 w-4" />
@@ -149,7 +147,15 @@ export function Tarjetas() {
             const totalFijos = gastosFijos
               .filter((g) => g.activo && g.tarjetaId === t.id)
               .reduce((acc, g) => acc + g.monto, 0)
-            return <FilaTarjeta key={t.id} tarjeta={t} moneda={moneda} totalFijos={totalFijos} />
+            return (
+              <FilaTarjeta
+                key={t.id}
+                uid={usuario.uid}
+                tarjeta={t}
+                moneda={moneda}
+                totalFijos={totalFijos}
+              />
+            )
           })}
         </div>
       )}

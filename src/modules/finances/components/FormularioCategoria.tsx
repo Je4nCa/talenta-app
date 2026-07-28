@@ -39,7 +39,7 @@ export function FormularioCategoria({
     const porcentaje = porcentajeRecomendado ? Number(porcentajeRecomendado) : undefined
 
     if (categoriaExistente) {
-      await categoriasRepository.actualizar(categoriaExistente.id, {
+      await categoriasRepository.actualizar(uid, categoriaExistente.id, {
         nombre: nombre.trim(),
         emoji,
         color,

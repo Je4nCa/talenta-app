@@ -164,7 +164,7 @@ export function Dashboard() {
                 <button
                   type="button"
                   aria-label="Eliminar ingreso"
-                  onClick={() => ingresosRepository.eliminar(i.id)}
+                  onClick={() => ingresosRepository.eliminar(i.uid, i.id)}
                   className="shrink-0 text-talenta-brown-mid transition-colors hover:text-red-700"
                 >
                   <Trash2 className="h-4 w-4" />

@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
-import { useLiveQuery } from 'dexie-react-hooks'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
-import { finanzasDB } from '../lib/db'
+import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import { categoriasRepository } from '../repositories'
 import type { Categoria } from '../types'
 
@@ -12,15 +11,10 @@ export function useCategorias() {
     if (uid) categoriasRepository.sembrarSiNecesario(uid)
   }, [uid])
 
-  const categorias = useLiveQuery(async () => {
-    if (!uid) return []
-    const todas = await finanzasDB.categorias.where('uid').equals(uid).toArray()
-    return todas.sort((a, b) => a.nombre.localeCompare(b.nombre))
-  }, [uid])
+  const { datos: sinOrdenar, cargando } = useColeccionUsuario<Categoria>(uid, 'categorias')
+  const categorias = [...sinOrdenar].sort((a, b) => a.nombre.localeCompare(b.nombre))
 
-  const mapa: Record<string, Categoria> = Object.fromEntries(
-    (categorias ?? []).map((c) => [c.id, c]),
-  )
+  const mapa: Record<string, Categoria> = Object.fromEntries(categorias.map((c) => [c.id, c]))
 
-  return { categorias: categorias ?? [], mapa, cargando: categorias === undefined }
+  return { categorias, mapa, cargando }
 }

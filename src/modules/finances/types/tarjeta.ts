@@ -37,6 +37,7 @@ export interface AbonoTarjeta {
 /** Monto manual a pagar (override del calculado) */
 export interface MontoManualTarjeta {
   id: ID // `${tarjetaId}-${anio}-${mes}`
+  uid: string
   tarjetaId: ID
   anio: number
   mes: number

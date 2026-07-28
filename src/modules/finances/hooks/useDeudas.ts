@@ -1,23 +1,17 @@
-import { useLiveQuery } from 'dexie-react-hooks'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
-import { finanzasDB } from '../lib/db'
+import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
+import type { AbonoDeuda, Deuda } from '../types'
 
 export function useDeudas() {
   const uid = useAuth((state) => state.usuario?.uid)
+  const { datos: deudas, cargando } = useColeccionUsuario<Deuda>(uid, 'deudas')
 
-  const deudas = useLiveQuery(async () => {
-    if (!uid) return []
-    return finanzasDB.deudas.where('uid').equals(uid).toArray()
-  }, [uid])
-
-  return { deudas: deudas ?? [], cargando: deudas === undefined }
+  return { deudas, cargando }
 }
 
-export function useAbonosDeuda(deudaId: string | undefined) {
-  const abonos = useLiveQuery(async () => {
-    if (!deudaId) return []
-    return finanzasDB.abonosDeuda.where('deudaId').equals(deudaId).toArray()
-  }, [deudaId])
+export function useAbonosDeuda(uid: string | undefined, deudaId: string | undefined) {
+  const { datos: todos, cargando } = useColeccionUsuario<AbonoDeuda>(uid, 'abonosDeuda')
+  const abonos = deudaId ? todos.filter((a) => a.deudaId === deudaId) : []
 
-  return { abonos: abonos ?? [], cargando: abonos === undefined }
+  return { abonos, cargando }
 }

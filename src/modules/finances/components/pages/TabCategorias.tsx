@@ -76,7 +76,7 @@ function FilaCategoria({
           <button
             type="button"
             aria-label="Eliminar categoría"
-            onClick={() => categoriasRepository.eliminar(categoria.id)}
+            onClick={() => categoriasRepository.eliminar(categoria.uid, categoria.id)}
             className="shrink-0 text-talenta-brown-mid transition-colors hover:text-red-700"
           >
             <Trash2 className="h-4 w-4" />

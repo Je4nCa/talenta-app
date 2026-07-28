@@ -1,10 +1,9 @@
-import { finanzasDB } from '../lib/db'
+import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { Deuda } from '../types'
-import { BaseRepository } from './base.repository'
 
-class DeudasRepository extends BaseRepository<Deuda> {
+class DeudasRepository extends FirestoreRepository<Deuda> {
   constructor() {
-    super(finanzasDB.deudas)
+    super('deudas')
   }
 }
 

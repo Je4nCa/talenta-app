@@ -1,21 +1,28 @@
-import { finanzasDB } from '../lib/db'
+import { deleteDoc, doc, runTransaction } from 'firebase/firestore'
+import { firestore } from '@/shared/lib/firebase'
+import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { AbonoDeuda } from '../types'
-import { BaseRepository } from './base.repository'
 
-class AbonosDeudaRepository extends BaseRepository<AbonoDeuda> {
+class AbonosDeudaRepository extends FirestoreRepository<AbonoDeuda> {
   constructor() {
-    super(finanzasDB.abonosDeuda)
+    super('abonosDeuda')
   }
 
-  async porDeuda(deudaId: string): Promise<AbonoDeuda[]> {
-    return this.tabla.where('deudaId').equals(deudaId).toArray()
+  async porDeuda(uid: string, deudaId: string): Promise<AbonoDeuda[]> {
+    const todos = await this.obtenerTodos(uid)
+    return todos.filter((a) => a.deudaId === deudaId)
   }
 
   /** Registra el abono y descuenta el monto del saldo de la deuda en una sola transacción. */
   async registrarAbono(deudaId: string, uid: string, monto: number, fecha: string): Promise<void> {
-    await finanzasDB.transaction('rw', finanzasDB.abonosDeuda, finanzasDB.deudas, async () => {
-      await this.tabla.add({
-        id: crypto.randomUUID(),
+    const refDeuda = doc(firestore, 'users', uid, 'deudas', deudaId)
+    const refAbono = this.docRef(uid, crypto.randomUUID())
+
+    await runTransaction(firestore, async (tx) => {
+      const deudaSnap = await tx.get(refDeuda)
+
+      tx.set(refAbono, {
+        id: refAbono.id,
         deudaId,
         uid,
         monto,
@@ -23,19 +30,19 @@ class AbonosDeudaRepository extends BaseRepository<AbonoDeuda> {
         creadoEn: new Date().toISOString(),
       })
 
-      const deuda = await finanzasDB.deudas.get(deudaId)
-      if (deuda) {
-        await finanzasDB.deudas.update(deudaId, {
-          saldoActual: Math.max(0, deuda.saldoActual - monto),
+      if (deudaSnap.exists()) {
+        const saldoActual = deudaSnap.data().saldoActual as number
+        tx.update(refDeuda, {
+          saldoActual: Math.max(0, saldoActual - monto),
           actualizadoEn: new Date().toISOString(),
         })
       }
     })
   }
 
-  async eliminarPorDeuda(deudaId: string): Promise<void> {
-    const abonos = await this.porDeuda(deudaId)
-    await this.tabla.bulkDelete(abonos.map((a) => a.id))
+  async eliminarPorDeuda(uid: string, deudaId: string): Promise<void> {
+    const abonos = await this.porDeuda(uid, deudaId)
+    await Promise.all(abonos.map((a) => deleteDoc(this.docRef(uid, a.id))))
   }
 }
 

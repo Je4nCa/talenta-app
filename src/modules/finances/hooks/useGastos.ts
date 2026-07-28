@@ -1,27 +1,20 @@
-import { useLiveQuery } from 'dexie-react-hooks'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
-import { finanzasDB } from '../lib/db'
+import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
+import type { Gasto, GastoFijo } from '../types'
 
 export function useGastosPorPeriodo(anio: number, mes: number) {
   const uid = useAuth((state) => state.usuario?.uid)
   const prefijo = `${anio}-${String(mes).padStart(2, '0')}`
+  const { datos: todos, cargando } = useColeccionUsuario<Gasto>(uid, 'gastos')
 
-  const gastos = useLiveQuery(async () => {
-    if (!uid) return []
-    const todos = await finanzasDB.gastos.where('uid').equals(uid).toArray()
-    return todos.filter((g) => (g.fechaCobro ?? g.fecha).startsWith(prefijo))
-  }, [uid, prefijo])
+  const gastos = todos.filter((g) => (g.fechaCobro ?? g.fecha).startsWith(prefijo))
 
-  return { gastos: gastos ?? [], cargando: gastos === undefined }
+  return { gastos, cargando }
 }
 
 export function useGastosFijos() {
   const uid = useAuth((state) => state.usuario?.uid)
+  const { datos: gastosFijos, cargando } = useColeccionUsuario<GastoFijo>(uid, 'gastosFijos')
 
-  const gastosFijos = useLiveQuery(async () => {
-    if (!uid) return []
-    return finanzasDB.gastosFijos.where('uid').equals(uid).toArray()
-  }, [uid])
-
-  return { gastosFijos: gastosFijos ?? [], cargando: gastosFijos === undefined }
+  return { gastosFijos, cargando }
 }

@@ -46,7 +46,7 @@ const ETIQUETA_POR_TIPO: Record<TipoDeuda, string> = Object.fromEntries(
 ) as Record<TipoDeuda, string>
 
 function TarjetaDeuda({ uid, deuda, moneda }: { uid: string; deuda: Deuda; moneda: string }) {
-  const { abonos } = useAbonosDeuda(deuda.id)
+  const { abonos } = useAbonosDeuda(uid, deuda.id)
   const [mostrandoForm, setMostrandoForm] = useState(false)
   const Icono = ICONO_POR_TIPO[deuda.tipo]
 
@@ -57,8 +57,8 @@ function TarjetaDeuda({ uid, deuda, moneda }: { uid: string; deuda: Deuda; moned
   const pagada = deuda.saldoActual <= 0
 
   async function manejarEliminar() {
-    await abonosDeudaRepository.eliminarPorDeuda(deuda.id)
-    await deudasRepository.eliminar(deuda.id)
+    await abonosDeudaRepository.eliminarPorDeuda(uid, deuda.id)
+    await deudasRepository.eliminar(uid, deuda.id)
   }
 
   return (
