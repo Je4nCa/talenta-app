@@ -5,6 +5,7 @@ import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { useAuth } from '../hooks/useAuth'
+import { RecuperarContrasenaForm } from './RecuperarContrasenaForm'
 
 export function LoginForm() {
   const { login, loading, error, limpiarError } = useAuth()
@@ -12,6 +13,7 @@ export function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [recordar, setRecordar] = useState(true)
+  const [mostrandoRecuperacion, setMostrandoRecuperacion] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -22,6 +24,17 @@ export function LoginForm() {
     } catch {
       // el error ya queda expuesto en el store
     }
+  }
+
+  if (mostrandoRecuperacion) {
+    return (
+      <RecuperarContrasenaForm
+        onVolver={() => {
+          limpiarError()
+          setMostrandoRecuperacion(false)
+        }}
+      />
+    )
   }
 
   return (
@@ -50,6 +63,16 @@ export function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+        <button
+          type="button"
+          onClick={() => {
+            limpiarError()
+            setMostrandoRecuperacion(true)
+          }}
+          className="self-start text-sm font-medium text-talenta-gold underline underline-offset-2"
+        >
+          ¿Olvidaste tu contraseña?
+        </button>
       </div>
 
       <label htmlFor="login-recordar" className="flex cursor-pointer items-center gap-3">

@@ -1,5 +1,6 @@
 import {
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   type AuthError as FirebaseAuthError,
 } from 'firebase/auth'
@@ -104,6 +105,23 @@ export async function actualizarVersionBiblia(uid: string, versionBiblia: string
 
 export async function actualizarMoneda(uid: string, monedaCodigo: string): Promise<void> {
   await updateDoc(docUsuario(uid), { monedaCodigo })
+}
+
+/**
+ * Envía el correo de restablecimiento de contraseña de Firebase Auth. No
+ * revela si el correo existe o no en el sistema (si `sendPasswordResetEmail`
+ * falla por `auth/user-not-found`, no se propaga el error) — evita que este
+ * flujo se use para averiguar qué correos tienen cuenta en TALENTA.
+ */
+export async function enviarCorreoRecuperacion(email: string): Promise<void> {
+  try {
+    await sendPasswordResetEmail(firebaseAuth, normalizarEmail(email))
+  } catch (err) {
+    if (esErrorFirebase(err) && err.code === 'auth/user-not-found') {
+      return
+    }
+    throw err
+  }
 }
 
 export async function iniciarSesion(input: LoginInput): Promise<UserProfile> {

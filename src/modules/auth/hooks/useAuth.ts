@@ -13,6 +13,7 @@ import {
   AuthError,
   actualizarMoneda,
   actualizarVersionBiblia,
+  enviarCorreoRecuperacion,
   iniciarSesion,
   registrarUsuario,
 } from '../lib/authService'
@@ -27,6 +28,7 @@ interface AuthState {
   logout: () => void
   limpiarError: () => void
   restaurarSesion: () => Promise<void>
+  recuperarContrasena: (email: string) => Promise<void>
   cambiarVersionBiblia: (versionBiblia: string) => Promise<void>
   cambiarMoneda: (monedaCodigo: string) => Promise<void>
 }
@@ -71,6 +73,18 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   limpiarError: () => set({ error: null }),
+
+  recuperarContrasena: async (email) => {
+    set({ loading: true, error: null })
+    try {
+      await enviarCorreoRecuperacion(email)
+      set({ loading: false })
+    } catch (err) {
+      const mensaje = err instanceof AuthError ? err.message : 'No se pudo enviar el correo. Intenta de nuevo.'
+      set({ error: mensaje, loading: false })
+      throw err
+    }
+  },
 
   restaurarSesion: () => {
     return new Promise<void>((resolve) => {
