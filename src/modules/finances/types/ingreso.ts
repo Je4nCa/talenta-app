@@ -14,5 +14,11 @@ export interface Ingreso {
   monto: number
   fecha: FechaISO
   notas?: string
+  /**
+   * Moneda en la que ocurrió realmente este movimiento. `undefined` = la
+   * moneda principal del usuario (así siguen siendo válidos los registros
+   * creados antes de que existiera la segunda moneda).
+   */
+  moneda?: string
   creadoEn: FechaHoraISO
 }

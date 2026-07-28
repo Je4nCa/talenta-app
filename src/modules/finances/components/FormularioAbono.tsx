@@ -10,8 +10,12 @@ import { abonosTarjetaRepository } from '../repositories'
 interface FormularioAbonoProps {
   uid: string
   tarjetaId: string
+  moneda?: string
   anio: number
   mes: number
+  /** En crédito es un pago de lo gastado; en débito, dinero que entra. */
+  etiquetaMonto?: string
+  textoBoton?: string
   onGuardado: () => void
   onCancelar: () => void
 }
@@ -23,8 +27,11 @@ function fechaHoy(): string {
 export function FormularioAbono({
   uid,
   tarjetaId,
+  moneda,
   anio,
   mes,
+  etiquetaMonto = 'Monto pagado',
+  textoBoton = 'Guardar',
   onGuardado,
   onCancelar,
 }: FormularioAbonoProps) {
@@ -45,6 +52,7 @@ export function FormularioAbono({
         anio,
         mes,
         monto: valor,
+        moneda,
         fecha,
         creadoEn: new Date().toISOString(),
       })
@@ -60,7 +68,7 @@ export function FormularioAbono({
       className="mt-3 flex flex-col gap-4 overflow-hidden rounded-xl border border-talenta-tan/60 bg-talenta-cream/60 p-4"
     >
       <div className="flex flex-col gap-2">
-        <Label htmlFor="abono-monto">Monto pagado</Label>
+        <Label htmlFor="abono-monto">{etiquetaMonto}</Label>
         <Input
           id="abono-monto"
           type="number"
@@ -72,7 +80,7 @@ export function FormularioAbono({
         />
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="abono-fecha">Fecha del pago</Label>
+        <Label htmlFor="abono-fecha">Fecha</Label>
         <Input
           id="abono-fecha"
           type="date"
@@ -92,7 +100,7 @@ export function FormularioAbono({
           Cancelar
         </Button>
         <Button type="submit" size="default" className="flex-1" disabled={guardando}>
-          {guardando ? 'Guardando…' : 'Registrar pago'}
+          {guardando ? 'Guardando…' : textoBoton}
         </Button>
       </div>
     </motion.form>

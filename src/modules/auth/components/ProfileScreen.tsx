@@ -55,6 +55,49 @@ function SelectorMoneda({ monedaCodigo }: { monedaCodigo: string }) {
   )
 }
 
+function SelectorMonedaSecundaria({
+  monedaPrincipal,
+  monedaSecundaria,
+}: {
+  monedaPrincipal: string
+  monedaSecundaria?: string
+}) {
+  const cambiarMonedaSecundaria = useAuth((state) => state.cambiarMonedaSecundaria)
+  const [guardando, setGuardando] = useState(false)
+
+  async function manejarCambio(e: ChangeEvent<HTMLSelectElement>) {
+    setGuardando(true)
+    await cambiarMonedaSecundaria(e.target.value || null)
+    setGuardando(false)
+  }
+
+  return (
+    <div className="w-full rounded-2xl border border-talenta-tan/60 bg-talenta-white/80 p-5 text-left shadow-sm">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="perfil-moneda-2">Segunda moneda (opcional)</Label>
+        <Select
+          id="perfil-moneda-2"
+          value={monedaSecundaria ?? ''}
+          onChange={manejarCambio}
+          disabled={guardando}
+        >
+          <option value="">Solo uso una moneda</option>
+          {MONEDAS.filter((m) => m.codigo !== monedaPrincipal).map((moneda) => (
+            <option key={moneda.codigo} value={moneda.codigo}>
+              {moneda.simbolo} {moneda.nombre}
+            </option>
+          ))}
+        </Select>
+        <p className="text-sm text-talenta-brown-mid">
+          Si recibes ingresos o pagas deudas en dos monedas, actívala y podrás elegir la moneda de
+          cada gasto, ingreso o deuda. Los totales se muestran en tu moneda principal, convertidos
+          al cambio aproximado del día.
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function diasRestantes(finPeriodoGratuito: string): number {
   const hoy = new Date()
   const fin = new Date(`${finPeriodoGratuito}T00:00:00`)
@@ -150,6 +193,11 @@ export function ProfileScreen() {
       )}
 
       <SelectorMoneda monedaCodigo={usuario.monedaCodigo} />
+
+      <SelectorMonedaSecundaria
+        monedaPrincipal={usuario.monedaCodigo}
+        monedaSecundaria={usuario.monedaSecundaria}
+      />
 
       <TextSizeSlider />
 

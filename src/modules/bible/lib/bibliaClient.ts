@@ -64,6 +64,14 @@ export async function obtenerPasaje(bibliaId: string, referenciaCompleta: string
   return (datos.text ?? '').trim()
 }
 
+/** Minúsculas y sin tildes, para comparar "Corazón" con "corazon". */
+function normalizar(texto: string): string {
+  return texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
 export async function buscarPalabra(
   bibliaId: string,
   consulta: string,
@@ -71,7 +79,9 @@ export async function buscarPalabra(
   const parametros = new URLSearchParams({
     query: consulta,
     mode: 'verse',
-    limit: '25',
+    // Se pide de más porque abajo se descartan los resultados irrelevantes
+    // que devuelve el API; con 25 quedaban muy pocos útiles.
+    limit: '50',
     preview: 'text',
     key: obtenerApiKey(),
   })
@@ -82,5 +92,25 @@ export async function buscarPalabra(
   }
 
   const datos = (await respuesta.json()) as { results?: { title: string; preview: string }[] }
-  return (datos.results ?? []).map((r) => ({ referencia: r.title, vistaPrevia: r.preview }))
+  const crudos = datos.results ?? []
+
+  // El API mezcla resultados que **no contienen** lo buscado (devuelve el
+  // versículo 1 de un capítulo relacionado) y repite referencias. Verificado
+  // contra el servicio real: de 25 resultados para "amor", 7 no traían la
+  // palabra y 1 venía duplicado. Se filtra y deduplica aquí.
+  const palabras = normalizar(consulta).split(/\s+/).filter(Boolean)
+  const vistas = new Set<string>()
+
+  return crudos
+    .filter((r) => {
+      if (!r.title || !r.preview) return false
+      if (vistas.has(r.title)) return false
+
+      const texto = normalizar(r.preview)
+      if (!palabras.every((palabra) => texto.includes(palabra))) return false
+
+      vistas.add(r.title)
+      return true
+    })
+    .map((r) => ({ referencia: r.title, vistaPrevia: r.preview }))
 }

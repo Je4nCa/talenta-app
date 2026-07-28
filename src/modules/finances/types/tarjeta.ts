@@ -9,6 +9,12 @@ export interface TarjetaCredito {
   nombre: string
   tipo: TipoTarjeta
   color: string
+  /**
+   * Moneda de la tarjeta — el límite, el saldo y sus abonos van todos en
+   * ella. `undefined` = moneda principal del usuario (tarjetas creadas antes
+   * de que existiera la segunda moneda).
+   */
+  moneda?: string
   creadoEn: FechaHoraISO
   actualizadoEn: FechaHoraISO
   /** Solo crédito: límite de la tarjeta */
@@ -31,6 +37,12 @@ export interface AbonoTarjeta {
   monto: number
   fecha: FechaISO
   notas?: string
+  /**
+   * Moneda en la que ocurrió realmente este movimiento. `undefined` = la
+   * moneda principal del usuario (así siguen siendo válidos los registros
+   * creados antes de que existiera la segunda moneda).
+   */
+  moneda?: string
   creadoEn: FechaHoraISO
 }
 

@@ -7,12 +7,18 @@
  * GitHub, no queda expuesta la lista real de correos — solo permite
  * verificar si un correo dado coincide, no recuperar la lista original.
  *
+ * Incluye, por cada correo, tanto su forma literal como su forma canónica
+ * (ver `canonizarEmail`): en Gmail `juan.perez@` y `juanperez@` son el mismo
+ * buzón, y sin ambas variantes un estudiante inscrito con una escritura no
+ * podría registrarse usando la otra.
+ *
  * Para agregar/actualizar estudiantes: pide el nuevo hash (nunca el correo
  * en texto plano) o regenera esta lista completa a partir del CSV de
  * inscripción.
  */
 export const CORREOS_ESTUDIANTES_HASH: readonly string[] = [
   '020cb47bd5788a438e4bab44b9e4925c67ffe5f07d6ab7d40d204cb2ad3ecb65',
+  '0e891ca161ebec4ef36d3524f5431090c5a9dda46c62606ffe1b3d1fbca3888b',
   '1686969c99d4394485a6d073a07fe7f23ed041b04b482764b0cdf3b67d4ee787',
   '20a51fcb917d506cf42b85220055c77b10af490315b237c53e38641614507189',
   '2247fcd508ec896d584b30e47b74843e59f191e1034ae4ee04eaa0ea4190ae26',
@@ -27,6 +33,7 @@ export const CORREOS_ESTUDIANTES_HASH: readonly string[] = [
   '4c7be0e192dfc4e0e37f902159e3449bda1bc353179c5d8b662f5015996df719',
   '4e0194fc550a84bc7aaa3b325f28b229dda493ee7bd854eb6ed76f0ec6653039',
   '4f0dd29151908032e693b5ca3dca79b60a82a726d8b11145aadf84c0d23f8e39',
+  '55b0fdfbef21e18582b9d55a89d8f9a3f75fde0be3aca23c4046f9521220b53e',
   '573bf51df2d7d47a7def761912b7bd4f4c071a868eb6422fab4cf8c5ef871e2e',
   '573e8bff04241d98796acc3adf09a170b89d3bc575bc9c4c55db98c78522ce0a',
   '65b9c42f080f9bfab7a282389b8a1fdca897cbe2235bc4f668eef5fa3c025e35',
@@ -40,6 +47,7 @@ export const CORREOS_ESTUDIANTES_HASH: readonly string[] = [
   '8bf8dde70dd006307ff47dab9045e1e6a477de092fe94527cb1c30a22e0f71a1',
   '937abec57fe1dc34d9c9fe0abf478cb6f686b87ede0a7b5efcedb1cb2db864ec',
   '9c17459194dbf8ccde28e9092cae676079b7799de93c0244af8af3dc8993b4a2',
+  'a5b715d1cda9dd5474e0f77fae8ce3480f75f62e38663e1a104d71f3248e5f8c',
   'a61660ac8791b6396a30ad0a8ff24a45d133a323d3a04d6142667168b5c035dc',
   'a9a8b526e34c6457ef36dd88c8a33c8025e4fb8580c19fc92ea7ae1abbc465ec',
   'aaab7533b51aea83066bb7ae48e2c5a6cb518d2d5c6a96de0bcb9e58c35f41d0',
@@ -54,6 +62,7 @@ export const CORREOS_ESTUDIANTES_HASH: readonly string[] = [
   'c1c9f0ea48315d47b247a3349037fb1d5ace7e877069bd32e799dd5e94ce6b21',
   'c754c94e7e69b0f3094843c73ffad42ef567bb324e85a9e76036c81ec803d23a',
   'cd79e5e0aed1c8aff7ef8b13bd973bac3ebda244c48f094ffb3318115a8cf95f',
+  'd257024ef30e87f30db5214449445f697c27a35d4c1d1ff4f8bf964358bca061',
   'db79cdcf96501644747fa637e547909dc4bb809e24c11f2e0bc79d53d5e173af',
   'e6caf3c3edae84c4e844684a7f65db18208b7b580d926f5f743adebeacf87f20',
   'fc6f056106ae7b24d19c2e2e5a2ab05057fa48ad4fcc2fc85d30144c37b57b44',

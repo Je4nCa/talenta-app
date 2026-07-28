@@ -12,6 +12,7 @@ import type { LoginInput, NuevoUsuarioInput, UserProfile } from '@/shared/types/
 import {
   AuthError,
   actualizarMoneda,
+  actualizarMonedaSecundaria,
   actualizarVersionBiblia,
   enviarCorreoRecuperacion,
   iniciarSesion,
@@ -31,6 +32,7 @@ interface AuthState {
   recuperarContrasena: (email: string) => Promise<void>
   cambiarVersionBiblia: (versionBiblia: string) => Promise<void>
   cambiarMoneda: (monedaCodigo: string) => Promise<void>
+  cambiarMonedaSecundaria: (monedaSecundaria: string | null) => Promise<void>
 }
 
 export const useAuth = create<AuthState>((set, get) => ({
@@ -113,6 +115,15 @@ export const useAuth = create<AuthState>((set, get) => ({
     if (!usuarioActual) return
     await actualizarVersionBiblia(usuarioActual.uid, versionBiblia)
     set({ usuario: { ...usuarioActual, versionBiblia } })
+  },
+
+  cambiarMonedaSecundaria: async (monedaSecundaria) => {
+    const usuarioActual = get().usuario
+    if (!usuarioActual) return
+    await actualizarMonedaSecundaria(usuarioActual.uid, monedaSecundaria)
+    set({
+      usuario: { ...usuarioActual, monedaSecundaria: monedaSecundaria ?? undefined },
+    })
   },
 
   cambiarMoneda: async (monedaCodigo) => {

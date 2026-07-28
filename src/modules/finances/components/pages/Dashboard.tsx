@@ -6,6 +6,8 @@ import { Button } from '@/shared/components/ui/button'
 import { useGastosFijos, useGastosPorPeriodo } from '../../hooks/useGastos'
 import { useDeudas } from '../../hooks/useDeudas'
 import { useIngresosPorPeriodo } from '../../hooks/useIngresos'
+import { useMonedas } from '../../hooks/useMonedas'
+import { montoMensualEquivalente } from '../../lib/recurrencia'
 import { ingresosRepository } from '../../repositories'
 import { formatearMonto, NOMBRES_MES } from '../../lib/formato'
 import { FormularioIngreso } from '../FormularioIngreso'
@@ -56,23 +58,39 @@ export function Dashboard() {
   const { deudas } = useDeudas()
   const { ingresos } = useIngresosPorPeriodo(periodo.anio, periodo.mes)
   const [mostrandoForm, setMostrandoForm] = useState(false)
+  const { aPrincipal, tieneDosMonedas, fechaTasas } = useMonedas()
 
   if (!usuario) return null
 
   const moneda = usuario.monedaCodigo
 
-  const totalVariables = useMemo(() => gastos.reduce((acc, g) => acc + g.monto, 0), [gastos])
+  // Cada movimiento puede estar en otra moneda: se lleva a la principal
+  // antes de sumar (ver useMonedas). Los gastos fijos además se normalizan a
+  // su equivalente mensual, porque uno semanal no cuesta lo mismo al mes.
+  const totalVariables = useMemo(
+    () => gastos.reduce((acc, g) => acc + aPrincipal(g.monto, g.moneda), 0),
+    [gastos, aPrincipal],
+  )
   const totalFijos = useMemo(
-    () => gastosFijos.filter((g) => g.activo).reduce((acc, g) => acc + g.monto, 0),
-    [gastosFijos],
+    () =>
+      gastosFijos
+        .filter((g) => g.activo)
+        .reduce(
+          (acc, g) => acc + aPrincipal(montoMensualEquivalente(g.monto, g.recurrencia), g.moneda),
+          0,
+        ),
+    [gastosFijos, aPrincipal],
   )
   const totalCuotaDeudas = useMemo(
-    () => deudas.reduce((acc, d) => acc + (d.cuotaMensual ?? 0), 0),
-    [deudas],
+    () => deudas.reduce((acc, d) => acc + aPrincipal(d.cuotaMensual ?? 0, d.moneda), 0),
+    [deudas, aPrincipal],
   )
   const totalGastado = totalVariables + totalFijos + totalCuotaDeudas
 
-  const totalIngresos = useMemo(() => ingresos.reduce((acc, i) => acc + i.monto, 0), [ingresos])
+  const totalIngresos = useMemo(
+    () => ingresos.reduce((acc, i) => acc + aPrincipal(i.monto, i.moneda), 0),
+    [ingresos, aPrincipal],
+  )
   const balance = totalIngresos - totalGastado
   const ingresosOrdenados = [...ingresos].sort((a, b) => b.fecha.localeCompare(a.fecha))
 
@@ -111,6 +129,12 @@ export function Dashboard() {
         <p className="mt-1 text-sm text-talenta-tan">
           Ingresos {formatearMonto(totalIngresos, moneda)} · Gastos {formatearMonto(totalGastado, moneda)}
         </p>
+        {tieneDosMonedas && (
+          <p className="mt-2 text-xs text-talenta-tan/80">
+            Convertido a {moneda} al cambio aproximado
+            {fechaTasas ? ` del ${fechaTasas}` : ''}.
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -159,7 +183,7 @@ export function Dashboard() {
                   <p className="text-sm text-talenta-brown-mid">{i.fecha}</p>
                 </div>
                 <p className="shrink-0 text-base font-semibold text-talenta-black">
-                  {formatearMonto(i.monto, moneda)}
+                  {formatearMonto(i.monto, i.moneda ?? moneda)}
                 </p>
                 <button
                   type="button"

@@ -8,13 +8,24 @@ import { useGastosFijos } from '../../hooks/useGastos'
 import { useTarjetas } from '../../hooks/useTarjetas'
 import { tarjetasRepository } from '../../repositories'
 import { formatearMonto } from '../../lib/formato'
+import { FormularioAbono } from '../FormularioAbono'
 import { FormularioTarjeta } from '../FormularioTarjeta'
 import type { Gasto } from '../../types/gasto'
-import type { TarjetaCredito } from '../../types/tarjeta'
+import type { AbonoTarjeta, TarjetaCredito } from '../../types/tarjeta'
 
 function useTotalGastadoTarjeta(uid: string, tarjetaId: string) {
   const { datos: gastos } = useColeccionUsuario<Gasto>(uid, 'gastos')
   return gastos.filter((g) => g.tarjetaId === tarjetaId).reduce((acc, g) => acc + g.monto, 0)
+}
+
+/**
+ * En una tarjeta de débito, un `AbonoTarjeta` es dinero que **entra**
+ * (salario depositado, transferencia, recarga) — al revés que en crédito,
+ * donde es un pago de lo gastado. Por eso aquí suma al disponible.
+ */
+function useTotalDepositado(uid: string, tarjetaId: string) {
+  const { datos: abonos } = useColeccionUsuario<AbonoTarjeta>(uid, 'abonosTarjeta')
+  return abonos.filter((a) => a.tarjetaId === tarjetaId).reduce((acc, a) => acc + a.monto, 0)
 }
 
 function FilaTarjeta({
@@ -29,9 +40,14 @@ function FilaTarjeta({
   totalFijos: number
 }) {
   const totalGastado = useTotalGastadoTarjeta(uid, tarjeta.id)
+  const totalDepositado = useTotalDepositado(uid, tarjeta.id)
+  const [mostrandoDeposito, setMostrandoDeposito] = useState(false)
+  const monedaTarjeta = tarjeta.moneda ?? moneda
 
   const disponible =
-    tarjeta.tipo === 'debito' ? (tarjeta.saldoInicial ?? 0) - totalGastado : undefined
+    tarjeta.tipo === 'debito'
+      ? (tarjeta.saldoInicial ?? 0) + totalDepositado - totalGastado
+      : undefined
 
   const porcentajeUsado =
     tarjeta.tipo === 'credito' && tarjeta.limite
@@ -66,10 +82,44 @@ function FilaTarjeta({
       </div>
 
       {tarjeta.tipo === 'debito' ? (
-        <p className="mt-4 text-2xl font-semibold text-talenta-black">
-          {formatearMonto(disponible ?? 0, moneda)}
-          <span className="ml-2 text-sm font-normal text-talenta-brown-mid">disponible</span>
-        </p>
+        <>
+          <p className="mt-4 text-2xl font-semibold text-talenta-black">
+            {formatearMonto(disponible ?? 0, monedaTarjeta)}
+            <span className="ml-2 text-sm font-normal text-talenta-brown-mid">disponible</span>
+          </p>
+          <p className="mt-1 text-sm text-talenta-brown-mid">
+            Saldo inicial {formatearMonto(tarjeta.saldoInicial ?? 0, monedaTarjeta)}
+            {totalDepositado > 0 && ` · Ingresado ${formatearMonto(totalDepositado, monedaTarjeta)}`}
+            {totalGastado > 0 && ` · Gastado ${formatearMonto(totalGastado, monedaTarjeta)}`}
+          </p>
+
+          <AnimatePresence mode="wait">
+            {mostrandoDeposito ? (
+              <FormularioAbono
+                key="deposito"
+                uid={uid}
+                tarjetaId={tarjeta.id}
+                moneda={monedaTarjeta}
+                anio={new Date().getFullYear()}
+                mes={new Date().getMonth() + 1}
+                etiquetaMonto="¿Cuánto dinero entró?"
+                textoBoton="Agregar"
+                onGuardado={() => setMostrandoDeposito(false)}
+                onCancelar={() => setMostrandoDeposito(false)}
+              />
+            ) : (
+              <Button
+                size="default"
+                variant="outline"
+                className="mt-3 w-full gap-2"
+                onClick={() => setMostrandoDeposito(true)}
+              >
+                <Plus className="h-4 w-4" />
+                Agregar dinero
+              </Button>
+            )}
+          </AnimatePresence>
+        </>
       ) : (
         <div className="mt-4">
           <p className="text-2xl font-semibold text-talenta-black">

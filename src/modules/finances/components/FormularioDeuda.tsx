@@ -6,9 +6,11 @@ import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
 import { generarId } from '@/shared/lib/id'
 import { CATEGORIAS_DEUDA_ORDENADAS } from '../constants/deudas'
+import { useMonedas } from '../hooks/useMonedas'
 import { useGuardado } from '../hooks/useGuardado'
 import { deudasRepository } from '../repositories'
 import { TipoDeuda } from '../types/deuda'
+import { SelectorMonedaMovimiento } from './SelectorMonedaMovimiento'
 
 interface FormularioDeudaProps {
   uid: string
@@ -28,6 +30,8 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
   const [cuotaMensual, setCuotaMensual] = useState('')
   const [fechaInicio, setFechaInicio] = useState(fechaHoy())
   const [fechaLiquidacion, setFechaLiquidacion] = useState('')
+  const { monedaPrincipal } = useMonedas()
+  const [moneda, setMoneda] = useState(monedaPrincipal)
   const { guardando, error, guardar } = useGuardado()
 
   async function manejarGuardar(e: FormEvent) {
@@ -44,6 +48,7 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
         tipo,
         montoOriginal: valor,
         saldoActual: valor,
+        moneda,
         tasaInteres: tasaInteres ? Number(tasaInteres) : undefined,
         cuotaMensual: cuotaMensual ? Number(cuotaMensual) : undefined,
         fechaInicio,
@@ -96,6 +101,8 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
           required
         />
       </div>
+
+      <SelectorMonedaMovimiento id="deuda-moneda" valor={moneda} onCambiar={setMoneda} />
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="deuda-fecha">Fecha de inicio</Label>

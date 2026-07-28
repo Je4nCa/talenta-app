@@ -5,8 +5,9 @@ import {
   type AuthError as FirebaseAuthError,
   type UserCredential,
 } from 'firebase/auth'
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { deleteField, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { firebaseAuth, firestore } from '@/shared/lib/firebase'
+import { canonizarEmail, normalizarEmail } from '@/shared/lib/email'
 import { sha256Hex } from '@/shared/lib/hash'
 import { buscarPais } from '@/shared/lib/paises'
 import type { LoginInput, NuevoUsuarioInput, UserProfile, UserRole } from '@/shared/types/user'
@@ -20,10 +21,6 @@ import {
 } from '../constants/promociones'
 
 export class AuthError extends Error {}
-
-function normalizarEmail(email: string): string {
-  return email.trim().toLowerCase()
-}
 
 function esErrorFirebase(err: unknown): err is FirebaseAuthError {
   return typeof err === 'object' && err !== null && 'code' in err
@@ -76,8 +73,17 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
   } else if (codigoPromocional === CODIGO_PROMOCIONAL_FACILITADOR) {
     rol = 'facilitador'
   } else if (codigoPromocional === CODIGO_PROMOCIONAL_VALIDO) {
-    const emailHash = await sha256Hex(email)
-    if (!CORREOS_ESTUDIANTES_HASH.includes(emailHash)) {
+    // Se prueba tal como lo escribió y también su forma canónica, para que
+    // quien esté inscrito con `juan.perez@gmail.com` pueda registrarse
+    // escribiendo `juanperez@gmail.com` (es el mismo buzón).
+    const [hashLiteral, hashCanonico] = await Promise.all([
+      sha256Hex(email),
+      sha256Hex(canonizarEmail(email)),
+    ])
+    const inscrito =
+      CORREOS_ESTUDIANTES_HASH.includes(hashLiteral) ||
+      CORREOS_ESTUDIANTES_HASH.includes(hashCanonico)
+    if (!inscrito) {
       throw new AuthError('Este correo no está en la lista de estudiantes inscritos en el curso.')
     }
   } else {
@@ -141,6 +147,14 @@ export async function actualizarVersionBiblia(uid: string, versionBiblia: string
 
 export async function actualizarMoneda(uid: string, monedaCodigo: string): Promise<void> {
   await updateDoc(docUsuario(uid), { monedaCodigo })
+}
+
+/** `null` desactiva la segunda moneda (el usuario vuelve a manejar una sola). */
+export async function actualizarMonedaSecundaria(
+  uid: string,
+  monedaSecundaria: string | null,
+): Promise<void> {
+  await updateDoc(docUsuario(uid), { monedaSecundaria: monedaSecundaria ?? deleteField() })
 }
 
 /**
