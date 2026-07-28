@@ -6,6 +6,7 @@ import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
+import { generarId } from '@/shared/lib/id'
 import { useCategorias } from '../hooks/useCategorias'
 import { useTarjetas } from '../hooks/useTarjetas'
 import { comprimirFacturaADataUrl } from '../lib/imagen'
@@ -78,7 +79,7 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
       const facturaImagen = facturaFile ? await comprimirFacturaADataUrl(facturaFile) : undefined
 
       await gastosRepository.crear({
-        id: crypto.randomUUID(),
+        id: generarId(),
         uid,
         titulo: titulo.trim(),
         monto: valor,

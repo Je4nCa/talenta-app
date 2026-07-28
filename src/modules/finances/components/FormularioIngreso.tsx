@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
+import { generarId } from '@/shared/lib/id'
 import { useGuardado } from '../hooks/useGuardado'
 import { ingresosRepository } from '../repositories'
 
@@ -29,7 +30,7 @@ export function FormularioIngreso({ uid, onGuardado, onCancelar }: FormularioIng
 
     await guardar(async () => {
       await ingresosRepository.crear({
-        id: crypto.randomUUID(),
+        id: generarId(),
         uid,
         titulo: titulo.trim(),
         monto: valor,

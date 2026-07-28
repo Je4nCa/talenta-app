@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
+import { generarId } from '@/shared/lib/id'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { obtenerPlan } from '../constants/planes'
 import { useSuscripcion } from '../hooks/useSuscripcion'
@@ -33,7 +34,7 @@ export function SuscripcionScreen() {
   const uid = usuario.uid
 
   async function manejarContinuar() {
-    const ordenId = crypto.randomUUID()
+    const ordenId = generarId()
     await suscripcionesRepository.crear({
       id: ordenId,
       uid,
