@@ -7,6 +7,7 @@ import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import { useGastosFijos } from '../../hooks/useGastos'
 import { useTarjetas } from '../../hooks/useTarjetas'
 import { tarjetasRepository } from '../../repositories'
+import { cn } from '@/shared/lib/utils'
 import { formatearMonto } from '../../lib/formato'
 import { FormularioIngreso } from '../FormularioIngreso'
 import { FormularioTarjeta } from '../FormularioTarjeta'
@@ -62,6 +63,7 @@ function FilaTarjeta({
     tarjeta.tipo === 'debito'
       ? (tarjeta.saldoInicial ?? 0) + totalDepositado - totalGastado
       : undefined
+  const sobregirada = disponible !== undefined && disponible < 0
 
   const porcentajeUsado =
     tarjeta.tipo === 'credito' && tarjeta.limite
@@ -97,7 +99,12 @@ function FilaTarjeta({
 
       {tarjeta.tipo === 'debito' ? (
         <>
-          <p className="mt-4 text-2xl font-semibold text-talenta-black">
+          <p
+            className={cn(
+              'mt-4 text-2xl font-semibold',
+              sobregirada ? 'text-red-700' : 'text-talenta-black',
+            )}
+          >
             {formatearMonto(disponible ?? 0, monedaTarjeta)}
             <span className="ml-2 text-sm font-normal text-talenta-brown-mid">disponible</span>
           </p>
@@ -106,6 +113,12 @@ function FilaTarjeta({
             {totalDepositado > 0 && ` · Entró ${formatearMonto(totalDepositado, monedaTarjeta)}`}
             {totalGastado > 0 && ` · Gastado ${formatearMonto(totalGastado, monedaTarjeta)}`}
           </p>
+          {sobregirada && (
+            <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              Has gastado más de lo que tenías en esta cuenta. Revisa que el saldo inicial esté
+              correcto o registra el dinero que te entró.
+            </p>
+          )}
 
           <AnimatePresence mode="wait">
             {mostrandoDeposito ? (
