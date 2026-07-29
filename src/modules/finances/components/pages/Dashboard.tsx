@@ -7,6 +7,7 @@ import { useGastosFijos, useGastosPorPeriodo } from '../../hooks/useGastos'
 import { useDeudas } from '../../hooks/useDeudas'
 import { useIngresosPorPeriodo } from '../../hooks/useIngresos'
 import { useMonedas } from '../../hooks/useMonedas'
+import { useTarjetas } from '../../hooks/useTarjetas'
 import { montoMensualEquivalente } from '../../lib/recurrencia'
 import { ingresosRepository } from '../../repositories'
 import { formatearMonto, NOMBRES_MES } from '../../lib/formato'
@@ -59,6 +60,7 @@ export function Dashboard() {
   const { ingresos } = useIngresosPorPeriodo(periodo.anio, periodo.mes)
   const [mostrandoForm, setMostrandoForm] = useState(false)
   const { aPrincipal, tieneDosMonedas, fechaTasas } = useMonedas()
+  const { tarjetas } = useTarjetas()
 
   if (!usuario) return null
 
@@ -180,7 +182,13 @@ export function Dashboard() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-base font-medium text-talenta-black">{i.titulo}</p>
-                  <p className="text-sm text-talenta-brown-mid">{i.fecha}</p>
+                  <p className="text-sm text-talenta-brown-mid">
+                    {i.fecha}
+                    {(() => {
+                      const cuenta = tarjetas.find((t) => t.id === i.tarjetaId)
+                      return cuenta ? ` · ${cuenta.banco} ${cuenta.nombre}` : ''
+                    })()}
+                  </p>
                 </div>
                 <p className="shrink-0 text-base font-semibold text-talenta-black">
                   {formatearMonto(i.monto, i.moneda ?? moneda)}

@@ -8,9 +8,10 @@ import { useGastosFijos } from '../../hooks/useGastos'
 import { useTarjetas } from '../../hooks/useTarjetas'
 import { tarjetasRepository } from '../../repositories'
 import { formatearMonto } from '../../lib/formato'
-import { FormularioAbono } from '../FormularioAbono'
+import { FormularioIngreso } from '../FormularioIngreso'
 import { FormularioTarjeta } from '../FormularioTarjeta'
 import type { Gasto } from '../../types/gasto'
+import type { Ingreso } from '../../types/ingreso'
 import type { AbonoTarjeta, TarjetaCredito } from '../../types/tarjeta'
 
 function useTotalGastadoTarjeta(uid: string, tarjetaId: string) {
@@ -19,13 +20,26 @@ function useTotalGastadoTarjeta(uid: string, tarjetaId: string) {
 }
 
 /**
- * En una tarjeta de débito, un `AbonoTarjeta` es dinero que **entra**
- * (salario depositado, transferencia, recarga) — al revés que en crédito,
- * donde es un pago de lo gastado. Por eso aquí suma al disponible.
+ * Dinero que **entró** a una cuenta de débito.
+ *
+ * La vía normal es un `Ingreso` con `tarjetaId` (un salario o transferencia
+ * que cae en esa cuenta): así el mismo movimiento cuenta en el balance del
+ * mes y sube el disponible, sin registrarlo dos veces. Se siguen sumando los
+ * `AbonoTarjeta` de débito por compatibilidad con lo que ya se hubiera
+ * registrado con el botón anterior.
  */
-function useTotalDepositado(uid: string, tarjetaId: string) {
+function useTotalIngresado(uid: string, tarjetaId: string) {
+  const { datos: ingresos } = useColeccionUsuario<Ingreso>(uid, 'ingresos')
   const { datos: abonos } = useColeccionUsuario<AbonoTarjeta>(uid, 'abonosTarjeta')
-  return abonos.filter((a) => a.tarjetaId === tarjetaId).reduce((acc, a) => acc + a.monto, 0)
+
+  const porIngresos = ingresos
+    .filter((i) => i.tarjetaId === tarjetaId)
+    .reduce((acc, i) => acc + i.monto, 0)
+  const porAbonosPrevios = abonos
+    .filter((a) => a.tarjetaId === tarjetaId)
+    .reduce((acc, a) => acc + a.monto, 0)
+
+  return porIngresos + porAbonosPrevios
 }
 
 function FilaTarjeta({
@@ -40,7 +54,7 @@ function FilaTarjeta({
   totalFijos: number
 }) {
   const totalGastado = useTotalGastadoTarjeta(uid, tarjeta.id)
-  const totalDepositado = useTotalDepositado(uid, tarjeta.id)
+  const totalDepositado = useTotalIngresado(uid, tarjeta.id)
   const [mostrandoDeposito, setMostrandoDeposito] = useState(false)
   const monedaTarjeta = tarjeta.moneda ?? moneda
 
@@ -89,21 +103,16 @@ function FilaTarjeta({
           </p>
           <p className="mt-1 text-sm text-talenta-brown-mid">
             Saldo inicial {formatearMonto(tarjeta.saldoInicial ?? 0, monedaTarjeta)}
-            {totalDepositado > 0 && ` · Ingresado ${formatearMonto(totalDepositado, monedaTarjeta)}`}
+            {totalDepositado > 0 && ` · Entró ${formatearMonto(totalDepositado, monedaTarjeta)}`}
             {totalGastado > 0 && ` · Gastado ${formatearMonto(totalGastado, monedaTarjeta)}`}
           </p>
 
           <AnimatePresence mode="wait">
             {mostrandoDeposito ? (
-              <FormularioAbono
+              <FormularioIngreso
                 key="deposito"
                 uid={uid}
-                tarjetaId={tarjeta.id}
-                moneda={monedaTarjeta}
-                anio={new Date().getFullYear()}
-                mes={new Date().getMonth() + 1}
-                etiquetaMonto="¿Cuánto dinero entró?"
-                textoBoton="Agregar"
+                tarjetaIdInicial={tarjeta.id}
                 onGuardado={() => setMostrandoDeposito(false)}
                 onCancelar={() => setMostrandoDeposito(false)}
               />
