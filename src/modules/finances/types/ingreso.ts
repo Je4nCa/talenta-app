@@ -13,6 +13,14 @@ export interface Ingreso {
   titulo: string
   monto: number
   fecha: FechaISO
+  /**
+   * Cuenta/tarjeta de débito a la que entró el dinero, opcional (si el
+   * ingreso fue en efectivo no aplica). Cuando está, el monto suma al
+   * disponible de esa tarjeta — el espejo de un gasto pagado con ella.
+   * Sin esto un ingreso "quedaba en el aire": contaba en el balance del mes
+   * pero no se reflejaba en el saldo de la cuenta donde realmente cayó.
+   */
+  tarjetaId?: ID
   notas?: string
   /**
    * Moneda en la que ocurrió realmente este movimiento. `undefined` = la
