@@ -11,6 +11,7 @@ import { canonizarEmail, normalizarEmail } from '@/shared/lib/email'
 import { sha256Hex } from '@/shared/lib/hash'
 import { buscarPais } from '@/shared/lib/paises'
 import type { LoginInput, NuevoUsuarioInput, UserProfile, UserRole } from '@/shared/types/user'
+import { estaAutorizadoEnFirestore } from '@/modules/admin/repositories/correosAutorizados.repository'
 import { CORREOS_ESTUDIANTES_HASH } from '../constants/estudiantesInscritos'
 import { VERSION_TERMINOS } from '../constants/legal'
 import {
@@ -57,6 +58,34 @@ async function recuperarRegistroIncompleto(
   return credencial
 }
 
+/**
+ * ¿Este correo puede registrarse como estudiante?
+ *
+ * Primero consulta la lista que Carlos y Alicia administran desde el panel
+ * (Firestore); si ahí no está, cae a `CORREOS_ESTUDIANTES_HASH`, la lista
+ * inicial que vive en el código. Ese respaldo evita que un fallo de red o
+ * una colección todavía vacía dejen fuera a los estudiantes ya inscritos.
+ *
+ * En ambos casos se prueba el correo tal como se escribió y su forma
+ * canónica, porque en Gmail `juan.perez@` y `juanperez@` son el mismo buzón.
+ */
+async function esEstudianteInscrito(email: string): Promise<boolean> {
+  try {
+    if (await estaAutorizadoEnFirestore(email)) return true
+  } catch {
+    // Sin conexión o sin permisos: seguimos con la lista del código.
+  }
+
+  const [hashLiteral, hashCanonico] = await Promise.all([
+    sha256Hex(email),
+    sha256Hex(canonizarEmail(email)),
+  ])
+  return (
+    CORREOS_ESTUDIANTES_HASH.includes(hashLiteral) ||
+    CORREOS_ESTUDIANTES_HASH.includes(hashCanonico)
+  )
+}
+
 export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserProfile> {
   const email = normalizarEmail(input.email)
 
@@ -73,17 +102,7 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
   } else if (codigoPromocional === CODIGO_PROMOCIONAL_FACILITADOR) {
     rol = 'facilitador'
   } else if (codigoPromocional === CODIGO_PROMOCIONAL_VALIDO) {
-    // Se prueba tal como lo escribió y también su forma canónica, para que
-    // quien esté inscrito con `juan.perez@gmail.com` pueda registrarse
-    // escribiendo `juanperez@gmail.com` (es el mismo buzón).
-    const [hashLiteral, hashCanonico] = await Promise.all([
-      sha256Hex(email),
-      sha256Hex(canonizarEmail(email)),
-    ])
-    const inscrito =
-      CORREOS_ESTUDIANTES_HASH.includes(hashLiteral) ||
-      CORREOS_ESTUDIANTES_HASH.includes(hashCanonico)
-    if (!inscrito) {
+    if (!(await esEstudianteInscrito(email))) {
       throw new AuthError('Este correo no está en la lista de estudiantes inscritos en el curso.')
     }
   } else {
