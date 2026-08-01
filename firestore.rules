@@ -53,6 +53,21 @@ service cloud.firestore {
       }
     }
 
+    // Correos autorizados a registrarse como estudiante, administrados por
+    // Carlos y Alicia desde el panel.
+    //
+    // El id de cada documento es el hash SHA-256 del correo, y `get` es
+    // público **a propósito**: durante el registro la app todavía no tiene
+    // sesión y necesita preguntar "¿está autorizado este correo?". Solo
+    // puede preguntar por un hash concreto, que ya requiere conocer el
+    // correo; `list` queda restringido a superadmin para que nadie pueda
+    // descargar la lista de correos de los estudiantes.
+    match /correosAutorizados/{hash} {
+      allow get: if true;
+      allow list: if esAdmin();
+      allow create, update, delete: if esAdmin();
+    }
+
     // Todo lo que no esté explícitamente permitido arriba queda cerrado.
     match /{document=**} {
       allow read, write: if false;
