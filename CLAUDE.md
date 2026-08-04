@@ -163,6 +163,8 @@ Cada módulo tiene su propio hook principal (`useCourse`, `useFinances`, `useBib
 
   **Duplicados de correo:** los bloquea Firebase Auth (verificado el 2026-07-28 sobre los datos reales: 17 perfiles, cero correos repetidos y cero variantes del mismo buzón). El único camino que permite volver a "Crear cuenta" con un correo existente es el de registro incompleto (cuenta en Auth sin perfil en Firestore), y exige la contraseña correcta **y** que no exista perfil; si el perfil existe, corta con "Ya existe una cuenta con este correo".
 
+  - `CODIGO_PROMOCIONAL_CHARLA` (`WEFCR2026`, 2026-08-04) → rol `student`: para la charla de promoción de Carlos. **Solo valida el código**, sin lista de correos (quien asiste no está inscrito en el curso). Su mes de prueba se cuenta **desde su propio registro** (`obtenerFinPruebaDesdeHoy()`), no desde `INICIO_PERIODO_GRATUITO` — la charla es en otra fecha y si no llegarían con la prueba ya vencida.
+
   Solo las cuentas de estudiante (`rol: 'student'`) reciben `finPeriodoGratuito` (`obtenerFinPeriodoGratuito()`, fecha fija `INICIO_PERIODO_GRATUITO` + 1 mes — **igual para todos los estudiantes**, no depende de la fecha de registro de cada quien). Las cuentas `facilitador` y `superadmin` **no** tienen este campo (queda `undefined`) — significa acceso completo, ilimitado y sin costo desde el registro, sin período de prueba ni suscripción; `ProfileScreen.tsx` y `SuscripcionScreen.tsx` muestran una tarjeta "Acceso completo" en vez del contador de días/botón de suscripción cuando este campo no existe. Aun así, **facilitador y superadmin son usuarios tradicionales**: usan Biblia, Finanzas y Perfil exactamente igual que un estudiante, solo que además tienen acceso completo sin paywall — y únicamente `superadmin` ve además el tab Admin. **Pendiente:** no hay todavía ningún bloqueo real de acceso cuando el período de un estudiante vence (eso depende de la integración de TiloPay, ver sección Pagos) — por ahora Perfil solo muestra cuántos días quedan o que ya venció, sin restringir el uso de la app.
 
 ### Curso — eliminado de Fase 1
@@ -254,18 +256,27 @@ Resumen semanal = vista agregada por categoría, calculada en cliente.
 - **Comisiones confirmadas** (`tilopay.com/tarifas`, específico para Costa Rica): 4.25% + $0.35 por tarjeta, 2% + $0.35 por SINPE Móvil — se muestran como nota debajo del selector de planes en `SuscripcionScreen.tsx`, antes de confirmar el pago.
 
 ### Panel de administración
-- Ruta protegida por `rol === 'superadmin'` en el perfil del usuario — **ni** `student` **ni** `facilitador` lo ven (ver "Código promocional obligatorio al registrarse" en Auth para los tres roles y sus códigos).
-- Roster paginado con columnas: nombre, pagó (sí/no), descargó el manual (sí/no), lección actual, última actividad
-- Vista de seguimiento semanal: usuarios sin actividad en los últimos 7 días
-- Desglose de completado por lección
-- Buzón de sugerencias (solo lectura) — **pendiente**, distinto del botón de feedback de abajo: este buzón implica guardar el feedback en Firestore para que el admin lo vea dentro de la app, y no existe todavía (requiere Firebase).
+
+**Construido (2026-08-04)** — `AdminHome.tsx`, ruta protegida por `rol === 'superadmin'` (**ni** `student` **ni** `facilitador` lo ven). Tres tabs:
+
+- **Correos** (`GestionCorreos.tsx`): Carlos y Alicia autorizan correos de estudiantes **sin depender de un despliegue**. Antes había que editar `CORREOS_ESTUDIANTES_HASH` en el código y volver a publicar cada vez que alguien se inscribía tarde. Cada fila marca si esa persona **ya creó su cuenta o no** — es la pregunta que surge cuando alguien dice "no puedo entrar".
+- **Registrados** (`RosterUsuarios.tsx`): todos los perfiles con conteo por rol.
+- **Feedback** (`BuzonFeedback.tsx`): buzón de mensajes, se pueden marcar como leídos.
+
+**Colección `correosAutorizados`** (raíz de Firestore, repositorio en `modules/admin/repositories/`): el **id de cada documento es el SHA-256 del correo**. Las reglas permiten `get` público pero `list` solo a superadmin — el registro no tiene sesión todavía y necesita preguntar "¿está autorizado este correo?", y preguntar exige ya conocer el correo, así que **nadie puede descargar el listado de estudiantes**. Se guardan dos documentos por correo (forma literal y canónica de Gmail).
+
+**El registro consulta Firestore primero y cae a `CORREOS_ESTUDIANTES_HASH` si falla** (`esEstudianteInscrito` en `authService.ts`). Ese respaldo es deliberado: se verificó que con las reglas sin publicar la consulta a Firestore es rechazada y **todos los estudiantes ya inscritos se siguen registrando bien**. No quitar ese fallback sin migrar antes la lista completa a Firestore.
+
+**Pendiente:** seguimiento semanal, progreso por lección y estado de pago (dependen de módulos que no existen todavía).
 
 ### Feedback de usuarios (EmailJS)
 
 **Decisión ya tomada:** TALENTA hoy es una SPA estática sin backend, así que no hay forma de enviar un correo desde un servidor propio. Se usa **EmailJS** (`@emailjs/browser`) para enviar el feedback directo desde el navegador, sin pasar por el buzón de Firestore de arriba (ese es para más adelante).
 
 - **Botón "Enviar feedback"** en Perfil (`src/modules/auth/components/FeedbackForm.tsx`), debajo de "Acerca de". Al enviar, llama a `emailjs.send(serviceId, templateId, { nombre_usuario, email_usuario, mensaje, fecha }, { publicKey })` — el nombre y correo del usuario se toman automáticamente de su perfil (`usuario.nombre` / `usuario.email`), no los vuelve a escribir, así Carlos y Alicia siempre saben quién mandó cada feedback. `fecha` se formatea en el cliente con `toLocaleString('es', { dateStyle: 'long', timeStyle: 'short' })`.
-- **Ya configurado y verificado end-to-end** (correo de destino `info@talentaapp.com`, dominio propio — antes `montevostudio@outlook.com`). El destino real ("To Email" en la pestaña Settings de la plantilla) vive **solo en el dashboard de EmailJS**, no en este repo — si cambia, hay que actualizarlo ahí manualmente. Las tres claves (Service ID, Template ID, Public Key) viven en `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID` y `VITE_EMAILJS_PUBLIC_KEY` — mismo patrón que `VITE_BIBLIA_API_KEY`: `.env.local` en desarrollo (gitignorado, ver `.env.example`), GitHub Actions secrets del mismo nombre en producción (`.github/workflows/deploy.yml`).
+- **El feedback también se guarda en Firestore** (colección `feedback`, `modules/admin/repositories/feedback.repository.ts`), no solo se manda por correo. Antes un mensaje existía **únicamente** como correo: si EmailJS fallaba o llegaba a un buzón equivocado, se perdía sin dejar rastro — pasó de verdad (Jean reportó "no tengo nada" sin forma de comprobar si alguien había escrito). El guardado ocurre **aunque el envío del correo falle**, y cada registro anota `correoEnviado` para detectar fallos. Se lee desde el tab Feedback del panel. Reglas: cualquier usuario con sesión puede crear un mensaje **solo bajo su propio uid**; leer y marcar leído es exclusivo de superadmin; **nadie puede borrar** (para que no se puedan eliminar quejas).
+- **El correo de destino vive SOLO en el dashboard de EmailJS** (campo "To Email" en la pestaña Settings de la plantilla), **no en este repo** — no se puede cambiar desde el código. Si piden cambiarlo, hay que hacerlo ahí manualmente.
+- **Ya configurado y verificado end-to-end** (destino histórico: `info@talentaapp.com`; en 2026-08-04 se pidió volver a `montevostudio@outlook.com`). El destino real ("To Email" en la pestaña Settings de la plantilla) vive **solo en el dashboard de EmailJS**, no en este repo — si cambia, hay que actualizarlo ahí manualmente. Las tres claves (Service ID, Template ID, Public Key) viven en `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID` y `VITE_EMAILJS_PUBLIC_KEY` — mismo patrón que `VITE_BIBLIA_API_KEY`: `.env.local` en desarrollo (gitignorado, ver `.env.example`), GitHub Actions secrets del mismo nombre en producción (`.github/workflows/deploy.yml`).
 - **Ojo con la plantilla de EmailJS:** las plantillas nuevas de EmailJS traen un contenido de ejemplo con variables `{{name}}` / `{{message}}` que no coinciden con lo que manda el código (`nombre_usuario`, `email_usuario`, `mensaje`, `fecha`) — si no se reemplaza el contenido de la plantilla, el correo llega vacío/con el texto de ejemplo sin romper nada (bug real encontrado y corregido: el primer envío de prueba llegó como plantilla demo). La plantilla actual ya fue reemplazada por un diseño con los colores de marca de TALENTA y las variables correctas; el campo "To Email" y "Reply To" (`{{email_usuario}}`) se configuran en la pestaña "Settings" de la plantilla, no en "Content".
 - **Misma advertencia de seguridad que la key de Biblia.com:** la Public Key de EmailJS queda visible en el navegador de cualquier visitante (es pública por diseño del servicio, pensada para usarse así desde el cliente), y el Service ID/Template ID tampoco son secretos. No hay forma de evitar esto sin backend propio. Aceptado como limitación, no un descuido.
 - Sin las tres variables configuradas, `FeedbackForm` falla de forma controlada (mensaje "No se pudo enviar tu feedback...") sin romper la UI.
@@ -299,6 +310,8 @@ Estas rutas existen como pantalla "Próximamente" sin ninguna lógica:
 - Sin librerías nuevas sin consultar primero.
 - El código del módulo `Finanzas/` original no se modifica. Se lee, se adapta en `src/modules/finances/`.
 - **Nunca usar valores arbitrarios de Tailwind en px para texto o íconos** (`text-[11px]`, `h-[18px]`) — el slider de accesibilidad (`useAccesibilidad`, `src/shared/hooks/useAccesibilidad.ts`) escala toda la interfaz cambiando el `font-size` del `<html>`, y eso solo funciona con unidades `rem` (las clases normales de Tailwind como `text-xs`, `h-5`, o arbitrarios en rem como `text-[0.6875rem]`). Un valor en px absoluto queda congelado sin importar el ajuste del usuario. Bug real encontrado y corregido en `FinanceBottomNav.tsx`.
+- **Nunca usar `new Date().toISOString().slice(0, 10)` para "hoy"** — eso da la fecha en **UTC**. En Costa Rica (UTC-6) a partir de las 6 p.m. ya es el día siguiente en UTC: los formularios proponían *mañana*, y un gasto registrado la noche del último día del mes caía en el mes siguiente y desaparecía de la vista del mes en curso. Usar siempre `fechaHoyLocal()` de `src/shared/lib/fecha.ts`. Bug real encontrado y corregido en los 5 formularios de Finanzas y en el pie de los PDF.
+- **Los movimientos se filtran por mes** (`useGastosPorPeriodo` y equivalentes): un gasto con fecha de otro mes se guarda bien pero **aparece en ese otro mes**. `FormularioGasto` avisa cuando la fecha elegida cae fuera del mes actual — sin ese aviso los usuarios creían que "no se había guardado" (reporte real de Carlos).
 - **Nunca hardcodear una ruta absoluta (`/assets/...`) para un archivo de `public/` dentro de un componente React** — en producción el build usa `base: '/talenta-app/'` (`vite.config.ts`, por GitHub Pages sirviendo desde un subpath), así que `/assets/x.png` resuelve a `github.io/assets/x.png` (404) en vez de `github.io/talenta-app/assets/x.png`. Usar siempre `` `${import.meta.env.BASE_URL}assets/x.png` ``. En `index.html` (favicon, manifest, etc.) usar el placeholder `%BASE_URL%assets/x.png`, que Vite sustituye en build — una ruta absoluta ahí tiene el mismo bug. Bug real encontrado y corregido en `ProfileScreen.tsx` (logo de Montevo Studio) e `index.html`.
 
 ---
@@ -332,3 +345,15 @@ Estas rutas existen como pantalla "Próximamente" sin ninguna lógica:
 | Botón de feedback de usuarios | `src/modules/auth/components/FeedbackForm.tsx` (Perfil) |
 | Claves de EmailJS (local) | `.env.local` → `VITE_EMAILJS_SERVICE_ID` / `VITE_EMAILJS_TEMPLATE_ID` / `VITE_EMAILJS_PUBLIC_KEY` |
 | Claves de EmailJS (deploy) | GitHub Actions secrets del mismo nombre en el repo |
+
+---
+
+## Pendientes fuera del repo (no se pueden resolver con código)
+
+Al 2026-08-04, cosas que solo puede hacer Jean desde una consola externa:
+
+1. **EmailJS — cambiar el destino del feedback** a `montevostudio@outlook.com`: dashboard de EmailJS → Email Templates → la plantilla → pestaña **Settings** → campo **To Email**. No existe en el repo.
+2. **Firestore Rules** — cada vez que cambie `firestore.rules` hay que pegarlo en Firebase Console → Firestore Database → Rules. Los cambios locales al archivo **no se aplican solos** (no hay Firebase CLI autenticado en este entorno; `firebase login` es interactivo).
+3. **Limpieza opcional**: quedan cuentas de prueba en Firebase Auth/Firestore creadas al verificar (`fb-superadmin-…`, `bugfix-test-…`, `verif-…`, `huerfana-test-…`, `charla-…`) y un mensaje "Prueba de verificación" en el buzón de feedback (las reglas prohíben borrar feedback a propósito).
+
+**Al verificar contra Firebase real, nunca usar el correo real de un estudiante** para pruebas de registro: crea la cuenta y luego esa persona no puede registrarse. Ya pasó dos veces (con `jhosy.mijares@` e `ing.itzel7@`) y hubo que borrarlas a mano. Usar siempre correos sintéticos con timestamp.
