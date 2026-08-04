@@ -1,4 +1,5 @@
 import { jsPDF } from 'jspdf'
+import { fechaHoyLocal } from '@/shared/lib/fecha'
 import autoTable from 'jspdf-autotable'
 import { CATEGORIAS_BIEN_ORDENADAS } from '../constants/bienes'
 import { CATEGORIAS_DEUDA_ORDENADAS } from '../constants/deudas'
@@ -10,9 +11,7 @@ import type { CeldaRIE } from '../types/rie'
 const NEGRO: [number, number, number] = [31, 27, 23]
 const TAN: [number, number, number] = [219, 198, 178]
 
-function fechaHoy(): string {
-  return new Date().toISOString().slice(0, 10)
-}
+
 
 /**
  * Las fuentes estándar de jsPDF (helvetica) solo soportan WinAnsiEncoding
@@ -39,7 +38,7 @@ function encabezado(doc: jsPDF, titulo: string, nombreUsuario: string, emailUsua
   doc.setFontSize(10)
   doc.text(`Nombre: ${nombreUsuario}`, 14, 36)
   doc.text(`Correo: ${emailUsuario}`, 14, 42)
-  doc.text(`Fecha de elaboración: ${fechaHoy()}`, 14, 48)
+  doc.text(`Fecha de elaboración: ${fechaHoyLocal()}`, 14, 48)
 
   return 56
 }

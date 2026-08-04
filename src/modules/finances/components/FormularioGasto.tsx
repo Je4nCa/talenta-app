@@ -6,10 +6,12 @@ import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
+import { fechaHoyLocal } from '@/shared/lib/fecha'
 import { generarId } from '@/shared/lib/id'
 import { useCategorias } from '../hooks/useCategorias'
 import { useMonedas } from '../hooks/useMonedas'
 import { useTarjetas } from '../hooks/useTarjetas'
+import { NOMBRES_MES } from '../lib/formato'
 import { comprimirFacturaADataUrl } from '../lib/imagen'
 import { gastosRepository } from '../repositories'
 import type { TipoPago } from '../types/gasto'
@@ -21,9 +23,6 @@ interface FormularioGastoProps {
   onCancelar: () => void
 }
 
-function fechaHoy(): string {
-  return new Date().toISOString().slice(0, 10)
-}
 
 export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGastoProps) {
   const { tarjetas } = useTarjetas()
@@ -33,7 +32,7 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
   const [categoriaId, setCategoriaId] = useState('')
   const [tipoPago, setTipoPago] = useState<TipoPago>('contado')
   const [tarjetaId, setTarjetaId] = useState('')
-  const [fecha, setFecha] = useState(fechaHoy())
+  const [fecha, setFecha] = useState(fechaHoyLocal())
   const [esCompraFutura, setEsCompraFutura] = useState(false)
   const [fechaCobro, setFechaCobro] = useState('')
   const [facturaFile, setFacturaFile] = useState<File | null>(null)
@@ -62,6 +61,15 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
   function manejarSeleccionFactura(e: ChangeEvent<HTMLInputElement>) {
     setFacturaFile(e.target.files?.[0] ?? null)
   }
+
+  // Un gasto con fecha de otro mes se guarda bien, pero aparece en ese otro
+  // mes — la lista filtra por período. Sin este aviso parecía que "no se
+  // había guardado" (reporte real de un usuario).
+  const mesDeLaFecha = fecha.slice(0, 7)
+  const esDeOtroMes = Boolean(fecha) && mesDeLaFecha !== fechaHoyLocal().slice(0, 7)
+  const nombreMesDeLaFecha = esDeOtroMes
+    ? `${NOMBRES_MES[Number(mesDeLaFecha.slice(5, 7)) - 1] ?? ''} ${mesDeLaFecha.slice(0, 4)}`
+    : ''
 
   const tarjetasDisponibles =
     tipoPago === 'tarjeta'
@@ -165,6 +173,12 @@ export function FormularioGasto({ uid, onGuardado, onCancelar }: FormularioGasto
           onChange={(e) => setFecha(e.target.value)}
           required
         />
+        {esDeOtroMes && (
+          <p className="rounded-lg bg-talenta-gold/15 px-3 py-2 text-sm text-talenta-brown-dark">
+            Este gasto quedará registrado en {nombreMesDeLaFecha}. Para verlo, cambia de mes con
+            las flechas de arriba.
+          </p>
+        )}
       </div>
 
       <label htmlFor="gasto-futuro" className="flex cursor-pointer items-center gap-3">

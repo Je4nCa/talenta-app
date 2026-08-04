@@ -4,6 +4,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
+import { fechaHoyLocal } from '@/shared/lib/fecha'
 import { generarId } from '@/shared/lib/id'
 import { useMonedas } from '../hooks/useMonedas'
 import { useTarjetas } from '../hooks/useTarjetas'
@@ -19,9 +20,6 @@ interface FormularioIngresoProps {
   onCancelar: () => void
 }
 
-function fechaHoy(): string {
-  return new Date().toISOString().slice(0, 10)
-}
 
 export function FormularioIngreso({
   uid,
@@ -33,7 +31,7 @@ export function FormularioIngreso({
   const [tarjetaId, setTarjetaId] = useState(tarjetaIdInicial ?? '')
   const [titulo, setTitulo] = useState('')
   const [monto, setMonto] = useState('')
-  const [fecha, setFecha] = useState(fechaHoy())
+  const [fecha, setFecha] = useState(fechaHoyLocal())
   const { monedaPrincipal } = useMonedas()
   const [moneda, setMoneda] = useState(monedaPrincipal)
   const { guardando, error, guardar } = useGuardado()

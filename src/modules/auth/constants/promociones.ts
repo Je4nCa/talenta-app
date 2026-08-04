@@ -33,6 +33,16 @@ export const CODIGO_PROMOCIONAL_SUPERADMIN = 'TALENTAADMIN272612'
 export const CODIGO_PROMOCIONAL_FACILITADOR = 'TALEFACILITA2026'
 
 /**
+ * Código de la charla de promoción de Carlos (WEF 2026): **solo valida el
+ * código**, no exige que el correo esté en ninguna lista — quien asiste a la
+ * charla no está inscrito en el curso. Da rol `student` con 1 mes de prueba
+ * contado **desde su propio registro** (`obtenerFinPruebaDesdeHoy`), no
+ * desde la fecha de arranque del curso: la charla es en otra fecha y si no
+ * fuera así llegarían con la prueba ya vencida.
+ */
+export const CODIGO_PROMOCIONAL_CHARLA = 'WEFCR2026'
+
+/**
  * La prueba gratuita NO se cuenta desde la fecha de registro de cada
  * usuario — inicia el mismo día para todos (fecha de arranque real del
  * curso), sin importar cuándo se registre cada estudiante.
@@ -43,5 +53,19 @@ export const DIAS_PERIODO_GRATUITO_MESES = 1
 export function obtenerFinPeriodoGratuito(): string {
   const fin = new Date(`${INICIO_PERIODO_GRATUITO}T00:00:00`)
   fin.setMonth(fin.getMonth() + DIAS_PERIODO_GRATUITO_MESES)
-  return fin.toISOString().slice(0, 10)
+  return aFechaLocal(fin)
+}
+
+/** 1 mes desde hoy — para quienes entran por la charla, no por el curso. */
+export function obtenerFinPruebaDesdeHoy(): string {
+  const fin = new Date()
+  fin.setMonth(fin.getMonth() + DIAS_PERIODO_GRATUITO_MESES)
+  return aFechaLocal(fin)
+}
+
+/** YYYY-MM-DD en la zona del usuario (ver `shared/lib/fecha.ts`). */
+function aFechaLocal(fecha: Date): string {
+  return new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60_000)
+    .toISOString()
+    .slice(0, 10)
 }

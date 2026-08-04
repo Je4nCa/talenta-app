@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
+import { fechaHoyLocal } from '@/shared/lib/fecha'
 import { useGuardado } from '../hooks/useGuardado'
 import { abonosDeudaRepository } from '../repositories'
 
@@ -13,13 +14,10 @@ interface FormularioAbonoDeudaProps {
   onCancelar: () => void
 }
 
-function fechaHoy(): string {
-  return new Date().toISOString().slice(0, 10)
-}
 
 export function FormularioAbonoDeuda({ uid, deudaId, onGuardado, onCancelar }: FormularioAbonoDeudaProps) {
   const [monto, setMonto] = useState('')
-  const [fecha, setFecha] = useState(fechaHoy())
+  const [fecha, setFecha] = useState(fechaHoyLocal())
   const { guardando, error, guardar } = useGuardado()
 
   async function manejarGuardar(e: FormEvent) {
