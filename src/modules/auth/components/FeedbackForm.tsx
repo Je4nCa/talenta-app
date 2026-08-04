@@ -6,15 +6,17 @@ import { Button } from '@/shared/components/ui/button'
 import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { sanitizarTextoLibre, sanitizarValorPlano } from '@/shared/lib/sanitize'
+import { guardarFeedback } from '@/modules/admin/repositories/feedback.repository'
 
 const MENSAJE_LARGO_MAXIMO = 2000
 
 interface FeedbackFormProps {
+  uid: string
   nombre: string
   email: string
 }
 
-export function FeedbackForm({ nombre, email }: FeedbackFormProps) {
+export function FeedbackForm({ uid, nombre, email }: FeedbackFormProps) {
   const [abierto, setAbierto] = useState(false)
   const [mensaje, setMensaje] = useState('')
   const [enviando, setEnviando] = useState(false)
@@ -27,6 +29,11 @@ export function FeedbackForm({ nombre, email }: FeedbackFormProps) {
 
     setEnviando(true)
     setError(null)
+
+    // Se guarda en Firestore pase lo que pase con el correo: antes, si
+    // EmailJS fallaba o el correo terminaba en el buzón equivocado, el
+    // mensaje se perdía sin dejar rastro.
+    let correoEnviado = false
     try {
       await emailjs.send(
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
@@ -52,10 +59,29 @@ export function FeedbackForm({ nombre, email }: FeedbackFormProps) {
         },
         { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY },
       )
+      correoEnviado = true
+    } catch {
+      // Seguimos: el mensaje igual queda guardado abajo.
+    }
+
+    try {
+      await guardarFeedback({
+        uid,
+        nombre: nombre.trim(),
+        email,
+        mensaje: mensaje.trim(),
+        correoEnviado,
+      })
       setEnviado(true)
       setMensaje('')
     } catch {
-      setError('No se pudo enviar tu feedback. Intenta de nuevo en un momento.')
+      if (correoEnviado) {
+        // El correo sí salió; no vale la pena alarmar al usuario.
+        setEnviado(true)
+        setMensaje('')
+      } else {
+        setError('No se pudo enviar tu feedback. Intenta de nuevo en un momento.')
+      }
     } finally {
       setEnviando(false)
     }

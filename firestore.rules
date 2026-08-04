@@ -68,6 +68,16 @@ service cloud.firestore {
       allow create, update, delete: if esAdmin();
     }
 
+    // Buzón de feedback. Cualquier usuario con sesión puede dejar un mensaje
+    // (y solo a su propio nombre), pero leerlo es cosa del superadmin: son
+    // mensajes privados de otras personas. Nadie puede editar ni borrar lo
+    // ya enviado, salvo el admin para marcarlo como leído.
+    match /feedback/{id} {
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow read, update: if esAdmin();
+      allow delete: if false;
+    }
+
     // Todo lo que no esté explícitamente permitido arriba queda cerrado.
     match /{document=**} {
       allow read, write: if false;

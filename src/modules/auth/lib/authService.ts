@@ -15,10 +15,12 @@ import { estaAutorizadoEnFirestore } from '@/modules/admin/repositories/correosA
 import { CORREOS_ESTUDIANTES_HASH } from '../constants/estudiantesInscritos'
 import { VERSION_TERMINOS } from '../constants/legal'
 import {
+  CODIGO_PROMOCIONAL_CHARLA,
   CODIGO_PROMOCIONAL_FACILITADOR,
   CODIGO_PROMOCIONAL_SUPERADMIN,
   CODIGO_PROMOCIONAL_VALIDO,
   obtenerFinPeriodoGratuito,
+  obtenerFinPruebaDesdeHoy,
 } from '../constants/promociones'
 
 export class AuthError extends Error {}
@@ -96,6 +98,9 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
 
   const codigoPromocional = input.codigoPromocional.trim().toUpperCase()
   let rol: UserRole = 'student'
+  // Quien entra por la charla no está inscrito en el curso: su mes de prueba
+  // corre desde que se registra, no desde el arranque del curso.
+  const esDeCharla = codigoPromocional === CODIGO_PROMOCIONAL_CHARLA
 
   if (codigoPromocional === CODIGO_PROMOCIONAL_SUPERADMIN) {
     rol = 'superadmin'
@@ -105,6 +110,8 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     if (!(await esEstudianteInscrito(email))) {
       throw new AuthError('Este correo no está en la lista de estudiantes inscritos en el curso.')
     }
+  } else if (esDeCharla) {
+    // Solo el código; sin lista de correos.
   } else {
     throw new AuthError('Código promocional inválido.')
   }
@@ -145,7 +152,9 @@ export async function registrarUsuario(input: NuevoUsuarioInput): Promise<UserPr
     // Las cuentas facilitador y superadmin tienen acceso completo sin costo
     // desde el registro — no aplica período de prueba. Solo los estudiantes
     // reciben finPeriodoGratuito.
-    ...(rol === 'student' ? { finPeriodoGratuito: obtenerFinPeriodoGratuito() } : {}),
+    ...(rol === 'student'
+      ? { finPeriodoGratuito: esDeCharla ? obtenerFinPruebaDesdeHoy() : obtenerFinPeriodoGratuito() }
+      : {}),
   }
 
   try {

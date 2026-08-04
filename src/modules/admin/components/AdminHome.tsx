@@ -3,6 +3,7 @@ import { ShieldCheck } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { ModuleScreen } from '@/shared/components/ModuleScreen'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { BuzonFeedback } from './BuzonFeedback'
 import { GestionCorreos } from './GestionCorreos'
 import { RosterUsuarios } from './RosterUsuarios'
 
@@ -26,12 +27,16 @@ export function AdminHome() {
           <TabsList>
             <TabsTrigger value="correos">Correos</TabsTrigger>
             <TabsTrigger value="roster">Registrados</TabsTrigger>
+            <TabsTrigger value="feedback">Feedback</TabsTrigger>
           </TabsList>
           <TabsContent value="correos">
             <GestionCorreos emailAdmin={usuario?.email ?? ''} />
           </TabsContent>
           <TabsContent value="roster">
             <RosterUsuarios />
+          </TabsContent>
+          <TabsContent value="feedback">
+            <BuzonFeedback />
           </TabsContent>
         </Tabs>
       </motion.div>

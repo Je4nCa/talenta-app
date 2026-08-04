@@ -4,6 +4,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
+import { fechaHoyLocal } from '@/shared/lib/fecha'
 import { generarId } from '@/shared/lib/id'
 import { CATEGORIAS_DEUDA_ORDENADAS } from '../constants/deudas'
 import { useMonedas } from '../hooks/useMonedas'
@@ -18,9 +19,6 @@ interface FormularioDeudaProps {
   onCancelar: () => void
 }
 
-function fechaHoy(): string {
-  return new Date().toISOString().slice(0, 10)
-}
 
 export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeudaProps) {
   const [nombre, setNombre] = useState('')
@@ -28,7 +26,7 @@ export function FormularioDeuda({ uid, onGuardado, onCancelar }: FormularioDeuda
   const [montoOriginal, setMontoOriginal] = useState('')
   const [tasaInteres, setTasaInteres] = useState('')
   const [cuotaMensual, setCuotaMensual] = useState('')
-  const [fechaInicio, setFechaInicio] = useState(fechaHoy())
+  const [fechaInicio, setFechaInicio] = useState(fechaHoyLocal())
   const [fechaLiquidacion, setFechaLiquidacion] = useState('')
   const { monedaPrincipal } = useMonedas()
   const [moneda, setMoneda] = useState(monedaPrincipal)

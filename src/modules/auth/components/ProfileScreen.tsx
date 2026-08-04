@@ -230,7 +230,7 @@ export function ProfileScreen() {
         </div>
       </div>
 
-      <FeedbackForm nombre={usuario.nombre} email={usuario.email} />
+      <FeedbackForm uid={usuario.uid} nombre={usuario.nombre} email={usuario.email} />
 
       <Button
         variant="outline"
