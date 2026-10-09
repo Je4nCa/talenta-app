@@ -1,3 +1,6 @@
+/**
+ * Monthly total owed per card and across all cards, recalculated when data or rates change.
+ */
 import { useState, useEffect } from 'react'
 import { calcularTotalMensual, calcularTotalTodasLasTarjetas } from '@/services/tarjeta.service'
 import { useMonedaStore } from '@/store'

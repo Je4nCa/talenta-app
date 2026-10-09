@@ -1,3 +1,6 @@
+/**
+ * Expenses: variable and fixed expenses for the selected month.
+ */
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Plus, Power, Receipt, Trash2 } from 'lucide-react'

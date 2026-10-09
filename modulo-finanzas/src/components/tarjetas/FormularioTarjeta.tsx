@@ -1,3 +1,6 @@
+/**
+ * Credit/debit card form: name, last digits, currency, limit, cut-off and due days.
+ */
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { tarjetasRepository } from '@/repositories'

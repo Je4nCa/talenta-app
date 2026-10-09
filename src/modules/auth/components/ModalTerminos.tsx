@@ -1,3 +1,6 @@
+/**
+ * Terms of service and privacy policy modal shown during registration.
+ */
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'

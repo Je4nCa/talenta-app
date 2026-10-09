@@ -1,3 +1,6 @@
+/**
+ * Income (salary) entries repository.
+ */
 import { BaseRepository } from './base.repository'
 import type { Salario, ID } from '@/types'
 

@@ -1,3 +1,6 @@
+/**
+ * Seeds the local database with the two default users and sample cards.
+ */
 import { db } from './db'
 import type { Usuario, TarjetaCredito, TipoCambio } from '@/types'
 

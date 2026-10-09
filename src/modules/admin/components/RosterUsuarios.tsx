@@ -1,3 +1,6 @@
+/**
+ * User roster grouped by role (student, facilitator, administrator).
+ */
 import { collection, onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { GraduationCap, ShieldCheck, Users } from 'lucide-react'

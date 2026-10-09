@@ -14,9 +14,7 @@ dist-ssr
 
 # Locally installed agent skills (reinstall with npx skills add)
 .agents
-.claude/skills
 skills-lock.json
-.claude/scheduled_tasks.lock
 
 # Editor directories and files
 .vscode/*

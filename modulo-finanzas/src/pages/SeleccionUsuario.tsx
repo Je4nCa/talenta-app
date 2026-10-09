@@ -1,3 +1,6 @@
+/**
+ * "Who are you?" — pick the active user or open the demo.
+ */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'

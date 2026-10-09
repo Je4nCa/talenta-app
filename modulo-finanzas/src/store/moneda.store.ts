@@ -1,3 +1,6 @@
+/**
+ * Currency store: display currency, buy/sell rates and conversion helpers.
+ */
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { TIPO_CAMBIO_COMPRA_DEFAULT, TIPO_CAMBIO_VENTA_DEFAULT } from '@/constants/moneda'

@@ -1,3 +1,6 @@
+/**
+ * Reference parsing and localized formatting (e.g. "Juan 3:16").
+ */
 import { LIBROS_BIBLIA, type LibroBiblia } from '../constants/libros'
 import { BIBLIAS_DISPONIBLES } from '../constants/biblias'
 import { NOMBRES_LIBROS_POR_IDIOMA } from '../constants/nombresLibrosPorIdioma'

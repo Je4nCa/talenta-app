@@ -1,3 +1,6 @@
+/**
+ * Animated TALENTA logo mark.
+ */
 import { motion, type Variants } from 'framer-motion'
 
 const easeSalida: [number, number, number, number] = [0.22, 1, 0.36, 1]

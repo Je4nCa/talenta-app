@@ -1,3 +1,6 @@
+/**
+ * PDF exports (jsPDF + autotable): debt list, assets and the income/expense record with totals.
+ */
 import { jsPDF } from 'jspdf'
 import { fechaHoyLocal } from '@/shared/lib/fecha'
 import autoTable from 'jspdf-autotable'

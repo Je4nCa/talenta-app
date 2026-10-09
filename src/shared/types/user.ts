@@ -1,3 +1,6 @@
+/**
+ * User types: roles, profile, registration and login inputs.
+ */
 export type UserRole = 'student' | 'facilitador' | 'superadmin'
 
 export interface UserProfile {

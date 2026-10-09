@@ -1,3 +1,6 @@
+/**
+ * Budget categories repository with default seeding.
+ */
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import { CATEGORIAS_SEMILLA } from '../constants/categorias'
 import type { Categoria } from '../types'

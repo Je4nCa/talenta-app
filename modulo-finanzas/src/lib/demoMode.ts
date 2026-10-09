@@ -1,3 +1,7 @@
+/**
+ * Demo mode: switches to a sandbox household and seeds realistic cards, expenses and installments
+ * so the app can be shown without touching real data.
+ */
 import { doc, setDoc, getDocs, collection } from 'firebase/firestore'
 import { firestore } from './firebase'
 import { EstadoCuota, TipoGastoCompartido, TipoRecurrencia } from '@/types'

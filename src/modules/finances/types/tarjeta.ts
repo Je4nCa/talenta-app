@@ -1,3 +1,6 @@
+/**
+ * Card types: credit/debit card, payments and manual statement amounts.
+ */
 import type { ID, FechaHoraISO, FechaISO } from './comunes'
 
 export type TipoTarjeta = 'credito' | 'debito'

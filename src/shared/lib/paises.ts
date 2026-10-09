@@ -1,3 +1,6 @@
+/**
+ * Supported countries and currencies with lookups and flag emoji.
+ */
 export interface Pais {
   codigo: string
   nombre: string

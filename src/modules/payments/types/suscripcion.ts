@@ -1,3 +1,6 @@
+/**
+ * Subscription status and record types.
+ */
 import type { PlanId } from './plan'
 
 export type EstadoSuscripcion = 'pendiente' | 'activa' | 'vencida' | 'cancelada'

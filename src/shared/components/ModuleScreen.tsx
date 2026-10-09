@@ -1,3 +1,6 @@
+/**
+ * Module container: shows a short splash the first time a module opens, then its content.
+ */
 import { useEffect, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'

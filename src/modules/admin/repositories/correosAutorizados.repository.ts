@@ -1,3 +1,6 @@
+/**
+ * Authorized emails (Firestore): check, list, add and remove.
+ */
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from 'firebase/firestore'
 import { canonizarEmail, normalizarEmail } from '@/shared/lib/email'
 import { firestore } from '@/shared/lib/firebase'

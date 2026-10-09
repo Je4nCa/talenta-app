@@ -1,3 +1,6 @@
+/**
+ * Full-screen loading state used while routes and data load.
+ */
 import { motion } from 'framer-motion'
 
 export default function LoadingScreen() {

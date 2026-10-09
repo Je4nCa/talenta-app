@@ -1,3 +1,6 @@
+/**
+ * Entry point: mounts <App /> inside the router.
+ */
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'

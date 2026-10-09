@@ -1,3 +1,6 @@
+/**
+ * Available Bible versions and the default one.
+ */
 export interface BibliaDisponible {
   id: string
   titulo: string

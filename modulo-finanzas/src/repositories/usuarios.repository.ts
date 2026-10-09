@@ -1,3 +1,6 @@
+/**
+ * Household users repository.
+ */
 import type { Usuario } from '@/types'
 import { BaseRepository } from './base.repository'
 

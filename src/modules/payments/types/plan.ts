@@ -1,3 +1,6 @@
+/**
+ * Subscription plan types.
+ */
 export type PlanId = 'mensual' | 'trimestral' | 'anual'
 
 export interface Plan {

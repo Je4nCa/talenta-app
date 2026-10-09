@@ -1,3 +1,6 @@
+/**
+ * Barrel file for the finances types.
+ */
 export * from './comunes'
 export * from './categoria'
 export * from './tarjeta'

@@ -1,3 +1,6 @@
+/**
+ * Bible books with ids, Spanish/English names and chapter counts.
+ */
 export interface LibroBiblia {
   orden: number
   nombre: string

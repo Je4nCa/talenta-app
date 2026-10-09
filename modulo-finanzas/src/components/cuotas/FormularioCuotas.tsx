@@ -1,3 +1,7 @@
+/**
+ * Zero-interest installment plan form: card, amount, number of months and first billing month;
+ * generates the monthly installments.
+ */
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Users } from 'lucide-react'

@@ -1,3 +1,6 @@
+/**
+ * Zero-interest installment plans with per-month progress and paid/pending status.
+ */
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, ChevronDown, Trash2, CheckCircle2, Circle, AlertCircle } from 'lucide-react'

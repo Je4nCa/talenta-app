@@ -1,3 +1,6 @@
+/**
+ * Installment hooks: by billing period, by plan and all plans.
+ */
 import { useMemo } from 'react'
 import { useCollection } from '@/hooks/useCollection'
 import { hCol } from '@/lib/firebase'

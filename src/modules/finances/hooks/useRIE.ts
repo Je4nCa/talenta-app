@@ -1,3 +1,6 @@
+/**
+ * Live income/expense record (RIE) entries.
+ */
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import type { CeldaRIE } from '../types'

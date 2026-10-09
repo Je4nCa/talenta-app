@@ -1,3 +1,6 @@
+/**
+ * Payments: what is due on each card this cycle, due-date warnings and how it splits between users.
+ */
 import { useState, useMemo } from 'react'
 import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react'
 import { useCollection } from '@/hooks/useCollection'

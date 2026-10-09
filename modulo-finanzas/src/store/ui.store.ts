@@ -1,3 +1,6 @@
+/**
+ * UI state: theme and transient flags.
+ */
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 

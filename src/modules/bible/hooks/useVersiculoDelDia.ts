@@ -1,3 +1,6 @@
+/**
+ * Picks a featured verse based on the day of the year and loads it in the user's version.
+ */
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { obtenerPasaje } from '../lib/bibliaClient'

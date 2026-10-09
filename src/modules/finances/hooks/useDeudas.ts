@@ -1,3 +1,6 @@
+/**
+ * Live debts and debt payments.
+ */
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import type { AbonoDeuda, Deuda } from '../types'

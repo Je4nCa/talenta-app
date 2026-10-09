@@ -1,3 +1,6 @@
+/**
+ * Live variable expenses for a period and fixed expenses.
+ */
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import type { Gasto, GastoFijo } from '../types'

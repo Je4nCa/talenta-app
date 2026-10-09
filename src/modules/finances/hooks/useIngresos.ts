@@ -1,3 +1,6 @@
+/**
+ * Live income entries for a period.
+ */
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import type { Ingreso } from '../types'

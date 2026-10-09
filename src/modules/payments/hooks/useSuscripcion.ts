@@ -1,3 +1,6 @@
+/**
+ * Live subscription state for the current user.
+ */
 import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import type { Suscripcion } from '../types/suscripcion'
 

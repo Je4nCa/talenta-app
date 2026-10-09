@@ -1,3 +1,6 @@
+/**
+ * Cards repository.
+ */
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { TarjetaCredito } from '../types'
 

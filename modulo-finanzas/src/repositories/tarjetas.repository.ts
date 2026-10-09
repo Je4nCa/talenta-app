@@ -1,3 +1,6 @@
+/**
+ * Cards repository.
+ */
 import type { TarjetaCredito, ID } from '@/types'
 import { BaseRepository } from './base.repository'
 

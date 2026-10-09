@@ -1,3 +1,6 @@
+/**
+ * Text-scale preference (Zustand): reads, clamps, persists and applies it as a CSS variable.
+ */
 import { create } from 'zustand'
 
 const CLAVE_ESCALA = 'talenta:escala-interfaz'

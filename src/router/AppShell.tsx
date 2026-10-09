@@ -1,3 +1,6 @@
+/**
+ * Main layout: decorative background, routed screen and bottom navigation.
+ */
 import { Outlet } from 'react-router-dom'
 import { DecorativeBackground } from '@/shared/components/DecorativeBackground'
 import { BottomNav } from '@/shared/components/layout/BottomNav'

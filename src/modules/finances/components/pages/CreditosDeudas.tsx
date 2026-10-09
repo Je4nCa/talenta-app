@@ -1,3 +1,6 @@
+/**
+ * Credits & debts: debt list (LD), assets and the income/expense record (RIE), each exportable to PDF.
+ */
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {

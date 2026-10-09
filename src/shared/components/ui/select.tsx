@@ -1,3 +1,6 @@
+/**
+ * Native select styled to match the design system.
+ */
 import * as React from 'react'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'

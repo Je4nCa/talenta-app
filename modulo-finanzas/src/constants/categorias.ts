@@ -1,3 +1,6 @@
+/**
+ * Expense categories with icon and color, plus a lookup map.
+ */
 import { TipoCategoria } from '@/types/categoria'
 import type { Categoria } from '@/types/categoria'
 

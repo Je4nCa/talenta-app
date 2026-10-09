@@ -1,3 +1,6 @@
+/**
+ * Card hooks: all cards and a single card.
+ */
 import { useMemo } from 'react'
 import { useCollection } from '@/hooks/useCollection'
 import { hCol } from '@/lib/firebase'

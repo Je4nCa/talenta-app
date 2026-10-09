@@ -1,3 +1,6 @@
+/**
+ * Expenses: variable and fixed expenses by month, with edit, delete and pause/resume.
+ */
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Pencil, Trash2, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'

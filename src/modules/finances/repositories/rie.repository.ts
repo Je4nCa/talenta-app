@@ -1,3 +1,6 @@
+/**
+ * Income/expense record (RIE) repository.
+ */
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { CeldaRIE, CategoriaRIE } from '../types'
 

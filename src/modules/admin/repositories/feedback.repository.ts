@@ -1,3 +1,6 @@
+/**
+ * User feedback (Firestore): save, mark as read and collection reference.
+ */
 import { collection, doc, setDoc, updateDoc } from 'firebase/firestore'
 import { firestore } from '@/shared/lib/firebase'
 import { generarId } from '@/shared/lib/id'

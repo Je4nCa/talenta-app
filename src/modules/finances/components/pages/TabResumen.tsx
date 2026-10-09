@@ -1,3 +1,6 @@
+/**
+ * Monthly summary: day-by-day income and expenses.
+ */
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCategorias } from '../../hooks/useCategorias'

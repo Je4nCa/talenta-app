@@ -1,3 +1,6 @@
+/**
+ * Debt payments repository; updates the debt balance in the same transaction.
+ */
 import { deleteDoc, doc, runTransaction } from 'firebase/firestore'
 import { firestore } from '@/shared/lib/firebase'
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'

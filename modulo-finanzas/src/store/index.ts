@@ -1,3 +1,6 @@
+/**
+ * Barrel file for the Zustand stores.
+ */
 export { useUIStore } from './ui.store'
 export { useMonedaStore } from './moneda.store'
 export { useUsuarioStore } from './usuario.store'

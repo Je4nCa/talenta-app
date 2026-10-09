@@ -1,3 +1,6 @@
+/**
+ * Live list of the user's assets.
+ */
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import type { Bien } from '../types'

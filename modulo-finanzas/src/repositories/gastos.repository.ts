@@ -1,3 +1,6 @@
+/**
+ * Variable expenses repository.
+ */
 import type { Gasto, ID } from '@/types'
 import { BaseRepository } from './base.repository'
 

@@ -1,3 +1,6 @@
+/**
+ * Fixed (recurring) expense form with the same fields plus billing day and active state.
+ */
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Users } from 'lucide-react'

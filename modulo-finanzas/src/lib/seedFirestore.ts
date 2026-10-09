@@ -1,3 +1,6 @@
+/**
+ * Creates the default users the first time a household is opened.
+ */
 import { getDocs } from 'firebase/firestore'
 import { hCol, hDoc } from './firebase'
 import type { Usuario } from '@/types'

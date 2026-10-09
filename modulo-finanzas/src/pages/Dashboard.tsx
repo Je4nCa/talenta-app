@@ -1,3 +1,6 @@
+/**
+ * Monthly dashboard: income per pay period, expenses by category, card totals and balance in either currency.
+ */
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, CreditCard, Repeat2, ReceiptText, Wallet, ChevronRight as Arrow, Plus, TrendingDown, FileSpreadsheet, Calculator } from 'lucide-react'

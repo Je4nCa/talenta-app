@@ -1,3 +1,6 @@
+/**
+ * Subscriptions repository.
+ */
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { Suscripcion } from '../types/suscripcion'
 

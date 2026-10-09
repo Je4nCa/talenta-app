@@ -1,3 +1,6 @@
+/**
+ * Expense form: amount, currency, category, card or cash, shared split and date.
+ */
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Users } from 'lucide-react'

@@ -1,3 +1,6 @@
+/**
+ * Route table: hub, finances, Bible, assistant, profile, subscription and the admin area (admins only).
+ */
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AdminHome } from '@/modules/admin/components/AdminHome'
 import { AsistenteHome } from '@/modules/asistente/components/AsistenteHome'

@@ -1,3 +1,6 @@
+/**
+ * Bible module: version picker, chapter reader, search and saved verses.
+ */
 import { useState } from 'react'
 import { BookHeart } from 'lucide-react'
 import { ModuleScreen } from '@/shared/components/ModuleScreen'

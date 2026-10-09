@@ -1,3 +1,6 @@
+/**
+ * Fixed expenses repository.
+ */
 import type { GastoFijo, ID } from '@/types'
 import { BaseRepository } from './base.repository'
 

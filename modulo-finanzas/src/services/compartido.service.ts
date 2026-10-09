@@ -1,3 +1,6 @@
+/**
+ * Shared-expense math: how an amount splits between users and the label for each split mode.
+ */
 import type { DetalleCompartido } from '@/types'
 import { TipoGastoCompartido } from '@/types'
 

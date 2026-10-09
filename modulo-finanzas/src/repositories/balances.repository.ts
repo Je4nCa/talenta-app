@@ -1,3 +1,6 @@
+/**
+ * Monthly balances repository.
+ */
 import type { Balance, ID } from '@/types'
 import { BaseRepository } from './base.repository'
 

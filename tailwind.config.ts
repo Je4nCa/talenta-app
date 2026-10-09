@@ -1,3 +1,6 @@
+/**
+ * Tailwind theme: TALENTA brand colors and fonts (Poppins, Playfair Display).
+ */
 import type { Config } from 'tailwindcss'
 
 export default {

@@ -1,3 +1,6 @@
+/**
+ * Page container with a shared enter/exit animation (Framer Motion).
+ */
 import { motion } from 'framer-motion'
 import type { ReactNode } from 'react'
 

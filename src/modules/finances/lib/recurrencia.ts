@@ -1,3 +1,6 @@
+/**
+ * Recurrence options for fixed expenses and their monthly-equivalent amount.
+ */
 import { TipoRecurrencia } from '../types/gasto'
 
 export const OPCIONES_RECURRENCIA: { valor: TipoRecurrencia; etiqueta: string }[] = [

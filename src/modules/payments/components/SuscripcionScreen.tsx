@@ -1,3 +1,6 @@
+/**
+ * Subscription screen: current status, days left, plan selection and checkout.
+ */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'

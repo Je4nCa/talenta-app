@@ -1,3 +1,6 @@
+/**
+ * Income (salary) type.
+ */
 import type { ID, FechaHoraISO } from './comunes'
 import type { Moneda } from './moneda'
 

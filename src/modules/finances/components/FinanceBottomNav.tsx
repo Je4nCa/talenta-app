@@ -1,3 +1,6 @@
+/**
+ * Bottom navigation inside the finances module.
+ */
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { CreditCard, Landmark, LayoutDashboard, Receipt, Wallet } from 'lucide-react'

@@ -1,3 +1,6 @@
+/**
+ * Bible version selector (persisted on the user profile).
+ */
 import { Select } from '@/shared/components/ui/select'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { BIBLIAS_DISPONIBLES, BIBLIA_POR_DEFECTO } from '../constants/biblias'

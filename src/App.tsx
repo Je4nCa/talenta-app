@@ -1,3 +1,6 @@
+/**
+ * Root component: splash screen while auth resolves, then the auth screen or the app routes.
+ */
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { HashRouter } from 'react-router-dom'

@@ -1,3 +1,6 @@
+/**
+ * Saved verses list with jump-to and remove.
+ */
 import { Bookmark, Trash2 } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useVersiculosGuardados } from '../hooks/useMarcadores'

@@ -1,3 +1,6 @@
+/**
+ * Expense form: amount, category, payment method, date, future flag and optional receipt image.
+ */
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
 import { Camera, X } from 'lucide-react'

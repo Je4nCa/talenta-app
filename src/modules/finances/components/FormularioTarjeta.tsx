@@ -1,3 +1,6 @@
+/**
+ * Card form: name, type, limit, cut-off and due days.
+ */
 import { useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
 import { CreditCard, Wallet } from 'lucide-react'

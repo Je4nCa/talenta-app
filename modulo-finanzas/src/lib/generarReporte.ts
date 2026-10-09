@@ -1,3 +1,6 @@
+/**
+ * Excel report (xlsx): one sheet per user with expenses, card charges, shared splits and totals for the month.
+ */
 import * as XLSX from 'xlsx'
 import { calcularPartes } from '@/services/compartido.service'
 import { periodoFacturacion } from '@/lib/billingCycle'

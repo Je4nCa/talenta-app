@@ -1,3 +1,6 @@
+/**
+ * Payments due this month per card.
+ */
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Plus, Trash2, Wallet } from 'lucide-react'

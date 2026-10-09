@@ -1,3 +1,6 @@
+/**
+ * Installment plans and their monthly installments; creates both atomically in a batch.
+ */
 import { writeBatch } from 'firebase/firestore'
 import { firestore, hDoc } from '@/lib/firebase'
 import type { PlanCuotas, CuotaMensual, ID } from '@/types'

@@ -1,3 +1,6 @@
+/**
+ * Generic Firestore repository scoped to a user's subcollection: typed list, get, create, update and delete.
+ */
 import {
   collection,
   deleteDoc,

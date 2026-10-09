@@ -1,3 +1,6 @@
+/**
+ * Live list of the user's cards.
+ */
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'
 import type { TarjetaCredito } from '../types'

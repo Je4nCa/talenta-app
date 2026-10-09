@@ -1,3 +1,6 @@
+/**
+ * Expenses store (Zustand).
+ */
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { gastosRepository } from '@/repositories'

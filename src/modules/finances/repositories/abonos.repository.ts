@@ -1,3 +1,6 @@
+/**
+ * Card payments repository.
+ */
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { AbonoTarjeta } from '../types'
 

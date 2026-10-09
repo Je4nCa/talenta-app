@@ -1,3 +1,6 @@
+/**
+ * Card checkout with the Tilopay SDK: loads the SDK, collects card data and confirms the payment.
+ */
 import { useEffect, useState, type FormEvent } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'

@@ -1,3 +1,7 @@
+/**
+ * Auth service: registration (including recovery of half-finished sign-ups), course-student checks,
+ * profile preference updates and password reset emails. Maps Firebase errors to friendly messages.
+ */
 import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,

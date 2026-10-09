@@ -1,3 +1,6 @@
+/**
+ * Vite config: React, path aliases, GitHub Pages base path and the PWA plugin (manifest, icons, caching).
+ */
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'

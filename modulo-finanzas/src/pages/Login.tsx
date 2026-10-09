@@ -1,3 +1,6 @@
+/**
+ * Sign-in screen (Google).
+ */
 import { useState } from 'react'
 import { signInWithPopup } from 'firebase/auth'
 import { motion } from 'framer-motion'

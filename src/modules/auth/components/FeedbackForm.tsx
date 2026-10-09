@@ -1,3 +1,6 @@
+/**
+ * Feedback form: sanitizes the message, stores it in Firestore and notifies via EmailJS.
+ */
 import { useState, type FormEvent } from 'react'
 import emailjs from '@emailjs/browser'
 import { AnimatePresence, motion } from 'framer-motion'

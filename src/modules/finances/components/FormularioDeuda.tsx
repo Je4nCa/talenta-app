@@ -1,3 +1,6 @@
+/**
+ * Debt form: creditor, type, balance, interest and monthly payment.
+ */
 import { useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'

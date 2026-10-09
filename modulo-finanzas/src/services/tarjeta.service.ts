@@ -1,3 +1,7 @@
+/**
+ * Card billing logic: monthly total per card (expenses, fixed charges, installments) using the billing cycle
+ * and currency conversion.
+ */
 import {
   tarjetasRepository,
   gastosRepository,

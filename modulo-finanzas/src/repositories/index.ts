@@ -1,3 +1,6 @@
+/**
+ * Barrel file for all Firestore repositories.
+ */
 export { tarjetasRepository }                                                    from './tarjetas.repository'
 export { gastosRepository }                                                      from './gastos.repository'
 export { usuariosRepository }                                                    from './usuarios.repository'

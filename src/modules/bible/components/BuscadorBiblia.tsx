@@ -1,3 +1,6 @@
+/**
+ * Word search across the selected Bible version, with save-to-favorites.
+ */
 import { useEffect, useState, type FormEvent } from 'react'
 import { Bookmark, ChevronRight, Search } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'

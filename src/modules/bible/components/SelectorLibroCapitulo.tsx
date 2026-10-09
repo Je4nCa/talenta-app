@@ -1,3 +1,6 @@
+/**
+ * Book and chapter selector with localized book names.
+ */
 import { Select } from '@/shared/components/ui/select'
 import { LIBROS_BIBLIA, type LibroBiblia } from '../constants/libros'
 import { ETIQUETA_CAPITULO_POR_IDIOMA, TESTAMENTOS_POR_IDIOMA } from '../constants/nombresLibrosPorIdioma'

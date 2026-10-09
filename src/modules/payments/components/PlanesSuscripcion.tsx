@@ -1,3 +1,6 @@
+/**
+ * Subscription plan picker (monthly / quarterly).
+ */
 import { Check } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { PLANES_SUSCRIPCION } from '../constants/planes'

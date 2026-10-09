@@ -1,3 +1,6 @@
+/**
+ * Debts repository.
+ */
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { Deuda } from '../types'
 

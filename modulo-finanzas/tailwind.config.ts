@@ -1,3 +1,6 @@
+/**
+ * Tailwind theme: colors, system font stacks, radii and animations.
+ */
 import type { Config } from 'tailwindcss'
 
 const config: Config = {

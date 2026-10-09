@@ -1,3 +1,6 @@
+/**
+ * Route table with lazily loaded pages wrapped in the app layout.
+ */
 import { lazy, Suspense } from 'react'
 import { createHashRouter, Navigate } from 'react-router-dom'
 import AppLayout from '@layouts/AppLayout'

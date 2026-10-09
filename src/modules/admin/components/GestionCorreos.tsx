@@ -1,3 +1,6 @@
+/**
+ * Authorized-email management: add or remove the course students allowed to register for free.
+ */
 import { useEffect, useState, type FormEvent } from 'react'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { AnimatePresence, motion } from 'framer-motion'

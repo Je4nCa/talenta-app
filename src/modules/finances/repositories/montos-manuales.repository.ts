@@ -1,3 +1,6 @@
+/**
+ * Manual statement amounts per card and period.
+ */
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { MontoManualTarjeta } from '../types'
 

@@ -1,3 +1,6 @@
+/**
+ * Barrel file for the finances repositories.
+ */
 export { gastosRepository } from './gastos.repository'
 export { gastosFijosRepository } from './gastos-fijos.repository'
 export { tarjetasRepository } from './tarjetas.repository'

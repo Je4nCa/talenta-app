@@ -1,3 +1,6 @@
+/**
+ * Finances dashboard: monthly income, expenses, balance and category breakdown.
+ */
 import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Landmark, Plus, Receipt, Repeat, Trash2, Wallet } from 'lucide-react'

@@ -1,3 +1,6 @@
+/**
+ * Profile: user details, primary/secondary currency, Bible version, subscription days left and sign-out.
+ */
 import { useState, type ChangeEvent } from 'react'
 import { motion } from 'framer-motion'
 import { CreditCard, LogOut, ShieldCheck } from 'lucide-react'

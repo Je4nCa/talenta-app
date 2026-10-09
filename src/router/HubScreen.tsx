@@ -1,3 +1,6 @@
+/**
+ * Home hub: greeting, verse of the day and cards to each module.
+ */
 import { motion, type Variants } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { BookHeart, ChevronRight, ShieldCheck, Sparkles, Wallet, type LucideIcon } from 'lucide-react'

@@ -1,3 +1,7 @@
+/**
+ * Payment calculator: how much of this month's total can be covered with the money available,
+ * in dollars or colones.
+ */
 import { useState, useMemo } from 'react'
 import { X, Wallet } from 'lucide-react'
 import { cn } from '@/lib/utils'

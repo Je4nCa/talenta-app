@@ -1,3 +1,6 @@
+/**
+ * Email/password sign-in with "remember me" and password recovery.
+ */
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'

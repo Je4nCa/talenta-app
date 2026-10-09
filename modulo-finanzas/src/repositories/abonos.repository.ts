@@ -1,3 +1,6 @@
+/**
+ * Card payments (abonos) repository.
+ */
 import { BaseRepository } from './base.repository'
 import type { AbonoTarjeta, ID } from '@/types'
 

@@ -1,3 +1,6 @@
+/**
+ * Fixed expenses repository.
+ */
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { GastoFijo } from '../types'
 

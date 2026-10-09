@@ -1,3 +1,6 @@
+/**
+ * Assets repository.
+ */
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { Bien, CategoriaBien } from '../types'
 

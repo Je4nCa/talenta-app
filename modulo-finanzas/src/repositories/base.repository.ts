@@ -1,3 +1,6 @@
+/**
+ * Generic Firestore repository: typed CRUD scoped to the household.
+ */
 import { getDocs, getDoc, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore'
 import { firestore, hCol, hDoc } from '@/lib/firebase'
 import type { ID } from '@/types'

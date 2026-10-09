@@ -1,3 +1,6 @@
+/**
+ * Applies the light/dark theme from the UI store to the document.
+ */
 import { useEffect, type ReactNode } from 'react'
 import { useUIStore } from '@store/ui.store'
 

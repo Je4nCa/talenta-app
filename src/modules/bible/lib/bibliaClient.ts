@@ -1,3 +1,6 @@
+/**
+ * Bible API client: chapters, passages and word search, with response parsing and typed errors.
+ */
 import type { ResultadoBusqueda, Versiculo } from '../types'
 
 const BASE_URL = 'https://api.biblia.com/v1/bible'

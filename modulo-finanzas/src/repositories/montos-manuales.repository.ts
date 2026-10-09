@@ -1,3 +1,6 @@
+/**
+ * Manual statement amounts per card and period.
+ */
 import { BaseRepository } from './base.repository'
 import type { MontoManualTarjeta, ID } from '@/types'
 

@@ -1,3 +1,6 @@
+/**
+ * Route guard: requires a selected user, otherwise redirects to user selection.
+ */
 import type { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useUsuarioStore } from '@/store'

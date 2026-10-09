@@ -1,3 +1,6 @@
+/**
+ * App bottom navigation; shows the admin entry only for administrators.
+ */
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { BookHeart, Home, ShieldCheck, UserRound, Wallet } from 'lucide-react'

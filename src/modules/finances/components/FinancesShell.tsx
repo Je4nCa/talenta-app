@@ -1,3 +1,6 @@
+/**
+ * Finances layout: header with the user's country/currency, routed page and module navigation.
+ */
 import { Outlet, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'

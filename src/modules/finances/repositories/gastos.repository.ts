@@ -1,3 +1,6 @@
+/**
+ * Variable expenses repository.
+ */
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { Gasto } from '../types'
 

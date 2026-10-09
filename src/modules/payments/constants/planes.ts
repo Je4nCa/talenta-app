@@ -1,3 +1,6 @@
+/**
+ * Subscription plans with prices and durations.
+ */
 import type { Plan, PlanId } from '../types/plan'
 
 export const PLANES_SUSCRIPCION: Plan[] = [

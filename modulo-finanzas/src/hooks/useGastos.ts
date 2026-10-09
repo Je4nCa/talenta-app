@@ -1,3 +1,6 @@
+/**
+ * Expense hooks: variable expenses for a period and fixed expenses.
+ */
 import { useMemo } from 'react'
 import { useCollection } from '@/hooks/useCollection'
 import { hCol } from '@/lib/firebase'

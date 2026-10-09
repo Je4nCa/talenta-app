@@ -1,3 +1,6 @@
+/**
+ * Password reset request form.
+ */
 import { useState, type FormEvent } from 'react'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'

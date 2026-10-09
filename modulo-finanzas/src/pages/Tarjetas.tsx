@@ -1,3 +1,6 @@
+/**
+ * Cards: balance, statement summary, payments/credits and manual amounts per card.
+ */
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, CreditCard, Check, X } from 'lucide-react'

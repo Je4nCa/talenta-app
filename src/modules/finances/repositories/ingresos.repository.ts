@@ -1,3 +1,6 @@
+/**
+ * Income repository.
+ */
 import { FirestoreRepository } from '@/shared/lib/firestoreRepository'
 import type { Ingreso } from '../types'
 

@@ -1,3 +1,6 @@
+/**
+ * Animated splash with the module icon and title.
+ */
 import { motion } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 

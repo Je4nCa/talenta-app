@@ -1,3 +1,6 @@
+/**
+ * Root component: theme provider, Firebase auth listener, first-run Firestore seeding and the router.
+ */
 import { useState, useEffect } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { onAuthStateChanged, type User } from 'firebase/auth'

@@ -1,3 +1,6 @@
+/**
+ * Soft animated background shapes shared by every screen.
+ */
 import { motion } from 'framer-motion'
 
 export function DecorativeBackground() {

@@ -1,3 +1,6 @@
+/**
+ * Card payment (abono) form.
+ */
 import { useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'

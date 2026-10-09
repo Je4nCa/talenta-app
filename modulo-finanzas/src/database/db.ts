@@ -1,3 +1,6 @@
+/**
+ * Local IndexedDB schema (Dexie) used by the original offline-first version.
+ */
 import Dexie, { type Table } from 'dexie'
 import type {
   Usuario,

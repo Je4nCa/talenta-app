@@ -1,3 +1,6 @@
+/**
+ * Budget categories with spending vs. budget and recommended benchmarks.
+ */
 import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'

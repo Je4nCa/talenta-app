@@ -1,3 +1,6 @@
+/**
+ * Settings: exchange rate (manual or synced), switch user, theme, demo mode and sign-out.
+ */
 import { RefreshCw, LogOut, Pencil, Check, X, FlaskConical } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'

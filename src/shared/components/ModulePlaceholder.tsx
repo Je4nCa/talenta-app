@@ -1,3 +1,6 @@
+/**
+ * "Coming soon" placeholder for modules still in development.
+ */
 import type { LucideIcon } from 'lucide-react'
 
 interface ModulePlaceholderProps {

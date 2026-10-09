@@ -1,3 +1,6 @@
+/**
+ * Exchange rate: cached read from Firestore (synced daily by a GitHub Action) with manual override.
+ */
 import { getDoc } from 'firebase/firestore'
 import { hDoc } from '@/lib/firebase'
 import { TIPO_CAMBIO_COMPRA_DEFAULT, TIPO_CAMBIO_VENTA_DEFAULT } from '@/constants/moneda'

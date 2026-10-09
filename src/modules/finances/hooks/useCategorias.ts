@@ -1,3 +1,6 @@
+/**
+ * Live budget categories; seeds the defaults on first use.
+ */
 import { useEffect } from 'react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { useColeccionUsuario } from '@/shared/hooks/useColeccionUsuario'

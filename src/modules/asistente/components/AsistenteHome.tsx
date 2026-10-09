@@ -1,3 +1,6 @@
+/**
+ * Financial assistant module — placeholder screen for the upcoming feature.
+ */
 import { Sparkles } from 'lucide-react'
 import { ModuleScreen } from '@/shared/components/ModuleScreen'
 import { ModulePlaceholder } from '@/shared/components/ModulePlaceholder'

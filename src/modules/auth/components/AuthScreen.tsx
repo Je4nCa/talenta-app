@@ -1,3 +1,6 @@
+/**
+ * Auth screen with Sign in / Create account tabs.
+ */
 import { motion } from 'framer-motion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { DecorativeBackground } from '@/shared/components/DecorativeBackground'

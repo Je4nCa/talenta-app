@@ -1,3 +1,6 @@
+/**
+ * Verse of the day card.
+ */
 import { motion } from 'framer-motion'
 import { BookHeart } from 'lucide-react'
 import { useVersiculoDelDia } from '../hooks/useVersiculoDelDia'

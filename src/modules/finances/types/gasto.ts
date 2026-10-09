@@ -1,3 +1,6 @@
+/**
+ * Expense types: payment method, variable and fixed expenses, filters.
+ */
 import type { ID, FechaHoraISO, FechaISO } from './comunes'
 import type { CategoriaId } from './categoria'
 

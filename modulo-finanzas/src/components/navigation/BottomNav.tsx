@@ -1,3 +1,6 @@
+/**
+ * Bottom tab bar with an animated active indicator.
+ */
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, Receipt, CreditCard, Wallet, Percent, Settings } from 'lucide-react'
 import { cn } from '@lib/utils'

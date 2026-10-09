@@ -1,3 +1,6 @@
+/**
+ * Entry screen for the finances module.
+ */
 import { Wallet } from 'lucide-react'
 import { ModuleScreen } from '@/shared/components/ModuleScreen'
 import { FinancesShell } from './FinancesShell'

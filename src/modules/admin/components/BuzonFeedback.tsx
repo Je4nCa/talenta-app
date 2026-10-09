@@ -1,3 +1,6 @@
+/**
+ * Feedback inbox: live list of user messages with read/unread toggling.
+ */
 import { onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { AlertTriangle, Check, MessageSquareHeart } from 'lucide-react'

@@ -1,3 +1,7 @@
+/**
+ * Auth store (Zustand) backed by Firebase Auth: session listener, user profile from Firestore,
+ * sign-in, sign-out, registration and password recovery.
+ */
 import {
   browserLocalPersistence,
   browserSessionPersistence,

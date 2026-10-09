@@ -1,3 +1,6 @@
+/**
+ * Authenticated layout: animated routed content above the bottom navigation.
+ */
 import { Outlet, useLocation } from 'react-router-dom'
 import BottomNav from '@components/navigation/BottomNav'
 import { AnimatePresence } from 'framer-motion'

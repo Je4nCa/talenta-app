@@ -1,3 +1,6 @@
+/**
+ * Cards: spent and paid totals per card.
+ */
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CreditCard, Plus, Trash2 } from 'lucide-react'

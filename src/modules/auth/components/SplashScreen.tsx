@@ -1,3 +1,6 @@
+/**
+ * Launch splash with the animated logo.
+ */
 import { motion } from 'framer-motion'
 import { LogoMark } from './LogoMark'
 

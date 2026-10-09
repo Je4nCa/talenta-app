@@ -1,3 +1,6 @@
+/**
+ * Income form: source, amount and date.
+ */
 import { useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/shared/components/ui/button'

@@ -1,3 +1,6 @@
+/**
+ * Registration form: name, country, email, password, course code and acceptance of the terms.
+ */
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'

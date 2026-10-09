@@ -1,3 +1,6 @@
+/**
+ * Bible module types: verses, search results, saved and highlighted verses.
+ */
 export interface Versiculo {
   numero: number
   texto: string

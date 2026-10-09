@@ -1,3 +1,6 @@
+/**
+ * Tilopay client: lazy-loads the SDK script, fetches a token from the backend endpoint and runs the payment.
+ */
 import type { Plan } from '../types/plan'
 
 export class TilopayError extends Error {}

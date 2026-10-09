@@ -1,3 +1,6 @@
+/**
+ * Accessibility slider to scale text and UI elements, with a live preview.
+ */
 import { ESCALA_MAXIMA, ESCALA_MINIMA, useAccesibilidad } from '@/shared/hooks/useAccesibilidad'
 
 const PASO = 0.125

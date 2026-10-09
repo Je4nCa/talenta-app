@@ -1,3 +1,6 @@
+/**
+ * Installment logic: generate the schedule, delete a plan with its installments and derive the current status.
+ */
 import { writeBatch } from 'firebase/firestore'
 import { firestore, hDoc } from '@/lib/firebase'
 import { cuotasMensualesRepository } from '@/repositories'

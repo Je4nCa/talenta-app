@@ -1,3 +1,6 @@
+/**
+ * Chapter reader with navigation, highlighting and saving verses.
+ */
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react'
